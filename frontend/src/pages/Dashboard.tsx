@@ -123,8 +123,8 @@ const Dashboard: React.FC = () => {
   const fetchUsers = async () => {
     try {
       const [usersRes, statsRes] = await Promise.all([
-        axios.get('${API_URL}/api/users', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('${API_URL}/api/users/stats', { headers: { Authorization: `Bearer ${token}` } })
+        axios.get(`${API_URL}/api/users`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${API_URL}/api/users/stats`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
       setUsers(usersRes.data);
       setUserStats(statsRes.data);
@@ -143,7 +143,7 @@ const Dashboard: React.FC = () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
-      await axios.post('${API_URL}/api/assets', newAsset, {
+      await axios.post(`${API_URL}/api/assets`, newAsset, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsAddModalOpen(false);
@@ -163,7 +163,7 @@ const Dashboard: React.FC = () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
-      await axios.post('${API_URL}/api/auth/register', newUser);
+      await axios.post(`${API_URL}/api/auth/register`, newUser);
       setIsUserModalOpen(false);
       setNewUser({ email: '', password: '', role: 'EMPLOYEE' });
       fetchUsers();
