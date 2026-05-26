@@ -1,6 +1,6 @@
 # Internal Asset Portal
 
-A full-stack enterprise IT Asset Tracking system built with React, Express, Prisma, and PostgreSQL (Neon).
+A full-stack enterprise Internal Asset Tracking system built with React, Express, Prisma, and PostgreSQL (Neon).
 
 ## Demo Credentials
 
