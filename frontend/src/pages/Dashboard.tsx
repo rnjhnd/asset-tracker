@@ -82,11 +82,11 @@ const Dashboard: React.FC = () => {
     
     const loadAll = async () => {
       setIsLoading(true);
-      await fetchAssets();
-      await fetchTotals();
-      if (user?.role === 'ADMIN') {
-        await fetchUsers();
-      }
+      await Promise.all([
+        fetchAssets(),
+        user?.role === 'ADMIN' ? fetchTotals() : Promise.resolve(),
+        user?.role === 'ADMIN' ? fetchUsers() : Promise.resolve()
+      ]);
       setIsLoading(false);
     };
     
@@ -557,7 +557,7 @@ const Dashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e4e4e7]">
-                    {assets.map((asset) => (
+                    {!isLoading && assets.map((asset) => (
                       <tr key={asset.id} className="hover:bg-gray-50 transition-all hover:shadow-[inset_4px_0_0_0_#3b82f6] group">
                         <td className="p-4 font-bold flex items-center gap-3">
                           <span className="text-[#3b82f6]">{getIcon(asset.category)}</span>
@@ -749,7 +749,7 @@ const Dashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e4e4e7]">
-                    {users.map((u) => (
+                    {!isLoading && users.map((u) => (
                       <tr key={u.id} className="hover:bg-gray-50 transition-all hover:shadow-[inset_4px_0_0_0_#3b82f6] group">
                       <td className="p-4 font-bold">{u.email}</td>
                       <td className="p-4">
