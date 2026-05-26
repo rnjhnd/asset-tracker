@@ -536,7 +536,7 @@ const Dashboard: React.FC = () => {
             </div>
 
             <div className="bg-white border border-[#e4e4e7] shadow-sm overflow-hidden mb-6">
-              <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+              <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse min-w-[800px] relative">
                   <thead className="sticky top-0 z-10 bg-gray-50 shadow-[0_1px_0_0_#e4e4e7]">
                     <tr className="font-mono text-xs uppercase tracking-wider text-gray-500">
@@ -717,7 +717,7 @@ const Dashboard: React.FC = () => {
             </div>
 
             <div className="bg-white border border-[#e4e4e7] shadow-sm overflow-hidden mb-12">
-              <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+              <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse relative">
                   <thead className="sticky top-0 z-10 bg-gray-50 shadow-[0_1px_0_0_#e4e4e7]">
                     <tr className="font-mono text-xs uppercase tracking-wider text-gray-500">
