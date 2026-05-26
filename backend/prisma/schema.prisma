@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  EMPLOYEE
+  ADMIN
+}
+
+enum AssetCategory {
+  LAPTOP
+  DESKTOP
+  MONITOR
+  TABLET
+  PHONE
+  SERVER
+  NETWORK
+  ACCESSORY
+}
+
+enum AssetStatus {
+  AVAILABLE
+  ASSIGNED
+  MAINTENANCE
+  RETIRED
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String
+  role         Role         @default(EMPLOYEE)
+  createdAt    DateTime     @default(now())
+  isActive     Boolean      @default(true)
+  assignments  Assignment[]
+}
+
+model Asset {
+  id           String        @id @default(uuid())
+  name         String
+  serialNumber String        @unique
+  category     AssetCategory
+  status       AssetStatus   @default(AVAILABLE)
+  purchaseDate DateTime
+  assignments  Assignment[]
+}
+
+model Assignment {
+  id           String    @id @default(uuid())
+  userId       String
+  assetId      String
+  checkoutDate DateTime  @default(now())
+  returnDate   DateTime?
+
+  user  User  @relation(fields: [userId], references: [id])
+  asset Asset @relation(fields: [assetId], references: [id])
+}

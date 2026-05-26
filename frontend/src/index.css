@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+:root {
+  --bg-color: #f4f4f5;
+  --text-color: #18181b;
+  --brand-color: #3b82f6;
+  --border-color: #e4e4e7;
+}
+
+@theme {
+  --color-bg-primary: var(--bg-color);
+  --color-text-primary: var(--text-color);
+  --color-brand: var(--brand-color);
+  --color-border: var(--border-color);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  background-image: radial-gradient(#d4d4d8 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  color: var(--text-color);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
