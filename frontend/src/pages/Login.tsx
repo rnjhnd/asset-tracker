@@ -46,13 +46,10 @@ const Login: React.FC = () => {
           }}
         ></div>
         
-        <div className="relative z-10 flex items-center gap-4 text-white mb-12 md:mb-0">
+        <div className="relative z-10 flex items-center mb-12 md:mb-0">
           <div className="w-12 h-12 bg-white text-[#3b82f6] flex items-center justify-center font-mono shrink-0 shadow-[4px_4px_0_0_#1e3a8a]">
             <Server size={24} />
           </div>
-          <span className="font-mono font-bold tracking-widest text-sm uppercase border-b-2 border-white pb-1">
-            System Identity
-          </span>
         </div>
 
         <div className="relative z-10 mt-auto">
