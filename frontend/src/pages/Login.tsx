@@ -2,19 +2,27 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { Server, Key } from 'lucide-react';
+import { Server, Key, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import API_URL from '../config/api';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error('ACCESS DENIED: MISSING CREDENTIALS');
+      setError('Please provide both email and password.');
+      return;
+    }
+
     try {
       const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
       login(response.data.user, response.data.token);
@@ -81,20 +89,27 @@ const Login: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full border-2 border-gray-300 bg-white p-3 sm:p-4 font-mono text-sm focus:border-black outline-none transition-colors"
-                  required
                   placeholder="admin@system.com"
                 />
               </div>
               <div>
                 <label className="block font-mono text-xs font-bold text-gray-900 mb-2 uppercase tracking-widest">Password</label>
-                <input 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border-2 border-gray-300 bg-white p-3 sm:p-4 font-mono text-sm focus:border-black outline-none transition-colors"
-                  required
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full border-2 border-gray-300 bg-white p-3 sm:p-4 pr-12 font-mono text-sm focus:border-black outline-none transition-colors"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
               <button 
                 type="submit" 
