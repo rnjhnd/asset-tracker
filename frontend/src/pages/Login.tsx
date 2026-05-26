@@ -32,7 +32,7 @@ const Login: React.FC = () => {
           <div className="w-12 h-12 bg-gray-900 text-white flex items-center justify-center font-mono">
             <Server size={24} />
           </div>
-          <h1 className="text-xl font-bold uppercase tracking-tight text-gray-900">IT ASSET TRACKER</h1>
+          <h1 className="text-xl font-bold uppercase tracking-tight text-gray-900">EMPLOYEE ASSET TRACKER</h1>
         </div>
         
         {error && (

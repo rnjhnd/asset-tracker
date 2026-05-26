@@ -396,7 +396,7 @@ const Dashboard: React.FC = () => {
             <Server size={24} />
           </div>
           <div>
-            <h1 className="text-xl font-bold uppercase tracking-tight">IT ASSET TRACKER</h1>
+            <h1 className="text-xl font-bold uppercase tracking-tight">EMPLOYEE ASSET TRACKER</h1>
             <p className="font-mono text-sm text-gray-500 uppercase">
               {user?.email} | ROLE: {user?.role}
             </p>
