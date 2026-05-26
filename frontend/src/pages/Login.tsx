@@ -52,7 +52,7 @@ const Login: React.FC = () => {
             Internal<br/>Asset<br/>Portal
           </h1>
           <p className="text-blue-100 font-mono text-sm md:text-base max-w-md uppercase tracking-wider leading-relaxed border-l-4 border-white pl-4">
-            Authorized personnel only. All access attempts are logged and monitored.
+            A robust, full-stack inventory management system for tracking hardware deployments, managing employee assignments, and monitoring asset lifecycles across the organization.
           </p>
         </div>
       </div>
