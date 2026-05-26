@@ -396,30 +396,37 @@ const Dashboard: React.FC = () => {
           },
         }}
       />
-      <header className="bg-white border-b-2 border-[#e4e4e7] p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
+      <header className="bg-white border-b-4 border-gray-900 px-4 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10 sticky top-0 shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-900 text-white flex items-center justify-center font-mono shrink-0">
-            <Server size={20} className="sm:w-6 sm:h-6" />
+          <div className="w-12 h-12 bg-[#3b82f6] text-white flex items-center justify-center font-mono shrink-0 shadow-[4px_4px_0_0_#1e3a8a]">
+            <Server size={24} />
           </div>
-          <div>
-            <h1 className="text-lg sm:text-xl font-bold uppercase tracking-tight">INTERNAL ASSET PORTAL</h1>
-            <p className="font-mono text-xs sm:text-sm text-gray-500 uppercase">
-              {user?.email} | ROLE: {user?.role}
-            </p>
+          <div className="flex flex-col justify-center">
+            <h1 className="text-xl sm:text-2xl font-bold uppercase tracking-tighter text-gray-900 leading-none mb-1">INTERNAL ASSET PORTAL</h1>
+            <div className="flex items-center gap-3 font-mono text-[10px] sm:text-xs text-gray-500 uppercase tracking-widest">
+              <span className="flex items-center gap-1.5 text-green-600 font-bold">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                ONLINE
+              </span>
+              <span className="text-gray-300">|</span>
+              <span className="font-bold text-gray-900">{user?.email}</span>
+              <span className="text-gray-300">|</span>
+              <span className="bg-gray-100 px-2 py-0.5 border border-gray-300">{user?.role}</span>
+            </div>
           </div>
         </div>
-        <div className="flex items-center justify-between w-full sm:w-auto gap-4 sm:gap-6 mt-2 sm:mt-0">
+        <div className="flex items-center w-full sm:w-auto gap-3 sm:gap-4 mt-2 sm:mt-0">
           <button 
             onClick={() => setIsPasswordModalOpen(true)}
-            className="flex items-center gap-2 text-gray-500 hover:text-black font-mono text-xs sm:text-sm uppercase transition-colors"
+            className="flex-1 sm:flex-none flex justify-center items-center gap-2 bg-white border-2 border-gray-300 hover:border-gray-900 text-gray-600 hover:text-black font-mono text-xs font-bold uppercase tracking-wider px-4 py-2.5 transition-colors shadow-sm"
           >
-            <Key size={16} /> Password
+            <Key size={14} /> Password
           </button>
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-2 text-gray-500 hover:text-red-500 font-mono text-xs sm:text-sm uppercase transition-colors"
+            className="flex-1 sm:flex-none flex justify-center items-center gap-2 bg-red-50 border-2 border-red-200 hover:border-red-600 text-red-600 font-mono text-xs font-bold uppercase tracking-wider px-4 py-2.5 transition-colors shadow-sm"
           >
-            <LogOut size={16} /> Logout
+            <LogOut size={14} /> Logout
           </button>
         </div>
       </header>
