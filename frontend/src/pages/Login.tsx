@@ -43,7 +43,7 @@ const Login: React.FC = () => {
             <Server size={24} />
           </div>
           <span className="font-mono font-bold tracking-widest text-sm uppercase border-b-2 border-white pb-1">
-            Internal Asset Portal
+            System Identity
           </span>
         </div>
 
