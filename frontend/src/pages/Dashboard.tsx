@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Filter, Copy, Users, Box, Clock, Download, Wrench, Trash2, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Terminal, Key, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Filter, Copy, Users, Box, Clock, Download, Wrench, Trash2, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import API_URL from '../config/api';
@@ -320,7 +320,6 @@ const Dashboard: React.FC = () => {
       try {
         const text = event.target?.result as string;
         const lines = text.split('\n').filter(line => line.trim());
-        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
         
         // Very simple CSV parser (Assumes: name,serial,category)
         const parsedAssets = lines.slice(1).map(line => {
