@@ -478,8 +478,8 @@ const Dashboard: React.FC = () => {
             )}
 
             <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end mb-6 gap-4">
-              <div className="bg-white px-4 py-2 border-2 border-[#e4e4e7]">
-                <h2 className="text-3xl font-bold uppercase tracking-tight whitespace-nowrap">
+              <div className="bg-gray-900 px-6 py-2 shadow-[4px_4px_0_0_#d4d4d8]">
+                <h2 className="text-3xl font-bold uppercase tracking-tight whitespace-nowrap text-white">
                   {user?.role === 'ADMIN' ? 'Inventory Log' : 'My Equipment'}
                 </h2>
               </div>
@@ -709,8 +709,8 @@ const Dashboard: React.FC = () => {
             </div>
 
             <div className="flex justify-between items-end mb-6 gap-4">
-              <div className="bg-white px-4 py-2 border-2 border-[#e4e4e7]">
-                <h2 className="text-3xl font-bold uppercase tracking-tight">Employee Directory</h2>
+              <div className="bg-gray-900 px-6 py-2 shadow-[4px_4px_0_0_#d4d4d8]">
+                <h2 className="text-3xl font-bold uppercase tracking-tight text-white">Employee Directory</h2>
               </div>
               <button 
                 onClick={() => setIsUserModalOpen(true)}
