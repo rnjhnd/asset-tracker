@@ -65,6 +65,7 @@ const Dashboard: React.FC = () => {
   const [forceResetUserEmail, setForceResetUserEmail] = useState('');
   const [forceNewPassword, setForceNewPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -78,13 +79,18 @@ const Dashboard: React.FC = () => {
       navigate('/login');
       return;
     }
-    fetchAssets();
-    // Also fetch KPI totals on mount
-    fetchTotals();
     
-    if (user?.role === 'ADMIN') {
-      fetchUsers();
-    }
+    const loadAll = async () => {
+      setIsLoading(true);
+      await fetchAssets();
+      await fetchTotals();
+      if (user?.role === 'ADMIN') {
+        await fetchUsers();
+      }
+      setIsLoading(false);
+    };
+    
+    loadAll();
   }, [token, navigate, user?.role, currentPage, filterStatus]);
 
   // Debounced Search Effect
@@ -644,7 +650,17 @@ const Dashboard: React.FC = () => {
                         )}
                       </tr>
                     ))}
-                    {assets.length === 0 && (
+                    {isLoading && (
+                      <tr>
+                        <td colSpan={user?.role === 'ADMIN' ? 6 : 4} className="p-24 text-center">
+                          <div className="flex flex-col items-center justify-center text-gray-900">
+                            <RefreshCw size={48} className="mb-4 animate-spin opacity-50" />
+                            <p className="font-mono text-sm uppercase tracking-widest font-bold">Loading Data...</p>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    {!isLoading && assets.length === 0 && (
                       <tr>
                         <td colSpan={user?.role === 'ADMIN' ? 6 : 4} className="p-24 text-center">
                           <div className="flex flex-col items-center justify-center text-gray-400">
@@ -783,7 +799,17 @@ const Dashboard: React.FC = () => {
                       </td>
                     </tr>
                   ))}
-                  {users.length === 0 && (
+                  {isLoading && (
+                    <tr>
+                      <td colSpan={5} className="p-24 text-center">
+                        <div className="flex flex-col items-center justify-center text-gray-900">
+                          <RefreshCw size={48} className="mb-4 animate-spin opacity-50" />
+                          <p className="font-mono text-sm uppercase tracking-widest font-bold">Loading Directory...</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  {!isLoading && users.length === 0 && (
                     <tr>
                       <td colSpan={5} className="p-24 text-center">
                         <div className="flex flex-col items-center justify-center text-gray-400">
