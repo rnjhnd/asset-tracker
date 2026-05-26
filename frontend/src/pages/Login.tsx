@@ -27,12 +27,12 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-transparent p-4 font-sans relative">
-      <div className="bg-white p-8 border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] w-full max-w-md relative z-10">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-12 h-12 bg-gray-900 text-white flex items-center justify-center font-mono">
+      <div className="bg-white p-6 sm:p-8 border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] w-full max-w-md relative z-10">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-8 text-center sm:text-left">
+          <div className="w-12 h-12 bg-gray-900 text-white flex items-center justify-center font-mono shrink-0">
             <Server size={24} />
           </div>
-          <h1 className="text-xl font-bold uppercase tracking-tight text-gray-900">EMPLOYEE ASSET TRACKER</h1>
+          <h1 className="text-lg sm:text-xl font-bold uppercase tracking-tight text-gray-900 mt-2 sm:mt-0">EMPLOYEE ASSET TRACKER</h1>
         </div>
         
         {error && (

@@ -396,48 +396,48 @@ const Dashboard: React.FC = () => {
           },
         }}
       />
-      <header className="bg-white border-b-2 border-[#e4e4e7] p-6 flex justify-between items-center relative z-10">
+      <header className="bg-white border-b-2 border-[#e4e4e7] p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gray-900 text-white flex items-center justify-center font-mono">
-            <Server size={24} />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-900 text-white flex items-center justify-center font-mono shrink-0">
+            <Server size={20} className="sm:w-6 sm:h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold uppercase tracking-tight">EMPLOYEE ASSET TRACKER</h1>
-            <p className="font-mono text-sm text-gray-500 uppercase">
+            <h1 className="text-lg sm:text-xl font-bold uppercase tracking-tight">EMPLOYEE ASSET TRACKER</h1>
+            <p className="font-mono text-xs sm:text-sm text-gray-500 uppercase">
               {user?.email} | ROLE: {user?.role}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center justify-between w-full sm:w-auto gap-4 sm:gap-6 mt-2 sm:mt-0">
           <button 
             onClick={() => setIsPasswordModalOpen(true)}
-            className="flex items-center gap-2 text-gray-500 hover:text-black font-mono text-sm uppercase transition-colors"
+            className="flex items-center gap-2 text-gray-500 hover:text-black font-mono text-xs sm:text-sm uppercase transition-colors"
           >
             <Key size={16} /> Password
           </button>
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-2 text-gray-500 hover:text-red-500 font-mono text-sm uppercase transition-colors"
+            className="flex items-center gap-2 text-gray-500 hover:text-red-500 font-mono text-xs sm:text-sm uppercase transition-colors"
           >
             <LogOut size={16} /> Logout
           </button>
         </div>
       </header>
 
-      <main className="p-8 max-w-7xl mx-auto">
+      <main className="p-4 sm:p-8 max-w-7xl mx-auto overflow-x-hidden">
         
         {/* Admin Tab Navigation */}
         {user?.role === 'ADMIN' && (
-          <div className="flex gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row gap-4 mb-6 sm:mb-8">
             <button 
               onClick={() => setCurrentTab('ASSETS')}
-              className={`flex items-center gap-2 font-mono text-sm uppercase tracking-wider font-bold transition-colors px-6 py-3 border-2 ${currentTab === 'ASSETS' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-[#e4e4e7] hover:border-gray-400 hover:text-black'}`}
+              className={`flex items-center justify-center sm:justify-start gap-2 font-mono text-sm uppercase tracking-wider font-bold transition-colors w-full sm:w-auto px-6 py-3 border-2 ${currentTab === 'ASSETS' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-[#e4e4e7] hover:border-gray-400 hover:text-black'}`}
             >
               <Box size={16} /> Hardware
             </button>
             <button 
               onClick={() => setCurrentTab('USERS')}
-              className={`flex items-center gap-2 font-mono text-sm uppercase tracking-wider font-bold transition-colors px-6 py-3 border-2 ${currentTab === 'USERS' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-[#e4e4e7] hover:border-gray-400 hover:text-black'}`}
+              className={`flex items-center justify-center sm:justify-start gap-2 font-mono text-sm uppercase tracking-wider font-bold transition-colors w-full sm:w-auto px-6 py-3 border-2 ${currentTab === 'USERS' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-[#e4e4e7] hover:border-gray-400 hover:text-black'}`}
             >
               <Users size={16} /> Employees
             </button>
@@ -449,7 +449,7 @@ const Dashboard: React.FC = () => {
           <>
             {/* KPI Analytics Cards (Admin Only) */}
             {user?.role === 'ADMIN' && (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
                 <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
                   <p className="font-mono text-sm text-gray-500 uppercase tracking-widest mb-1">Total Assets</p>
                   <p className="text-4xl font-bold font-mono">{stats.total}</p>
@@ -471,7 +471,7 @@ const Dashboard: React.FC = () => {
 
             {/* Employee Specific KPI Cards */}
             {user?.role === 'EMPLOYEE' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
                 <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
                   <p className="font-mono text-sm text-gray-500 uppercase tracking-widest mb-1">Active Devices</p>
                   <p className="text-4xl font-bold font-mono">{assets.length}</p>
@@ -484,15 +484,15 @@ const Dashboard: React.FC = () => {
             )}
 
             <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end mb-6 gap-4">
-              <div className="bg-gray-900 px-6 py-2 shadow-[4px_4px_0_0_#d4d4d8]">
-                <h2 className="text-3xl font-bold uppercase tracking-tight whitespace-nowrap text-white">
+              <div className="bg-gray-900 px-4 sm:px-6 py-2 shadow-[4px_4px_0_0_#d4d4d8]">
+                <h2 className="text-xl sm:text-3xl font-bold uppercase tracking-tight whitespace-nowrap text-white">
                   {user?.role === 'ADMIN' ? 'Inventory Log' : 'My Equipment'}
                 </h2>
               </div>
               
               {user?.role === 'ADMIN' && (
-                <div className="flex flex-wrap items-center justify-end gap-4 w-full xl:w-auto">
-                  <div className="relative flex-1 min-w-[200px]">
+                <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-end gap-4 w-full xl:w-auto">
+                  <div className="relative w-full sm:w-auto sm:flex-1 min-w-[200px]">
                     <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     <input 
                       type="text" 
@@ -502,7 +502,7 @@ const Dashboard: React.FC = () => {
                       className="w-full pl-10 pr-4 py-2 border-2 border-[#e4e4e7] bg-white font-mono text-sm focus:border-[#3b82f6] outline-none"
                     />
                   </div>
-                  <div className="relative flex-1 min-w-[150px]">
+                  <div className="relative w-full sm:w-auto sm:flex-1 min-w-[150px]">
                     <Filter size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     <select 
                       value={filterStatus}
@@ -516,25 +516,25 @@ const Dashboard: React.FC = () => {
                       <option value="RETIRED">Retired</option>
                     </select>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <input type="file" accept=".csv" ref={fileInputRef} onChange={handleBulkImport} className="hidden" />
                     <button 
                       onClick={() => fileInputRef.current?.click()}
-                      className="bg-white border-2 border-[#e4e4e7] text-gray-600 px-4 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-50 hover:text-black transition-colors flex items-center gap-2"
+                      className="w-full sm:w-auto bg-white border-2 border-[#e4e4e7] text-gray-600 px-4 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-50 hover:text-black transition-colors flex items-center justify-center gap-2"
                       title="Bulk Import CSV"
                     >
                       <Upload size={16} /> Import
                     </button>
                     <button 
                       onClick={handleExportCSV}
-                      className="bg-white border-2 border-[#e4e4e7] text-gray-600 px-4 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-50 hover:text-black transition-colors flex items-center gap-2"
+                      className="w-full sm:w-auto bg-white border-2 border-[#e4e4e7] text-gray-600 px-4 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-50 hover:text-black transition-colors flex items-center justify-center gap-2"
                       title="Export CSV"
                     >
                       <Download size={16} /> Export
                     </button>
                     <button 
                       onClick={() => setIsAddModalOpen(true)}
-                      className="bg-gray-900 text-white px-6 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-800 transition-colors whitespace-nowrap"
+                      className="w-full sm:w-auto bg-gray-900 text-white px-6 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-800 transition-colors whitespace-nowrap flex justify-center items-center"
                     >
                       + Register Asset
                     </button>
@@ -705,7 +705,7 @@ const Dashboard: React.FC = () => {
         {/* --- USERS TAB --- */}
         {currentTab === 'USERS' && user?.role === 'ADMIN' && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
               <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
                 <p className="font-mono text-sm text-gray-500 uppercase tracking-widest mb-1">Total Users</p>
                 <p className="text-4xl font-bold font-mono">{userStats.total}</p>
@@ -724,13 +724,13 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex justify-between items-end mb-6 gap-4">
-              <div className="bg-gray-900 px-6 py-2 shadow-[4px_4px_0_0_#d4d4d8]">
-                <h2 className="text-3xl font-bold uppercase tracking-tight text-white">Employee Directory</h2>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
+              <div className="bg-gray-900 px-4 sm:px-6 py-2 shadow-[4px_4px_0_0_#d4d4d8]">
+                <h2 className="text-xl sm:text-3xl font-bold uppercase tracking-tight text-white">Employee Directory</h2>
               </div>
               <button 
                 onClick={() => setIsUserModalOpen(true)}
-                className="bg-gray-900 text-white px-6 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-800 transition-colors whitespace-nowrap"
+                className="w-full sm:w-auto bg-gray-900 text-white px-6 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-800 transition-colors whitespace-nowrap flex justify-center items-center"
               >
                 + Register User
               </button>
@@ -833,7 +833,7 @@ const Dashboard: React.FC = () => {
       {/* Password Change Modal */}
       {isPasswordModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-8 w-full max-w-md relative">
+          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
             <button onClick={() => setIsPasswordModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
@@ -858,7 +858,7 @@ const Dashboard: React.FC = () => {
       {/* Force Reset Password Modal (Admin Only) */}
       {isForceResetModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-8 w-full max-w-md relative">
+          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
             <button onClick={() => setIsForceResetModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
@@ -880,7 +880,7 @@ const Dashboard: React.FC = () => {
       {/* History Modal */}
       {isHistoryModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-8 w-full max-w-lg relative max-h-[80vh] flex flex-col">
+          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-lg relative max-h-[90vh] overflow-y-auto flex flex-col">
             <button onClick={() => setIsHistoryModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
@@ -914,7 +914,7 @@ const Dashboard: React.FC = () => {
       {/* Add Asset Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-8 w-full max-w-md relative">
+          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
             <button onClick={() => setIsAddModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
@@ -952,7 +952,7 @@ const Dashboard: React.FC = () => {
       {/* Assign Asset Modal */}
       {isAssignModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-8 w-full max-w-md relative">
+          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
             <button onClick={() => setIsAssignModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
@@ -971,7 +971,7 @@ const Dashboard: React.FC = () => {
       {/* Add User Modal */}
       {isUserModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-8 w-full max-w-md relative">
+          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
             <button onClick={() => setIsUserModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
