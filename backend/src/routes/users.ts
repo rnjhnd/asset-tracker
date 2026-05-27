@@ -75,6 +75,7 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
           department: true,
           createdAt: true,
           isActive: true,
+          resetRequested: true,
         },
         orderBy: orderByClause,
         skip,
@@ -137,7 +138,7 @@ router.put('/:id/force-password', authenticateToken, requireAdmin, async (req, r
     
     await prisma.user.update({
       where: { id },
-      data: { password: hashedPassword }
+      data: { passwordHash: hashedPassword, resetRequested: false }
     });
 
     res.json({ message: 'Password reset successfully' });

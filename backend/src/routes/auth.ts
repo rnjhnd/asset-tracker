@@ -98,13 +98,35 @@ router.put('/password', authenticateToken, async (req, res) => {
 
     await prisma.user.update({
       where: { id: userId },
-      data: { passwordHash: newPasswordHash }
+      data: { passwordHash: newPasswordHash },
     });
 
     res.json({ message: 'Password updated successfully' });
   } catch (error) {
     console.error('Password Update Error:', error);
     res.status(500).json({ error: 'Server error during password update' });
+  }
+});
+
+// REQUEST PASSWORD RESET ROUTE
+router.post('/request-reset', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    // We intentionally don't return 404 to prevent email enumeration,
+    // we just silently succeed or update if user exists.
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (user) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { resetRequested: true },
+      });
+    }
+
+    res.json({ message: 'Password reset request sent successfully' });
+  } catch (error) {
+    console.error('Request Reset Error:', error);
+    res.status(500).json({ error: 'Server error during password reset request' });
   }
 });
 

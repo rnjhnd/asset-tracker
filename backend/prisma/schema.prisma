@@ -31,9 +31,10 @@ model User {
   passwordHash String
   role         Role         @default(EMPLOYEE)
   department   String       @default("UNASSIGNED")
-  createdAt    DateTime     @default(now())
-  isActive     Boolean      @default(true)
-  assignments  Assignment[]
+  createdAt      DateTime     @default(now())
+  isActive       Boolean      @default(true)
+  resetRequested Boolean      @default(false)
+  assignments    Assignment[]
 }
 
 model Asset {

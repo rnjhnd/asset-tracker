@@ -25,6 +25,7 @@ type UserAccount = {
   department: string;
   createdAt: string;
   isActive: boolean;
+  resetRequested?: boolean;
 };
 
 type AuditLog = {
@@ -1018,6 +1019,21 @@ const Dashboard: React.FC = () => {
             </div>
 
             <div className="flex flex-col mb-6 gap-4">
+              {/* Reset Requests Banner */}
+              {users.filter(u => u.resetRequested).length > 0 && (
+                <div className="bg-red-50 border-2 border-red-600 p-4 mb-2 shadow-[4px_4px_0_0_#dc2626] flex items-center gap-3 animate-in fade-in zoom-in">
+                  <div className="bg-red-600 text-white p-2 shrink-0">
+                    <Key size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-red-700 uppercase tracking-tight text-lg leading-none mb-1">Password Resets Requested</h3>
+                    <p className="font-mono text-xs text-red-600 uppercase font-bold">
+                      {users.filter(u => u.resetRequested).length} employee(s) have requested a password reset. Use the key icon to force reset their passwords.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div className="bg-gray-900 px-4 sm:px-6 py-2 shadow-[4px_4px_0_0_#d4d4d8]">
                   <h2 className="text-xl sm:text-3xl font-bold uppercase tracking-tight text-white">Employee Directory</h2>
@@ -1127,7 +1143,16 @@ const Dashboard: React.FC = () => {
                   <tbody className="divide-y divide-[#e4e4e7]">
                     {!isLoading && users.map((u) => (
                       <tr key={u.id} className="hover:bg-gray-50 transition-all hover:shadow-[inset_4px_0_0_0_#3b82f6] group">
-                      <td className="p-4 font-bold">{u.email}</td>
+                      <td className="p-4 font-bold">
+                        <div className="flex items-center gap-2">
+                          {u.email}
+                          {u.resetRequested && (
+                            <span className="bg-red-100 text-red-700 border border-red-300 font-mono text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 whitespace-nowrap animate-pulse">
+                              Reset Req
+                            </span>
+                          )}
+                        </div>
+                      </td>
                       <td className="p-4">
                         <span className={`inline-block px-2 py-1 font-mono text-xs border ${
                           u.role === 'ADMIN' ? 'border-purple-200 bg-purple-50 text-purple-700' : 'border-gray-200 bg-gray-50 text-gray-700'

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { Server, Key, Eye, EyeOff } from 'lucide-react';
+import { Server, Key, Eye, EyeOff, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import API_URL from '../config/api';
 
@@ -11,6 +11,11 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [isSubmittingForgot, setIsSubmittingForgot] = useState(false);
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -30,6 +35,26 @@ const Login: React.FC = () => {
       navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Login failed');
+    }
+  };
+
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail) {
+      toast.error('Please enter your email address');
+      return;
+    }
+    
+    setIsSubmittingForgot(true);
+    try {
+      await axios.post(`${API_URL}/api/auth/request-reset`, { email: forgotEmail });
+      toast.success('Password reset request sent to Administrators!', { duration: 5000 });
+      setIsForgotModalOpen(false);
+      setForgotEmail('');
+    } catch (err) {
+      toast.error('Failed to send reset request');
+    } finally {
+      setIsSubmittingForgot(false);
     }
   };
 
@@ -113,7 +138,7 @@ const Login: React.FC = () => {
                 <div className="flex justify-end mt-2">
                   <button 
                     type="button" 
-                    onClick={() => toast.error('Please contact your IT Administrator at admin@system.com to request a password reset.', { icon: '🔒', duration: 6000 })}
+                    onClick={() => setIsForgotModalOpen(true)}
                     className="font-mono text-xs text-gray-500 hover:text-black uppercase font-bold tracking-widest transition-colors"
                   >
                     Forgot Password?
@@ -150,6 +175,55 @@ const Login: React.FC = () => {
 
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {isForgotModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white border-4 border-gray-900 shadow-[8px_8px_0_0_#111827] w-full max-w-md p-6 sm:p-8 relative animate-in fade-in zoom-in duration-200">
+            <button 
+              onClick={() => setIsForgotModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors"
+            >
+              <X size={24} />
+            </button>
+            <h2 className="text-2xl font-bold uppercase tracking-tighter text-gray-900 mb-2 flex items-center gap-2">
+              <Key size={24} /> Reset Request
+            </h2>
+            <p className="font-mono text-sm text-gray-600 mb-6">
+              Enter your email address to submit a password reset request to your IT Administrator.
+            </p>
+            <form onSubmit={handleForgotSubmit} className="space-y-4">
+              <div>
+                <label className="block font-mono text-xs font-bold text-gray-900 mb-2 uppercase tracking-widest">Email Address</label>
+                <input 
+                  type="email" 
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  className="w-full border-2 border-gray-300 bg-white p-3 font-mono text-sm focus:border-black outline-none transition-colors"
+                  placeholder="employee@system.com"
+                  required
+                />
+              </div>
+              <div className="flex gap-4 pt-4">
+                <button 
+                  type="button"
+                  onClick={() => setIsForgotModalOpen(false)}
+                  className="flex-1 bg-gray-200 text-gray-900 font-mono uppercase font-bold tracking-widest py-3 hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={isSubmittingForgot}
+                  className="flex-1 bg-gray-900 text-white font-mono uppercase font-bold tracking-widest py-3 hover:bg-black transition-colors disabled:opacity-50"
+                >
+                  {isSubmittingForgot ? 'Sending...' : 'Submit'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
