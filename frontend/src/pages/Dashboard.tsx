@@ -66,9 +66,9 @@ const Dashboard: React.FC = () => {
   // Advanced Filter/Sort State - USERS
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [userFilterRole, setUserFilterRole] = useState('ALL');
-  const [userFilterStatus, setUserFilterStatus] = useState('ACTIVE');
-  const [userSortBy, setUserSortBy] = useState('name');
-  const [userSortOrder, setUserSortOrder] = useState('asc');
+  const [userFilterStatus, setUserFilterStatus] = useState('ALL');
+  const [userSortBy, setUserSortBy] = useState('createdAt');
+  const [userSortOrder, setUserSortOrder] = useState('desc');
 
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -125,10 +125,10 @@ const Dashboard: React.FC = () => {
       setAssetSortOrder('asc');
     } else {
       setUserSearchQuery('');
-      setUserFilterStatus('ACTIVE');
+      setUserFilterStatus('ALL');
       setUserFilterRole('ALL');
-      setUserSortBy('name');
-      setUserSortOrder('asc');
+      setUserSortBy('createdAt');
+      setUserSortOrder('desc');
     }
     setCurrentPage(1);
   };
