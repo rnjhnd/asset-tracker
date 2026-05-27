@@ -133,6 +133,14 @@ router.post('/:id/assign', authenticateToken, requireAdmin, async (req, res) => 
       return res.status(400).json({ error: 'Asset not found or not available' });
     }
 
+    const targetUser = await prisma.user.findUnique({ where: { id: userId } });
+    if (!targetUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    if (targetUser.role === 'ADMIN') {
+      return res.status(400).json({ error: 'Cannot assign assets to an ADMIN' });
+    }
+
     // Create assignment and update asset status in a transaction
     const transaction = await prisma.$transaction([
       prisma.assignment.create({

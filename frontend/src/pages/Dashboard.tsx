@@ -195,8 +195,8 @@ const Dashboard: React.FC = () => {
       fetchAssets();
       fetchTotals();
       toast.success('Asset assigned successfully!');
-    } catch (error) {
-      toast.error('Failed to assign asset. Please ensure the UUID is correct.');
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to assign asset. Please ensure the UUID is correct.');
     } finally {
       setIsSubmitting(false);
     }
@@ -404,15 +404,15 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="flex flex-col justify-center">
             <h1 className="text-xl sm:text-2xl font-bold uppercase tracking-tighter text-gray-900 leading-none mb-1">INTERNAL ASSET PORTAL</h1>
-            <div className="flex items-center gap-3 font-mono text-[10px] sm:text-xs text-gray-500 uppercase tracking-widest">
-              <span className="flex items-center gap-1.5 text-green-600 font-bold">
+            <div className="flex items-center flex-wrap gap-2 sm:gap-3 font-mono text-[10px] sm:text-xs text-gray-500 uppercase tracking-widest mt-1">
+              <span className="flex items-center gap-1.5 text-green-600 font-bold whitespace-nowrap">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 ONLINE
               </span>
-              <span className="text-gray-300">|</span>
-              <span className="font-bold text-gray-900">{user?.email}</span>
-              <span className="text-gray-300">|</span>
-              <span className="bg-gray-100 px-2 py-0.5 border border-gray-300">{user?.role}</span>
+              <span className="text-gray-300 hidden sm:inline">|</span>
+              <span className="font-bold text-gray-900 truncate max-w-[150px] sm:max-w-[250px]" title={user?.email}>{user?.email}</span>
+              <span className="text-gray-300 hidden sm:inline">|</span>
+              <span className="bg-gray-100 px-2 py-0.5 border border-gray-300 whitespace-nowrap">{user?.role}</span>
             </div>
           </div>
         </div>
