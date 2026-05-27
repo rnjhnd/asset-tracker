@@ -862,8 +862,8 @@ const Dashboard: React.FC = () => {
                         <td colSpan={user?.role === 'ADMIN' ? 6 : 4} className="p-24 text-center">
                           <div className="flex flex-col items-center justify-center text-gray-400">
                             <Box size={48} className="mb-4 opacity-50" />
-                            <p className="font-mono text-sm uppercase tracking-widest text-gray-500">
-                              {user?.role === 'ADMIN' ? 'No Assets Match Criteria.' : 'You have no assigned equipment.'}
+                            <p className="font-mono text-sm uppercase tracking-widest font-bold text-gray-900">
+                              {user?.role === 'ADMIN' ? 'No assets found matching your filters.' : 'You have no assigned equipment.'}
                             </p>
                           </div>
                         </td>
