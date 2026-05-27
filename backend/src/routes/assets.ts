@@ -32,7 +32,7 @@ router.get('/', authenticateToken, async (req, res) => {
     }
 
     if (category !== 'ALL') {
-      whereClause.category = category;
+      whereClause.category = { name: category };
     }
 
     if (search) {
@@ -50,35 +50,53 @@ router.get('/', authenticateToken, async (req, res) => {
     }
 
     // Build the query orderBy clause
-    const validSortFields = ['name', 'serialNumber', 'category', 'status', 'purchaseDate'];
+    const validSortFields = ['name', 'serialNumber', 'category', 'status', 'purchaseDate', 'employee'];
     const validSortOrders = ['asc', 'desc'];
     
     const sortField = validSortFields.includes(sortBy as string) ? (sortBy as string) : 'purchaseDate';
     const sortDir = validSortOrders.includes(sortOrder as string) ? (sortOrder as string) : 'desc';
 
-    const orderByClause = [
+    let orderByClause: any = [
       { [sortField]: sortDir },
       { id: 'asc' }
     ];
 
-    const [assets, total] = await Promise.all([
-      prisma.asset.findMany({
-        where: whereClause,
-        include: {
-          assignments: {
-            where: { returnDate: null },
-            include: { user: { select: { email: true } } }
-          }
-        },
-        orderBy: orderByClause,
-        skip,
-        take: limitNumber
-      }),
-      prisma.asset.count({ where: whereClause })
-    ]);
+    if (sortField === 'employee' || sortField === 'category') {
+      orderByClause = { id: 'asc' }; // Remove Prisma sorting, we'll sort in JS
+    }
+
+    let assets = await prisma.asset.findMany({
+      where: whereClause,
+      include: {
+        category: true,
+        assignments: {
+          where: { returnDate: null },
+          include: { user: { select: { email: true } } }
+        }
+      },
+      orderBy: orderByClause,
+    });
+
+    // Handle JS sorting for complex relations
+    if (sortField === 'employee') {
+      assets.sort((a: any, b: any) => {
+        const emailA = a.assignments[0]?.user?.email || '';
+        const emailB = b.assignments[0]?.user?.email || '';
+        return sortDir === 'asc' ? emailA.localeCompare(emailB) : emailB.localeCompare(emailA);
+      });
+    } else if (sortField === 'category') {
+      assets.sort((a: any, b: any) => {
+        const catA = a.category?.name || '';
+        const catB = b.category?.name || '';
+        return sortDir === 'asc' ? catA.localeCompare(catB) : catB.localeCompare(catA);
+      });
+    }
+
+    const total = assets.length;
+    const paginatedAssets = assets.slice(skip, skip + limitNumber);
 
     res.json({
-      data: assets,
+      data: paginatedAssets.map((a: any) => ({ ...a, category: a.category?.name || 'UNKNOWN' })),
       total,
       page: pageNumber,
       totalPages: Math.ceil(total / limitNumber)
@@ -92,11 +110,18 @@ router.get('/', authenticateToken, async (req, res) => {
 router.post('/', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { name, serialNumber, category, purchaseDate } = req.body;
+    
+    // Find or create category
+    let catRecord = await prisma.category.findUnique({ where: { name: category } });
+    if (!catRecord) {
+      catRecord = await prisma.category.create({ data: { name: category } });
+    }
+
     const newAsset = await prisma.asset.create({
       data: {
         name,
         serialNumber,
-        category,
+        categoryId: catRecord.id,
         purchaseDate: new Date(purchaseDate),
       }
     });

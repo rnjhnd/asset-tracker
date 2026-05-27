@@ -9,7 +9,7 @@ const router = Router();
 // REGISTER ROUTE
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password, role, department } = req.body;
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -27,6 +27,7 @@ router.post('/register', async (req, res) => {
         email,
         passwordHash,
         role: role || 'EMPLOYEE',
+        department: department || 'UNASSIGNED',
         isActive: true,
       },
     });

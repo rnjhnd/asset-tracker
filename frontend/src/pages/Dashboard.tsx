@@ -11,7 +11,7 @@ type Asset = {
   id: string;
   name: string;
   serialNumber: string;
-  category: 'LAPTOP' | 'DESKTOP' | 'MONITOR' | 'TABLET' | 'PHONE' | 'SERVER' | 'NETWORK' | 'ACCESSORY';
+  category: string;
   status: 'AVAILABLE' | 'ASSIGNED' | 'MAINTENANCE' | 'RETIRED';
   assignments: { user: { email: string } }[];
 };
@@ -20,6 +20,7 @@ type UserAccount = {
   id: string;
   email: string;
   role: string;
+  department: string;
   createdAt: string;
   isActive: boolean;
 };
@@ -43,6 +44,7 @@ const Dashboard: React.FC = () => {
   });
   const [users, setUsers] = useState<UserAccount[]>([]);
   const [userStats, setUserStats] = useState({ total: 0, active: 0, deactivated: 0, admins: 0 });
+  const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
   const [currentTab, setCurrentTab] = useState<'ASSETS' | 'USERS'>('ASSETS');
 
   // Shared Pagination State
@@ -55,14 +57,14 @@ const Dashboard: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [assetFilterCategory, setAssetFilterCategory] = useState('ALL');
   const [assetSortBy, setAssetSortBy] = useState('purchaseDate');
-  const [assetSortOrder, setAssetSortOrder] = useState('desc');
+  const [assetSortOrder, setAssetSortOrder] = useState('asc');
 
   // Advanced Filter/Sort State - USERS
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [userFilterRole, setUserFilterRole] = useState('ALL');
   const [userFilterStatus, setUserFilterStatus] = useState('ALL');
   const [userSortBy, setUserSortBy] = useState('createdAt');
-  const [userSortOrder, setUserSortOrder] = useState('desc');
+  const [userSortOrder, setUserSortOrder] = useState('asc');
 
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -73,10 +75,12 @@ const Dashboard: React.FC = () => {
   const [isForceResetModalOpen, setIsForceResetModalOpen] = useState(false);
   
   // Form States
-  const [newAsset, setNewAsset] = useState({ name: '', serialNumber: '', category: 'LAPTOP', purchaseDate: new Date().toISOString().split('T')[0] });
+  const [newAsset, setNewAsset] = useState({ name: '', serialNumber: '', category: '', purchaseDate: new Date().toISOString().split('T')[0] });
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
   const [assignAssetId, setAssignAssetId] = useState('');
   const [assignUserId, setAssignUserId] = useState('');
-  const [newUser, setNewUser] = useState({ email: '', password: '', role: 'EMPLOYEE' });
+  const [newUser, setNewUser] = useState({ email: '', password: '', role: 'EMPLOYEE', department: '' });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
   const [forceResetUserId, setForceResetUserId] = useState('');
   const [forceResetUserEmail, setForceResetUserEmail] = useState('');
@@ -104,13 +108,13 @@ const Dashboard: React.FC = () => {
       setFilterStatus('ALL');
       setAssetFilterCategory('ALL');
       setAssetSortBy('purchaseDate');
-      setAssetSortOrder('desc');
+      setAssetSortOrder('asc');
     } else {
       setUserSearchQuery('');
       setUserFilterStatus('ALL');
       setUserFilterRole('ALL');
       setUserSortBy('createdAt');
-      setUserSortOrder('desc');
+      setUserSortOrder('asc');
     }
     setCurrentPage(1);
   };
@@ -126,7 +130,8 @@ const Dashboard: React.FC = () => {
       await Promise.all([
         currentTab === 'ASSETS' ? fetchAssets() : Promise.resolve(),
         user?.role === 'ADMIN' && currentTab === 'ASSETS' ? fetchTotals() : Promise.resolve(),
-        user?.role === 'ADMIN' && currentTab === 'USERS' ? fetchUsers() : Promise.resolve()
+        user?.role === 'ADMIN' && currentTab === 'USERS' ? fetchUsers() : Promise.resolve(),
+        fetchCategories()
       ]);
       setIsLoading(false);
     };
@@ -154,6 +159,18 @@ const Dashboard: React.FC = () => {
     }, 500);
     return () => clearTimeout(delayDebounceFn);
   }, [userSearchQuery]);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/categories`, { headers: { Authorization: `Bearer ${token}` } });
+      setCategories(res.data);
+      if (res.data.length > 0 && !newAsset.category) {
+        setNewAsset(prev => ({ ...prev, category: res.data[0].name }));
+      }
+    } catch (error) {
+      console.error('Failed to fetch categories');
+    }
+  };
 
   const fetchAssets = async () => {
     try {
@@ -208,7 +225,7 @@ const Dashboard: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsAddModalOpen(false);
-      setNewAsset({ name: '', serialNumber: '', category: 'LAPTOP', purchaseDate: new Date().toISOString().split('T')[0] });
+      setNewAsset({ name: '', serialNumber: '', category: categories.length > 0 ? categories[0].name : '', purchaseDate: new Date().toISOString().split('T')[0] });
       fetchAssets();
       fetchTotals();
       toast.success('Hardware registered successfully!');
@@ -226,11 +243,31 @@ const Dashboard: React.FC = () => {
     try {
       await axios.post(`${API_URL}/api/auth/register`, newUser);
       setIsUserModalOpen(false);
-      setNewUser({ email: '', password: '', role: 'EMPLOYEE' });
+      setNewUser({ email: '', password: '', role: 'EMPLOYEE', department: '' });
       fetchUsers();
       toast.success('Employee account created!');
     } catch (error) {
       toast.error('Failed to create user. Email may already exist.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting || !newCategoryName.trim()) return;
+    setIsSubmitting(true);
+    try {
+      const res = await axios.post(`${API_URL}/api/categories`, { name: newCategoryName }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCategories([...categories, res.data]);
+      setNewAsset({ ...newAsset, category: res.data.name });
+      setNewCategoryName('');
+      setIsCreatingCategory(false);
+      toast.success('Category created!');
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to create category');
     } finally {
       setIsSubmitting(false);
     }
@@ -695,14 +732,9 @@ const Dashboard: React.FC = () => {
                       className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
                     >
                       <option value="ALL">All Categories</option>
-                      <option value="LAPTOP">Laptop</option>
-                      <option value="MONITOR">Monitor</option>
-                      <option value="PHONE">Phone</option>
-                      <option value="TABLET">Tablet</option>
-                      <option value="KEYBOARD">Keyboard</option>
-                      <option value="MOUSE">Mouse</option>
-                      <option value="SERVER">Server</option>
-                      <option value="NETWORK">Network</option>
+                      {categories.map(c => (
+                        <option key={c.id} value={c.name}>{c.name}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="flex-1 min-w-[150px]">
@@ -717,6 +749,7 @@ const Dashboard: React.FC = () => {
                       <option value="serialNumber">Serial Number</option>
                       <option value="category">Category</option>
                       <option value="status">Status</option>
+                      <option value="employee">Assigned Employee</option>
                     </select>
                   </div>
                   <div className="flex-1 min-w-[150px]">
@@ -990,6 +1023,7 @@ const Dashboard: React.FC = () => {
                       <option value="createdAt">Date Added</option>
                       <option value="email">Email</option>
                       <option value="role">Role</option>
+                      <option value="department">Department</option>
                       <option value="isActive">Status</option>
                     </select>
                   </div>
@@ -1021,6 +1055,7 @@ const Dashboard: React.FC = () => {
                     <tr className="font-mono text-xs uppercase tracking-wider text-gray-500">
                       <th className="p-4 bg-gray-50">Email</th>
                       <th className="p-4 bg-gray-50">Role</th>
+                      <th className="p-4 bg-gray-50">Department</th>
                       <th className="p-4 bg-gray-50">Status</th>
                       <th className="p-4 bg-gray-50">Account Created</th>
                       <th className="p-4 text-right bg-gray-50">Actions</th>
@@ -1037,6 +1072,7 @@ const Dashboard: React.FC = () => {
                           {u.role}
                         </span>
                       </td>
+                      <td className="p-4 font-mono text-sm">{u.department}</td>
                       <td className="p-4">
                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs border rounded-full ${
                           u.isActive ? 'border-green-300 bg-green-50 text-green-700' : 'border-red-300 bg-red-50 text-red-700'
@@ -1202,16 +1238,22 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Category</label>
-                <select value={newAsset.category} onChange={e => setNewAsset({...newAsset, category: e.target.value as any})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white transition-colors">
-                  <option value="LAPTOP">Laptop</option>
-                  <option value="DESKTOP">Desktop</option>
-                  <option value="MONITOR">Monitor</option>
-                  <option value="TABLET">Tablet</option>
-                  <option value="PHONE">Phone / Mobile</option>
-                  <option value="SERVER">Server</option>
-                  <option value="NETWORK">Networking Device</option>
-                  <option value="ACCESSORY">Accessory / Other</option>
-                </select>
+                {isCreatingCategory ? (
+                  <div className="flex gap-2">
+                    <input autoFocus type="text" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} className="flex-1 border-2 border-[#3b82f6] p-3 font-mono text-sm focus:border-blue-600 outline-none transition-colors" placeholder="E.g. VR HEADSET" />
+                    <button type="button" onClick={handleCreateCategory} disabled={isSubmitting || !newCategoryName.trim()} className="bg-[#3b82f6] text-white px-4 font-bold hover:bg-blue-600 transition-colors">ADD</button>
+                    <button type="button" onClick={() => setIsCreatingCategory(false)} className="bg-gray-200 text-gray-700 px-4 font-bold hover:bg-gray-300 transition-colors">CANCEL</button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <select value={newAsset.category} onChange={e => setNewAsset({...newAsset, category: e.target.value})} className="flex-1 border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white transition-colors">
+                      {categories.map(c => (
+                        <option key={c.id} value={c.name}>{c.name}</option>
+                      ))}
+                    </select>
+                    <button type="button" onClick={() => setIsCreatingCategory(true)} className="bg-gray-900 text-white px-4 font-bold hover:bg-gray-700 transition-colors whitespace-nowrap">+ NEW</button>
+                  </div>
+                )}
               </div>
               <button disabled={isSubmitting} type="submit" className={`w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isSubmitting ? 'PROCESSING...' : 'Deploy to Inventory'}
@@ -1261,6 +1303,10 @@ const Dashboard: React.FC = () => {
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Initial Password</label>
                 <input required type="text" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="secure_password" />
+              </div>
+              <div>
+                <label className="block font-mono text-xs uppercase mb-1 font-bold">Department</label>
+                <input required type="text" value={newUser.department} onChange={e => setNewUser({...newUser, department: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. ENGINEERING" />
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">System Role</label>

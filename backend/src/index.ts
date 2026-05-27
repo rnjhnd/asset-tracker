@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import assetRoutes from './routes/assets';
 import userRoutes from './routes/users';
+import categoryRoutes from './routes/categories';
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ app.use('/api/auth', authRoutes);
 // Apply strict limiter specifically to modifying endpoints if needed, but for portfolio protection we can apply it to all asset/user writes
 app.use('/api/assets', strictLimiter, assetRoutes);
 app.use('/api/users', strictLimiter, userRoutes);
+app.use('/api/categories', strictLimiter, categoryRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

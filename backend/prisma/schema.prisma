@@ -12,17 +12,6 @@ enum Role {
   EMPLOYEE
 }
 
-enum AssetCategory {
-  ACCESSORY
-  DESKTOP
-  LAPTOP
-  MONITOR
-  NETWORK
-  PHONE
-  SERVER
-  TABLET
-}
-
 enum AssetStatus {
   ASSIGNED
   AVAILABLE
@@ -30,11 +19,18 @@ enum AssetStatus {
   RETIRED
 }
 
+model Category {
+  id    String @id @default(uuid())
+  name  String @unique @db.Citext
+  assets Asset[]
+}
+
 model User {
   id           String       @id @default(uuid())
   email        String       @unique @db.Citext
   passwordHash String
   role         Role         @default(EMPLOYEE)
+  department   String       @default("UNASSIGNED")
   createdAt    DateTime     @default(now())
   isActive     Boolean      @default(true)
   assignments  Assignment[]
@@ -44,7 +40,8 @@ model Asset {
   id           String        @id @default(uuid())
   name         String        @db.Citext
   serialNumber String        @unique @db.Citext
-  category     AssetCategory
+  categoryId   String
+  category     Category      @relation(fields: [categoryId], references: [id])
   status       AssetStatus   @default(AVAILABLE)
   purchaseDate DateTime
   assignments  Assignment[]

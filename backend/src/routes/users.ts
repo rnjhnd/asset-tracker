@@ -54,7 +54,7 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
     }
 
     // Build orderBy clause
-    const validSortFields = ['email', 'role', 'isActive', 'createdAt'];
+    const validSortFields = ['email', 'role', 'isActive', 'createdAt', 'department'];
     const validSortOrders = ['asc', 'desc'];
     
     const sortField = validSortFields.includes(sortBy as string) ? (sortBy as string) : 'createdAt';
@@ -72,6 +72,7 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
           id: true,
           email: true,
           role: true,
+          department: true,
           createdAt: true,
           isActive: true,
         },
