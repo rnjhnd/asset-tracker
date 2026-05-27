@@ -459,27 +459,7 @@ const Dashboard: React.FC = () => {
         {/* --- ASSETS TAB --- */}
         {currentTab === 'ASSETS' && (
           <>
-            {/* KPI Analytics Cards (Admin Only) */}
-            {user?.role === 'ADMIN' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-                <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
-                  <p className="font-mono text-sm text-gray-500 uppercase tracking-widest mb-1">Total Assets</p>
-                  <p className="text-4xl font-bold font-mono">{stats.total}</p>
-                </div>
-                <div className="bg-white border-2 border-blue-600 p-6 shadow-[4px_4px_0_0_#2563eb]">
-                  <p className="font-mono text-sm text-blue-600 uppercase tracking-widest mb-1">Deployed</p>
-                  <p className="text-4xl font-bold font-mono">{stats.assigned}</p>
-                </div>
-                <div className="bg-white border-2 border-green-600 p-6 shadow-[4px_4px_0_0_#16a34a]">
-                  <p className="font-mono text-sm text-green-600 uppercase tracking-widest mb-1">Available</p>
-                  <p className="text-4xl font-bold font-mono">{stats.available}</p>
-                </div>
-                <div className="bg-white border-2 border-yellow-600 p-6 shadow-[4px_4px_0_0_#ca8a04]">
-                  <p className="font-mono text-sm text-yellow-600 uppercase tracking-widest mb-1">Maintenance</p>
-                  <p className="text-4xl font-bold font-mono">{stats.maintenance}</p>
-                </div>
-              </div>
-            )}
+
 
             {/* Analytics Grid */}
             {user?.role === 'ADMIN' && (
@@ -582,7 +562,7 @@ const Dashboard: React.FC = () => {
             <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end mb-6 gap-4">
               <div className="bg-gray-900 px-4 sm:px-6 py-2 shadow-[4px_4px_0_0_#d4d4d8]">
                 <h2 className="text-xl sm:text-3xl font-bold uppercase tracking-tight whitespace-nowrap text-white">
-                  {user?.role === 'ADMIN' ? 'Inventory Log' : 'My Equipment'}
+                  {user?.role === 'ADMIN' ? `Inventory Log (${stats.total} Total)` : 'My Equipment'}
                 </h2>
               </div>
               
