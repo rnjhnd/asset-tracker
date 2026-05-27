@@ -26,7 +26,7 @@ const Login: React.FC = () => {
     try {
       const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
       login(response.data.user, response.data.token);
-      toast.success('AUTHENTICATION SUCCESSFUL');
+      toast.success('AUTHENTICATION SUCCESSFUL', { id: 'login-toast' });
       navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Login failed');

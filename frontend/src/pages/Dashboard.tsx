@@ -141,7 +141,7 @@ const Dashboard: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    toast.success('SYSTEM DISCONNECTED');
+    toast.success('SYSTEM DISCONNECTED', { id: 'logout-toast' });
     navigate('/login');
   };
 
