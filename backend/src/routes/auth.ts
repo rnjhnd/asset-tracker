@@ -120,6 +120,12 @@ router.put('/password', authenticateToken, async (req, res) => {
     const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!isMatch) return res.status(400).json({ error: 'Incorrect current password' });
 
+    // Protect core demo accounts from being changed
+    const protectedAccounts = ['admin@system.com', 'employee1@system.com', 'employee2@system.com'];
+    if (protectedAccounts.includes(user.email.toLowerCase())) {
+      return res.status(403).json({ error: 'Changing the password of core demo accounts is disabled.' });
+    }
+
     if (newPassword.length < 8) {
       return res.status(400).json({ error: 'New password must be at least 8 characters long.' });
     }

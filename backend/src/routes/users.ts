@@ -104,6 +104,11 @@ router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    const protectedAccounts = ['admin@system.com', 'employee1@system.com', 'employee2@system.com'];
+    if (protectedAccounts.includes(user.email.toLowerCase())) {
+      return res.status(403).json({ error: 'Modifying core demo accounts is disabled.' });
+    }
+
     // Auto-capitalize name
     if (name) {
       name = name
@@ -160,6 +165,11 @@ router.put('/:id/status', authenticateToken, requireAdmin, async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    const protectedAccounts = ['admin@system.com', 'employee1@system.com', 'employee2@system.com'];
+    if (protectedAccounts.includes(user.email.toLowerCase())) {
+      return res.status(403).json({ error: 'Deactivating core demo accounts is disabled.' });
+    }
+
     // Prevent admin from deactivating themselves or other admins
     if (user.id === req.user?.userId) {
       return res.status(400).json({ error: 'You cannot deactivate your own account.' });
@@ -192,6 +202,11 @@ router.put('/:id/force-password', authenticateToken, requireAdmin, async (req, r
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    const protectedAccounts = ['admin@system.com', 'employee1@system.com', 'employee2@system.com'];
+    if (protectedAccounts.includes(user.email.toLowerCase())) {
+      return res.status(403).json({ error: 'Resetting the password of core demo accounts is disabled.' });
+    }
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     
     await prisma.user.update({
@@ -215,6 +230,12 @@ router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
     });
 
     if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    const protectedAccounts = ['admin@system.com', 'employee1@system.com', 'employee2@system.com'];
+    if (protectedAccounts.includes(user.email.toLowerCase())) {
+      return res.status(403).json({ error: 'Deleting core demo accounts is disabled.' });
+    }
+
     if (user.id === req.user?.userId) return res.status(400).json({ error: 'You cannot delete your own account.' });
     if (user.role === 'ADMIN') return res.status(400).json({ error: 'Cannot delete an ADMIN account.' });
     if (user.assignments.length > 0) {
