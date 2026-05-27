@@ -148,7 +148,7 @@ const Dashboard: React.FC = () => {
       setFilterStatus('ALL');
       setAssetFilterCategory('ALL');
       setAssetSortBy('purchaseDate');
-      setAssetSortOrder('asc');
+      setAssetSortOrder('desc');
     } else {
       setUserSearchQuery('');
       setUserFilterStatus('ALL');

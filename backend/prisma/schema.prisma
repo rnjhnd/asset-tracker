@@ -7,6 +7,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Category {
+  id     String  @id @default(uuid())
+  name   String  @unique @db.Citext
+  assets Asset[]
+}
+
+model User {
+  id             String       @id @default(uuid())
+  email          String       @unique @db.Citext
+  passwordHash   String
+  role           Role         @default(EMPLOYEE)
+  createdAt      DateTime     @default(now())
+  isActive       Boolean      @default(true)
+  department     String       @default("UNASSIGNED")
+  resetRequested Boolean      @default(false)
+  name           String       @default("Unknown Employee")
+  assignments    Assignment[]
+}
+
+model Asset {
+  id           String       @id @default(uuid())
+  name         String       @db.Citext
+  serialNumber String       @unique @db.Citext
+  status       AssetStatus  @default(AVAILABLE)
+  purchaseDate DateTime
+  categoryId   String
+  category     Category     @relation(fields: [categoryId], references: [id])
+  assignments  Assignment[]
+}
+
+model Assignment {
+  id           String    @id @default(uuid())
+  userId       String
+  assetId      String
+  checkoutDate DateTime  @default(now())
+  returnDate   DateTime?
+  asset        Asset     @relation(fields: [assetId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
+}
+
 enum Role {
   ADMIN
   EMPLOYEE
@@ -17,45 +57,4 @@ enum AssetStatus {
   AVAILABLE
   MAINTENANCE
   RETIRED
-}
-
-model Category {
-  id    String @id @default(uuid())
-  name  String @unique @db.Citext
-  assets Asset[]
-}
-
-model User {
-  id           String       @id @default(uuid())
-  email        String       @unique @db.Citext
-  name         String       @default("Unknown Employee")
-  passwordHash String
-  role         Role         @default(EMPLOYEE)
-  department   String       @default("UNASSIGNED")
-  createdAt      DateTime     @default(now())
-  isActive       Boolean      @default(true)
-  resetRequested Boolean      @default(false)
-  assignments    Assignment[]
-}
-
-model Asset {
-  id           String        @id @default(uuid())
-  name         String        @db.Citext
-  serialNumber String        @unique @db.Citext
-  categoryId   String
-  category     Category      @relation(fields: [categoryId], references: [id])
-  status       AssetStatus   @default(AVAILABLE)
-  purchaseDate DateTime
-  assignments  Assignment[]
-}
-
-model Assignment {
-  id           String    @id @default(uuid())
-  userId       String
-  assetId      String
-  checkoutDate DateTime  @default(now())
-  returnDate   DateTime?
-
-  user  User  @relation(fields: [userId], references: [id])
-  asset Asset @relation(fields: [assetId], references: [id])
 }
