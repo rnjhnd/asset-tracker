@@ -278,10 +278,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('UUID copied to clipboard!', { id: 'copy-uuid' });
-  };
+
 
   const handleExportCSV = async () => {
     try {
@@ -781,14 +778,7 @@ const Dashboard: React.FC = () => {
                         >
                           <Key size={16} />
                         </button>
-                        <div className="h-4 w-px bg-gray-300 mx-1"></div>
-                        <button 
-                          onClick={() => copyToClipboard(u.id)}
-                          className="text-[#3b82f6] hover:underline font-mono text-sm uppercase flex items-center gap-1"
-                          title="Copy UUID"
-                        >
-                          <Copy size={14} /> Copy UUID
-                        </button>
+
                       </td>
                     </tr>
                   ))}
