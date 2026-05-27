@@ -952,8 +952,13 @@ const Dashboard: React.FC = () => {
             <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Assign Hardware</h3>
             <form onSubmit={handleAssignAsset} className="space-y-4">
               <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Employee UUID</label>
-                <input required type="text" value={assignUserId} onChange={e => setAssignUserId(e.target.value)} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="Paste UUID from Employees tab..." />
+                <label className="block font-mono text-xs uppercase mb-1 font-bold">Select Employee</label>
+                <select required value={assignUserId} onChange={e => setAssignUserId(e.target.value)} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white transition-colors">
+                  <option value="" disabled>-- Choose an Employee --</option>
+                  {users.filter(u => u.role !== 'ADMIN' && u.isActive).map(u => (
+                    <option key={u.id} value={u.id}>{u.email}</option>
+                  ))}
+                </select>
               </div>
               <button type="submit" className="w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors">Confirm Assignment</button>
             </form>
