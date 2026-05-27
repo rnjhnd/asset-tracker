@@ -880,7 +880,7 @@ const Dashboard: React.FC = () => {
                                 setEditingAsset({ id: asset.id, name: asset.name, serialNumber: asset.serialNumber });
                                 setIsEditModalOpen(true);
                               }}
-                              className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-600 transition-colors"
+                              className="text-gray-400 hover:text-blue-600 transition-colors"
                               title="Edit Asset"
                             >
                               <Edit2 size={16} />
