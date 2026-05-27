@@ -352,14 +352,14 @@ const Dashboard: React.FC = () => {
   const handleCategoryNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     const sanitized = raw.replace(/[^A-Za-z\s]/g, '');
-    if (raw !== sanitized) toast('Only letters and spaces allowed', { icon: '⚠️' });
+    if (raw !== sanitized) toast('Only letters and spaces allowed', { icon: '⚠️', id: 'category-val-err' });
     setNewCategoryName(sanitized.toUpperCase());
   };
 
   const handleDepartmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     const sanitized = raw.replace(/[^A-Za-z\s]/g, '');
-    if (raw !== sanitized) toast('Only letters and spaces allowed', { icon: '⚠️' });
+    if (raw !== sanitized) toast('Only letters and spaces allowed', { icon: '⚠️', id: 'dept-val-err' });
     setNewUser({...newUser, department: sanitized.toUpperCase()});
   };
 
@@ -1184,29 +1184,30 @@ const Dashboard: React.FC = () => {
                           {u.isActive ? 'ACTIVE' : 'DEACTIVATED'}
                         </span>
                       </td>
-                      <td className="p-4 font-mono text-sm text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
-                      <td className="p-4 flex items-center justify-end gap-3">
-                        <button 
-                          onClick={() => handleToggleUserStatus(u.id)}
-                          disabled={u.role === 'ADMIN' && u.isActive}
-                          className={`${u.role === 'ADMIN' && u.isActive ? 'text-gray-300 cursor-not-allowed' : (u.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-500 hover:text-green-700')} font-mono text-sm uppercase transition-colors`}
-                          title={u.role === 'ADMIN' && u.isActive ? "Cannot deactivate ADMIN" : (u.isActive ? "Deactivate User" : "Reactivate User")}
-                        >
-                          {u.isActive ? <UserX size={16} /> : <UserCheck size={16} />}
-                        </button>
-                        <div className="h-4 w-px bg-gray-300 mx-1"></div>
-                        <button 
-                          onClick={() => {
-                            setForceResetUserId(u.id);
-                            setForceResetUserEmail(u.email);
-                            setIsForceResetModalOpen(true);
-                          }}
-                          className="text-[#ca8a04] hover:text-yellow-600 transition-colors"
-                          title="Force Reset Password"
-                        >
-                          <Key size={16} />
-                        </button>
-
+                      <td className="p-4 font-mono text-sm text-gray-500 align-middle">{new Date(u.createdAt).toLocaleDateString()}</td>
+                      <td className="p-4 align-middle">
+                        <div className="flex items-center justify-end gap-3">
+                          <button 
+                            onClick={() => handleToggleUserStatus(u.id)}
+                            disabled={u.role === 'ADMIN' && u.isActive}
+                            className={`${u.role === 'ADMIN' && u.isActive ? 'text-gray-300 cursor-not-allowed' : (u.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-500 hover:text-green-700')} font-mono text-sm uppercase transition-colors`}
+                            title={u.role === 'ADMIN' && u.isActive ? "Cannot deactivate ADMIN" : (u.isActive ? "Deactivate User" : "Reactivate User")}
+                          >
+                            {u.isActive ? <UserX size={16} /> : <UserCheck size={16} />}
+                          </button>
+                          <div className="h-4 w-px bg-gray-300 mx-1"></div>
+                          <button 
+                            onClick={() => {
+                              setForceResetUserId(u.id);
+                              setForceResetUserEmail(u.email);
+                              setIsForceResetModalOpen(true);
+                            }}
+                            className="text-[#ca8a04] hover:text-yellow-600 transition-colors"
+                            title="Force Reset Password"
+                          >
+                            <Key size={16} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1401,7 +1402,7 @@ const Dashboard: React.FC = () => {
                     required={!assignUserId}
                   />
                   {showAssignDropdown && (
-                    <ul className="absolute z-10 w-full bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] mt-1 max-h-48 overflow-y-auto">
+                    <ul className="w-full bg-white border-2 border-gray-900 border-t-0 shadow-[4px_4px_0_0_#111827] mt-0 max-h-48 overflow-y-auto">
                       {users.filter(u => u.isActive && u.role !== 'ADMIN' && (u.name.toLowerCase().includes(assignSearchQuery.toLowerCase()) || u.email.toLowerCase().includes(assignSearchQuery.toLowerCase()))).length === 0 ? (
                         <li className="p-3 font-mono text-sm text-gray-500">No employees found.</li>
                       ) : (
@@ -1478,7 +1479,7 @@ const Dashboard: React.FC = () => {
                   onChange={e => {
                     const rawVal = e.target.value;
                     if (/[^A-Za-z\s]/.test(rawVal)) {
-                      toast.error('Only letters and spaces are allowed for Full Name', { id: 'name-val-err' });
+                      toast('Only letters and spaces are allowed for Full Name', { icon: '⚠️', id: 'name-val-err' });
                     }
                     setNewUser({...newUser, name: rawVal.replace(/[^A-Za-z\s]/g, '')});
                   }} 
