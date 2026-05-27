@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Users, Box, Clock, Download, Wrench, Trash2, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight, SlidersHorizontal, Eye, EyeOff, Edit2, MoreHorizontal } from 'lucide-react';
+import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Users, Box, Clock, Download, Wrench, Trash2, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight, SlidersHorizontal, Eye, EyeOff, Edit2, MoreHorizontal, User, ChevronDown } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid, Legend } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -87,6 +87,7 @@ const Dashboard: React.FC = () => {
   const [newUser, setNewUser] = useState({ email: '', password: '', role: 'EMPLOYEE', department: '' });
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, showAbove: false });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
   const [forceResetUserId, setForceResetUserId] = useState('');
@@ -222,6 +223,20 @@ const Dashboard: React.FC = () => {
     toast.success('LOGGED OUT SUCCESSFULLY', { id: 'logout-toast' });
     navigate('/login');
   };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.action-dropdown-container')) {
+        setActiveDropdownId(null);
+      }
+      if (!target.closest('.profile-dropdown-container')) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   const handleCreateAsset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -550,19 +565,37 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center w-full sm:w-auto gap-3 sm:gap-4 mt-2 sm:mt-0">
+        <div className="flex items-center w-full sm:w-auto mt-2 sm:mt-0 relative profile-dropdown-container">
           <button 
-            onClick={() => setIsPasswordModalOpen(true)}
-            className="flex-1 sm:flex-none flex justify-center items-center gap-2 bg-white border-2 border-gray-300 hover:border-gray-900 text-gray-600 hover:text-black font-mono text-xs font-bold uppercase tracking-wider px-4 py-2.5 transition-colors shadow-sm"
+            onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+            className="w-full sm:w-auto flex justify-between sm:justify-center items-center gap-2 bg-white border-2 border-gray-900 text-gray-900 font-mono text-xs font-bold uppercase tracking-wider px-4 py-2.5 transition-colors shadow-[4px_4px_0_0_#111827] hover:bg-gray-50 hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[2px_2px_0_0_#111827]"
           >
-            <Key size={14} /> Password
+            <div className="flex items-center gap-2">
+              <User size={14} /> {user?.role} Profile
+            </div>
+            <ChevronDown size={14} className={`transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
           </button>
-          <button 
-            onClick={handleLogout}
-            className="flex-1 sm:flex-none flex justify-center items-center gap-2 bg-red-50 border-2 border-red-200 hover:border-red-600 text-red-600 font-mono text-xs font-bold uppercase tracking-wider px-4 py-2.5 transition-colors shadow-sm"
-          >
-            <LogOut size={14} /> Logout
-          </button>
+          
+          {isProfileDropdownOpen && (
+            <div className="absolute right-0 top-full mt-2 w-full sm:w-56 bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] flex flex-col p-1 text-left z-50">
+              <div className="px-3 py-2 border-b border-gray-200 mb-1">
+                <p className="font-mono text-[10px] text-gray-500 uppercase font-bold tracking-widest">Signed in as</p>
+                <p className="font-mono text-sm truncate text-gray-900 font-bold" title={user?.email}>{user?.email}</p>
+              </div>
+              <button 
+                onClick={() => { setIsPasswordModalOpen(true); setIsProfileDropdownOpen(false); }}
+                className="px-3 py-2 text-sm font-mono text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors"
+              >
+                <Key size={14} /> Change Password
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="px-3 py-2 text-sm font-mono text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors mt-1"
+              >
+                <LogOut size={14} /> Logout
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
