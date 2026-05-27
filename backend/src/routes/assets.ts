@@ -131,6 +131,34 @@ router.post('/', authenticateToken, requireAdmin, async (req, res) => {
   }
 });
 
+// Edit Asset Details (Admin Only)
+router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, serialNumber } = req.body;
+    
+    // Check if serial number belongs to another asset
+    if (serialNumber) {
+      const existing = await prisma.asset.findUnique({ where: { serialNumber } });
+      if (existing && existing.id !== id) {
+        return res.status(400).json({ error: 'Serial number already in use' });
+      }
+    }
+
+    const updatedAsset = await prisma.asset.update({
+      where: { id },
+      data: {
+        ...(name && { name }),
+        ...(serialNumber && { serialNumber })
+      }
+    });
+    
+    res.json(updatedAsset);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update asset' });
+  }
+});
+
 // Get Asset Statistics (Admin Only)
 router.get('/stats', authenticateToken, requireAdmin, async (req, res) => {
   try {

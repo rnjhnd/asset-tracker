@@ -69,6 +69,7 @@ const Dashboard: React.FC = () => {
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -78,9 +79,11 @@ const Dashboard: React.FC = () => {
   const [newAsset, setNewAsset] = useState({ name: '', serialNumber: '', category: '', purchaseDate: new Date().toISOString().split('T')[0] });
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [editingAsset, setEditingAsset] = useState({ id: '', name: '', serialNumber: '' });
   const [assignAssetId, setAssignAssetId] = useState('');
   const [assignUserId, setAssignUserId] = useState('');
   const [newUser, setNewUser] = useState({ email: '', password: '', role: 'EMPLOYEE', department: '' });
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
   const [forceResetUserId, setForceResetUserId] = useState('');
   const [forceResetUserEmail, setForceResetUserEmail] = useState('');
@@ -282,15 +285,51 @@ const Dashboard: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsAssignModalOpen(false);
+      setAssignAssetId('');
       setAssignUserId('');
       fetchAssets();
       fetchTotals();
       toast.success('Asset assigned successfully!');
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to assign asset. Please ensure the UUID is correct.');
+    } catch (error) {
+      toast.error('Failed to assign asset');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleUpdateAsset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await axios.put(`${API_URL}/api/assets/${editingAsset.id}`, {
+        name: editingAsset.name,
+        serialNumber: editingAsset.serialNumber
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setIsEditModalOpen(false);
+      fetchAssets();
+      toast.success('Asset updated successfully!');
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to update asset');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCategoryNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    const sanitized = raw.replace(/[^A-Za-z\s]/g, '');
+    if (raw !== sanitized) toast('Only letters and spaces allowed', { icon: '⚠️' });
+    setNewCategoryName(sanitized.toUpperCase());
+  };
+
+  const handleDepartmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    const sanitized = raw.replace(/[^A-Za-z\s]/g, '');
+    if (raw !== sanitized) toast('Only letters and spaces allowed', { icon: '⚠️' });
+    setNewUser({...newUser, department: sanitized.toUpperCase()});
   };
 
   const handleReturnAsset = async (assetId: string) => {
@@ -835,7 +874,19 @@ const Dashboard: React.FC = () => {
                               </button>
                             )}
                             
-                            {asset.status !== 'MAINTENANCE' && asset.status !== 'RETIRED' && (
+                            {user?.role === 'ADMIN' && (
+                            <button 
+                              onClick={() => {
+                                setEditingAsset({ id: asset.id, name: asset.name, serialNumber: asset.serialNumber });
+                                setIsEditModalOpen(true);
+                              }}
+                              className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-600 transition-colors"
+                              title="Edit Asset"
+                            >
+                              <Wrench size={16} />
+                            </button>
+                          )}
+                          {user?.role === 'ADMIN' && asset.status !== 'RETIRED' && (
                               <button 
                                 onClick={() => handleUpdateStatus(asset.id, 'MAINTENANCE')}
                                 className="text-gray-400 hover:text-yellow-600 transition-colors"
@@ -1240,7 +1291,7 @@ const Dashboard: React.FC = () => {
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Category</label>
                 {isCreatingCategory ? (
                   <div className="flex gap-2">
-                    <input required autoFocus type="text" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value.replace(/[^A-Za-z\s]/g, '').toUpperCase())} className="flex-1 border-2 border-[#3b82f6] p-3 font-mono text-sm focus:border-blue-600 outline-none transition-colors" placeholder="E.g. VR HEADSET" />
+                    <input required autoFocus type="text" value={newCategoryName} onChange={handleCategoryNameChange} className="flex-1 border-2 border-[#3b82f6] p-3 font-mono text-sm focus:border-blue-600 outline-none transition-colors" placeholder="E.g. VR HEADSET" />
                     <button type="button" onClick={handleCreateCategory} disabled={isSubmitting || !newCategoryName.trim()} className="bg-[#3b82f6] text-white px-4 font-bold hover:bg-blue-600 transition-colors">ADD</button>
                     <button type="button" onClick={() => setIsCreatingCategory(false)} className="bg-gray-200 text-gray-700 px-4 font-bold hover:bg-gray-300 transition-colors">CANCEL</button>
                   </div>
@@ -1287,6 +1338,34 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
+      {/* Edit Asset Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
+            <button onClick={() => setIsEditModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+              <X size={24} />
+            </button>
+            <h2 className="text-xl sm:text-2xl font-bold font-mono tracking-tight uppercase mb-6 flex items-center gap-3">
+              <Wrench className="text-[#3b82f6]" />
+              Edit Asset Details
+            </h2>
+            <form onSubmit={handleUpdateAsset} className="space-y-4">
+              <div>
+                <label className="block font-mono text-xs uppercase mb-1 font-bold">Asset Name</label>
+                <input required autoFocus type="text" value={editingAsset.name} onChange={e => setEditingAsset({...editingAsset, name: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
+              </div>
+              <div>
+                <label className="block font-mono text-xs uppercase mb-1 font-bold">Serial Number</label>
+                <input required type="text" value={editingAsset.serialNumber} onChange={e => setEditingAsset({...editingAsset, serialNumber: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
+              </div>
+              <button disabled={isSubmitting} type="submit" className={`w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                {isSubmitting ? 'PROCESSING...' : 'Save Changes'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Add User Modal */}
       {isUserModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -1302,11 +1381,16 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Initial Password</label>
-                <input required type="text" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="secure_password" />
+                <div className="relative">
+                  <input required type={isPasswordVisible ? "text" : "password"} value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="secure_password" />
+                  <button type="button" onClick={() => setIsPasswordVisible(!isPasswordVisible)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black focus:outline-none">
+                    {isPasswordVisible ? '🙈' : '👁️'}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Department</label>
-                <input required type="text" value={newUser.department} onChange={e => setNewUser({...newUser, department: e.target.value.replace(/[^A-Za-z\s]/g, '').toUpperCase()})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. ENGINEERING" />
+                <input required type="text" value={newUser.department} onChange={handleDepartmentChange} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. ENGINEERING" />
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">System Role</label>
