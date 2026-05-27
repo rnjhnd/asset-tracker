@@ -86,6 +86,7 @@ const Dashboard: React.FC = () => {
   const [editingAsset, setEditingAsset] = useState({ id: '', name: '', serialNumber: '' });
   const [assignAssetId, setAssignAssetId] = useState('');
   const [assignUserId, setAssignUserId] = useState('');
+  const [assignSearchQuery, setAssignSearchQuery] = useState('');
   const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'EMPLOYEE', department: '' });
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
@@ -301,6 +302,13 @@ const Dashboard: React.FC = () => {
     e.preventDefault();
     if (isSubmitting) return;
     setIsSubmitting(true);
+    
+    if (!assignUserId) {
+      toast.error('Please select a valid employee from the list');
+      setIsSubmitting(false);
+      return;
+    }
+    
     try {
       await axios.post(`${API_URL}/api/assets/${assignAssetId}/assign`, { userId: assignUserId }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -308,6 +316,7 @@ const Dashboard: React.FC = () => {
       setIsAssignModalOpen(false);
       setAssignAssetId('');
       setAssignUserId('');
+      setAssignSearchQuery('');
       fetchAssets();
       fetchTotals();
       toast.success('Asset assigned successfully!');
@@ -1247,6 +1256,7 @@ const Dashboard: React.FC = () => {
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">New Password</label>
                 <input required type="password" value={passwordForm.newPassword} onChange={e => setPasswordForm({...passwordForm, newPassword: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
+                <p className="font-mono text-[10px] text-gray-500 mt-2">Must be at least 8 chars, 1 uppercase, 1 number, 1 special character.</p>
               </div>
               <button disabled={isSubmitting} type="submit" className={`w-full bg-gray-900 text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-black transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isSubmitting ? 'PROCESSING...' : 'Update Password'}
@@ -1269,6 +1279,7 @@ const Dashboard: React.FC = () => {
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">New Temporary Password</label>
                 <input required type="text" value={forceNewPassword} onChange={e => setForceNewPassword(e.target.value)} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. TempPass123!" />
+                <p className="font-mono text-[10px] text-gray-500 mt-2">Must be at least 8 chars, 1 uppercase, 1 number, 1 special character.</p>
               </div>
               <button disabled={isSubmitting} type="submit" className={`w-full bg-red-600 text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-red-700 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isSubmitting ? 'PROCESSING...' : 'OVERRIDE PASSWORD'}
@@ -1373,18 +1384,26 @@ const Dashboard: React.FC = () => {
             <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Assign Hardware</h3>
             <form onSubmit={handleAssignAsset} className="space-y-4">
               <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Select Employee</label>
-                <select 
-                  value={assignUserId} 
-                  onChange={(e) => setAssignUserId(e.target.value)}
+                <label className="block font-mono text-xs uppercase mb-1 font-bold">Search & Select Employee</label>
+                <input 
+                  type="text" 
+                  list="employee-list"
+                  value={assignSearchQuery}
+                  onChange={(e) => {
+                    setAssignSearchQuery(e.target.value);
+                    const match = users.find(u => `${u.name} (${u.email})` === e.target.value);
+                    if (match) setAssignUserId(match.id);
+                    else setAssignUserId('');
+                  }}
                   className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white transition-colors"
+                  placeholder="Type to search employee..."
                   required
-                >
-                  <option value="">Select an employee...</option>
-                  {users.filter(u => u.isActive).map(u => (
-                    <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+                />
+                <datalist id="employee-list">
+                  {users.filter(u => u.isActive && u.role !== 'ADMIN').map(u => (
+                    <option key={u.id} value={`${u.name} (${u.email})`} />
                   ))}
-                </select>
+                </datalist>
               </div>
               <button type="submit" className="w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors">Confirm Assignment</button>
             </form>
@@ -1431,7 +1450,7 @@ const Dashboard: React.FC = () => {
             <form onSubmit={handleCreateUser} className="space-y-4">
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Full Name</label>
-                <input required type="text" pattern="^[A-Za-z\s]+$" title="Only letters and spaces are allowed." value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. John Doe" />
+                <input required type="text" pattern="^[A-Za-z\s]+$" title="Only letters and spaces are allowed." value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value.replace(/[^A-Za-z\s]/g, '')})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. John Doe" />
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Email Address</label>
@@ -1439,12 +1458,13 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Initial Password</label>
-                <div className="relative">
+                <div className="relative mb-2">
                   <input required type={isPasswordVisible ? "text" : "password"} value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="secure_password" />
                   <button type="button" onClick={() => setIsPasswordVisible(!isPasswordVisible)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black focus:outline-none">
                     {isPasswordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
+                <p className="font-mono text-[10px] text-gray-500">Must be at least 8 chars, 1 uppercase, 1 number, 1 special character.</p>
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Department</label>

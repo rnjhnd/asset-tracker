@@ -9,7 +9,22 @@ const router = Router();
 // REGISTER ROUTE
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, name, role, department } = req.body;
+    let { email, password, name, role, department } = req.body;
+
+    // Validate password
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters long and contain at least one uppercase letter, one number, and one special character.' });
+    }
+
+    // Auto-capitalize name (Title Case)
+    if (name) {
+      name = name
+        .toLowerCase()
+        .split(' ')
+        .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -93,6 +108,11 @@ router.put('/password', authenticateToken, async (req, res) => {
 
     const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!isMatch) return res.status(400).json({ error: 'Incorrect current password' });
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters long and contain at least one uppercase letter, one number, and one special character.' });
+    }
 
     const salt = await bcrypt.genSalt(10);
     const newPasswordHash = await bcrypt.hash(newPassword, salt);

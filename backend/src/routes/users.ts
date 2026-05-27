@@ -127,8 +127,9 @@ router.put('/:id/force-password', authenticateToken, requireAdmin, async (req, r
   const { id } = req.params;
   const { newPassword } = req.body;
   
-  if (!newPassword || newPassword.length < 6) {
-    return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!newPassword || !passwordRegex.test(newPassword)) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters long and contain at least one uppercase letter, one number, and one special character.' });
   }
 
   try {
