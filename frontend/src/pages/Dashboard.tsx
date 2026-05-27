@@ -420,6 +420,7 @@ const Dashboard: React.FC = () => {
       );
       setIsForceResetModalOpen(false);
       setForceNewPassword('');
+      fetchUsers();
       toast.success(`PASSWORD RESET FOR ${forceResetUserEmail}`, { id: 'force-reset' });
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to force reset password.', { id: 'force-reset-err' });
