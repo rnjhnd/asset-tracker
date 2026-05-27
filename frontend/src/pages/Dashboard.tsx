@@ -467,79 +467,87 @@ const Dashboard: React.FC = () => {
                 {/* 1. Asset Distribution */}
                 <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
                   <h3 className="font-mono text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-gray-900 pb-2">Asset Distribution</h3>
-                  <div className="h-[250px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={stats.categoryStats}
-                          innerRadius={60}
-                          outerRadius={90}
-                          paddingAngle={2}
-                          dataKey="value"
-                          stroke="#111827"
-                          strokeWidth={2}
-                        >
-                          {stats.categoryStats.map((_: any, index: number) => (
-                            <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip content={<BrutalistTooltip />} />
-                        <Legend iconType="square" wrapperStyle={{ fontFamily: 'monospace', fontSize: '10px' }} />
-                      </PieChart>
-                    </ResponsiveContainer>
+                  <div className="h-[250px] w-full flex items-center justify-center">
+                    {isLoading ? <RefreshCw size={32} className="animate-spin text-gray-400" /> : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={stats.categoryStats}
+                            innerRadius={60}
+                            outerRadius={90}
+                            paddingAngle={2}
+                            dataKey="value"
+                            stroke="#111827"
+                            strokeWidth={2}
+                          >
+                            {stats.categoryStats.map((_: any, index: number) => (
+                              <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip content={<BrutalistTooltip />} />
+                          <Legend iconType="square" wrapperStyle={{ fontFamily: 'monospace', fontSize: '10px' }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    )}
                   </div>
                 </div>
 
                 {/* 2. Status Breakdown */}
                 <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
                   <h3 className="font-mono text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-gray-900 pb-2">Status Breakdown ({stats.total} Total)</h3>
-                  <div className="h-[250px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={[
-                        { name: 'Available', count: stats.available, fill: '#16a34a' },
-                        { name: 'Deployed', count: stats.assigned, fill: '#3b82f6' },
-                        { name: 'Maintenance', count: stats.maintenance, fill: '#ca8a04' },
-                        { name: 'Retired', count: stats.retired, fill: '#dc2626' }
-                      ]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
-                        <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
-                        <Tooltip content={<BrutalistTooltip />} cursor={{ fill: '#f3f4f6' }} />
-                        <Bar dataKey="count" stroke="#111827" strokeWidth={2} />
-                      </BarChart>
-                    </ResponsiveContainer>
+                  <div className="h-[250px] w-full flex items-center justify-center">
+                    {isLoading ? <RefreshCw size={32} className="animate-spin text-gray-400" /> : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={[
+                          { name: 'Available', count: stats.available, fill: '#16a34a' },
+                          { name: 'Deployed', count: stats.assigned, fill: '#3b82f6' },
+                          { name: 'Maintenance', count: stats.maintenance, fill: '#ca8a04' },
+                          { name: 'Retired', count: stats.retired, fill: '#dc2626' }
+                        ]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
+                          <XAxis dataKey="name" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
+                          <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
+                          <Tooltip content={<BrutalistTooltip />} cursor={{ fill: '#f3f4f6' }} />
+                          <Bar dataKey="count" stroke="#111827" strokeWidth={2} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )}
                   </div>
                 </div>
 
                 {/* 3. Hardware Aging */}
                 <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
                   <h3 className="font-mono text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-gray-900 pb-2">Hardware Aging (By Purchase Year)</h3>
-                  <div className="h-[250px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={stats.agingStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
-                        <XAxis dataKey="year" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
-                        <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} allowDecimals={false} />
-                        <Tooltip content={<BrutalistTooltip />} cursor={{ fill: '#f3f4f6' }} />
-                        <Bar dataKey="count" fill="#9333ea" stroke="#111827" strokeWidth={2} />
-                      </BarChart>
-                    </ResponsiveContainer>
+                  <div className="h-[250px] w-full flex items-center justify-center">
+                    {isLoading ? <RefreshCw size={32} className="animate-spin text-gray-400" /> : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={stats.agingStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
+                          <XAxis dataKey="year" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
+                          <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} allowDecimals={false} />
+                          <Tooltip content={<BrutalistTooltip />} cursor={{ fill: '#f3f4f6' }} />
+                          <Bar dataKey="count" fill="#9333ea" stroke="#111827" strokeWidth={2} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )}
                   </div>
                 </div>
 
                 {/* 4. Utilization Timeline */}
                 <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
                   <h3 className="font-mono text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-gray-900 pb-2">Assignments (Last 6 Months)</h3>
-                  <div className="h-[250px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={stats.timelineStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
-                        <XAxis dataKey="month" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
-                        <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} allowDecimals={false} />
-                        <Tooltip content={<BrutalistTooltip />} />
-                        <Area type="monotone" dataKey="assignments" stroke="#ea580c" strokeWidth={2} fill="#ffedd5" />
-                      </AreaChart>
-                    </ResponsiveContainer>
+                  <div className="h-[250px] w-full flex items-center justify-center">
+                    {isLoading ? <RefreshCw size={32} className="animate-spin text-gray-400" /> : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={stats.timelineStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
+                          <XAxis dataKey="month" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
+                          <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} allowDecimals={false} />
+                          <Tooltip content={<BrutalistTooltip />} />
+                          <Area type="monotone" dataKey="assignments" stroke="#ea580c" strokeWidth={2} fill="#ffedd5" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    )}
                   </div>
                 </div>
               </div>
@@ -550,11 +558,11 @@ const Dashboard: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
                 <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
                   <p className="font-mono text-sm text-gray-500 uppercase tracking-widest mb-1">Active Devices</p>
-                  <p className="text-4xl font-bold font-mono">{assets.length}</p>
+                  {isLoading ? <div className="h-10 w-16 bg-gray-200 animate-pulse mt-1"></div> : <p className="text-4xl font-bold font-mono">{assets.length}</p>}
                 </div>
                 <div className="bg-white border-2 border-green-600 p-6 shadow-[4px_4px_0_0_#16a34a]">
                   <p className="font-mono text-sm text-green-600 uppercase tracking-widest mb-1">Account Status</p>
-                  <p className="text-2xl font-bold font-mono mt-1">ACTIVE - SECURE</p>
+                  {isLoading ? <div className="h-8 w-48 bg-green-200 animate-pulse mt-1"></div> : <p className="text-2xl font-bold font-mono mt-1">ACTIVE - SECURE</p>}
                 </div>
               </div>
             )}
@@ -784,19 +792,19 @@ const Dashboard: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
               <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
                 <p className="font-mono text-sm text-gray-500 uppercase tracking-widest mb-1">Total Users</p>
-                <p className="text-4xl font-bold font-mono">{userStats.total}</p>
+                {isLoading ? <div className="h-10 w-16 bg-gray-200 animate-pulse mt-1"></div> : <p className="text-4xl font-bold font-mono">{userStats.total}</p>}
               </div>
               <div className="bg-white border-2 border-green-600 p-6 shadow-[4px_4px_0_0_#16a34a]">
                 <p className="font-mono text-sm text-green-600 uppercase tracking-widest mb-1">Active Accounts</p>
-                <p className="text-4xl font-bold font-mono">{userStats.active}</p>
+                {isLoading ? <div className="h-10 w-16 bg-green-100 animate-pulse mt-1"></div> : <p className="text-4xl font-bold font-mono">{userStats.active}</p>}
               </div>
               <div className="bg-white border-2 border-red-600 p-6 shadow-[4px_4px_0_0_#dc2626]">
                 <p className="font-mono text-sm text-red-600 uppercase tracking-widest mb-1">Deactivated</p>
-                <p className="text-4xl font-bold font-mono">{userStats.deactivated}</p>
+                {isLoading ? <div className="h-10 w-16 bg-red-100 animate-pulse mt-1"></div> : <p className="text-4xl font-bold font-mono">{userStats.deactivated}</p>}
               </div>
               <div className="bg-white border-2 border-purple-600 p-6 shadow-[4px_4px_0_0_#9333ea]">
                 <p className="font-mono text-sm text-purple-600 uppercase tracking-widest mb-1">System Admins</p>
-                <p className="text-4xl font-bold font-mono">{userStats.admins}</p>
+                {isLoading ? <div className="h-10 w-16 bg-purple-100 animate-pulse mt-1"></div> : <p className="text-4xl font-bold font-mono">{userStats.admins}</p>}
               </div>
             </div>
 
