@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Users, Box, Clock, Download, Wrench, Trash2, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
+import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Users, Box, Clock, Download, Wrench, Trash2, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight, SlidersHorizontal, Eye, EyeOff, Edit2 } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid, Legend } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -527,7 +527,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-transparent text-gray-900 font-sans">
 
-      <header className="bg-white border-b-4 border-gray-900 px-4 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10 sticky top-0 shadow-sm">
+      <header className="bg-white border-b-4 border-gray-900 px-4 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-40 sticky top-0 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-[#3b82f6] text-white flex items-center justify-center font-mono shrink-0 shadow-[4px_4px_0_0_#1e3a8a]">
             <Server size={24} />
@@ -883,7 +883,7 @@ const Dashboard: React.FC = () => {
                               className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-600 transition-colors"
                               title="Edit Asset"
                             >
-                              <Wrench size={16} />
+                              <Edit2 size={16} />
                             </button>
                           )}
                           {user?.role === 'ADMIN' && asset.status !== 'RETIRED' && (
@@ -1346,7 +1346,7 @@ const Dashboard: React.FC = () => {
               <X size={24} />
             </button>
             <h2 className="text-xl sm:text-2xl font-bold font-mono tracking-tight uppercase mb-6 flex items-center gap-3">
-              <Wrench className="text-[#3b82f6]" />
+              <Edit2 className="text-[#3b82f6]" />
               Edit Asset Details
             </h2>
             <form onSubmit={handleUpdateAsset} className="space-y-4">
@@ -1384,7 +1384,7 @@ const Dashboard: React.FC = () => {
                 <div className="relative">
                   <input required type={isPasswordVisible ? "text" : "password"} value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="secure_password" />
                   <button type="button" onClick={() => setIsPasswordVisible(!isPasswordVisible)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black focus:outline-none">
-                    {isPasswordVisible ? '🙈' : '👁️'}
+                    {isPasswordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
               </div>
