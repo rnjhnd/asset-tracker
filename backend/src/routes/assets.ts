@@ -148,9 +148,10 @@ router.get('/stats', authenticateToken, requireAdmin, async (req, res) => {
     const categoryCounts: Record<string, number> = {};
     const purchaseYearCounts: Record<string, number> = {};
     
-    allAssets.forEach(asset => {
+    allAssets.forEach((asset: any) => {
       // Category count
-      categoryCounts[asset.category] = (categoryCounts[asset.category] || 0) + 1;
+      const catName = asset.category?.name || 'UNKNOWN';
+      categoryCounts[catName] = (categoryCounts[catName] || 0) + 1;
       
       // Aging count by purchase year
       if (asset.purchaseDate) {

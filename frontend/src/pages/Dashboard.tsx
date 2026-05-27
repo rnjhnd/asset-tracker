@@ -759,8 +759,8 @@ const Dashboard: React.FC = () => {
                       onChange={(e) => { setAssetSortOrder(e.target.value); setCurrentPage(1); }}
                       className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
                     >
-                      <option value="desc">Descending</option>
                       <option value="asc">Ascending</option>
+                      <option value="desc">Descending</option>
                     </select>
                   </div>
                   <button 
@@ -1034,8 +1034,8 @@ const Dashboard: React.FC = () => {
                       onChange={(e) => { setUserSortOrder(e.target.value); setCurrentPage(1); }}
                       className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
                     >
-                      <option value="desc">Descending</option>
                       <option value="asc">Ascending</option>
+                      <option value="desc">Descending</option>
                     </select>
                   </div>
                   <button 
@@ -1240,7 +1240,7 @@ const Dashboard: React.FC = () => {
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Category</label>
                 {isCreatingCategory ? (
                   <div className="flex gap-2">
-                    <input autoFocus type="text" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} className="flex-1 border-2 border-[#3b82f6] p-3 font-mono text-sm focus:border-blue-600 outline-none transition-colors" placeholder="E.g. VR HEADSET" />
+                    <input required autoFocus type="text" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value.replace(/[^A-Za-z\s]/g, '').toUpperCase())} className="flex-1 border-2 border-[#3b82f6] p-3 font-mono text-sm focus:border-blue-600 outline-none transition-colors" placeholder="E.g. VR HEADSET" />
                     <button type="button" onClick={handleCreateCategory} disabled={isSubmitting || !newCategoryName.trim()} className="bg-[#3b82f6] text-white px-4 font-bold hover:bg-blue-600 transition-colors">ADD</button>
                     <button type="button" onClick={() => setIsCreatingCategory(false)} className="bg-gray-200 text-gray-700 px-4 font-bold hover:bg-gray-300 transition-colors">CANCEL</button>
                   </div>
@@ -1306,7 +1306,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Department</label>
-                <input required type="text" value={newUser.department} onChange={e => setNewUser({...newUser, department: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. ENGINEERING" />
+                <input required type="text" value={newUser.department} onChange={e => setNewUser({...newUser, department: e.target.value.replace(/[^A-Za-z\s]/g, '').toUpperCase()})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. ENGINEERING" />
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">System Role</label>
