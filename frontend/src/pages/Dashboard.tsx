@@ -98,6 +98,23 @@ const Dashboard: React.FC = () => {
     setShowFilters(false);
   };
 
+  const handleResetFilters = () => {
+    if (currentTab === 'ASSETS') {
+      setSearchQuery('');
+      setFilterStatus('ALL');
+      setAssetFilterCategory('ALL');
+      setAssetSortBy('purchaseDate');
+      setAssetSortOrder('desc');
+    } else {
+      setUserSearchQuery('');
+      setUserFilterStatus('ALL');
+      setUserFilterRole('ALL');
+      setUserSortBy('createdAt');
+      setUserSortOrder('desc');
+    }
+    setCurrentPage(1);
+  };
+
   useEffect(() => {
     if (!token) {
       navigate('/login');
@@ -713,6 +730,12 @@ const Dashboard: React.FC = () => {
                       <option value="asc">Ascending</option>
                     </select>
                   </div>
+                  <button 
+                    onClick={handleResetFilters}
+                    className="flex-none px-4 py-2 border-2 border-red-500 text-red-500 font-mono text-sm uppercase tracking-wider font-bold hover:bg-red-50 transition-colors"
+                  >
+                    Reset
+                  </button>
                 </div>
               )}
             </div>
@@ -981,6 +1004,12 @@ const Dashboard: React.FC = () => {
                       <option value="asc">Ascending</option>
                     </select>
                   </div>
+                  <button 
+                    onClick={handleResetFilters}
+                    className="flex-none px-4 py-2 border-2 border-red-500 text-red-500 font-mono text-sm uppercase tracking-wider font-bold hover:bg-red-50 transition-colors"
+                  >
+                    Reset
+                  </button>
                 </div>
               )}
             </div>
@@ -1057,7 +1086,7 @@ const Dashboard: React.FC = () => {
                       <td colSpan={5} className="p-24 text-center">
                         <div className="flex flex-col items-center justify-center text-gray-400">
                           <Users size={48} className="mb-4 opacity-50" />
-                          <p className="font-mono text-sm uppercase tracking-widest text-gray-500">Loading directory...</p>
+                          <p className="font-mono text-sm uppercase tracking-widest font-bold text-gray-900">No users found matching your filters.</p>
                         </div>
                       </td>
                     </tr>
