@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import axios from 'axios';
 
 type User = {
   id: string;
@@ -25,6 +26,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(() => {
     return localStorage.getItem('token');
   });
+
+  React.useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      response => response,
+      error => {
+        if (error.response?.status === 401) {
+          // If the token expires or is invalid, log the user out automatically
+          setUser(null);
+          setToken(null);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
+        return Promise.reject(error);
+      }
+    );
+    return () => axios.interceptors.response.eject(interceptor);
+  }, []);
 
   const login = (userData: User, authToken: string) => {
     setUser(userData);
