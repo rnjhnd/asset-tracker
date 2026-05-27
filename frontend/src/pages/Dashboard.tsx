@@ -1158,6 +1158,7 @@ const Dashboard: React.FC = () => {
                       className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
                     >
                       <option value="createdAt">Date Added</option>
+                      <option value="name">Name</option>
                       <option value="email">Email</option>
                       <option value="role">Role</option>
                       <option value="department">Department</option>
