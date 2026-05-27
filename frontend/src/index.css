@@ -26,12 +26,22 @@ html, body {
 }
 
 @layer utilities {
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
   }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
   }
 }
 

@@ -72,7 +72,7 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({ value, onChange,
       {isOpen && !disabled && rect && createPortal(
         <ul 
           id="dropdown-portal-root"
-          className="fixed z-[9999] bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] max-h-60 overflow-y-auto scrollbar-hide"
+          className="fixed z-[9999] bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] max-h-60 overflow-y-auto custom-scrollbar"
           style={{
             top: rect.bottom + 4,
             left: rect.left,
