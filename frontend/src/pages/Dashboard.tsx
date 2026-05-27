@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Filter, Users, Box, Clock, Download, Wrench, Trash2, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import API_URL from '../config/api';
@@ -36,7 +37,10 @@ const Dashboard: React.FC = () => {
 
   // Data States
   const [assets, setAssets] = useState<Asset[]>([]);
-  const [stats, setStats] = useState({ total: 0, available: 0, assigned: 0, maintenance: 0 });
+  const [stats, setStats] = useState({ 
+    total: 0, available: 0, assigned: 0, maintenance: 0, retired: 0,
+    categoryStats: [] as any[], agingStats: [] as any[], timelineStats: [] as any[]
+  });
   const [users, setUsers] = useState<UserAccount[]>([]);
   const [userStats, setUserStats] = useState({ total: 0, active: 0, deactivated: 0, admins: 0 });
   const [currentTab, setCurrentTab] = useState<'ASSETS' | 'USERS'>('ASSETS');
@@ -376,6 +380,24 @@ const Dashboard: React.FC = () => {
     return <Mouse size={18} />;
   };
 
+  const BrutalistTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] p-3">
+          <p className="font-mono font-bold text-sm uppercase">{label || payload[0].name}</p>
+          {payload.map((p: any, i: number) => (
+            <p key={i} className="font-mono text-sm uppercase text-gray-700">
+              {p.name}: <span className="font-bold text-black">{p.value}</span>
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const chartColors = ['#3b82f6', '#16a34a', '#dc2626', '#ca8a04', '#9333ea', '#ea580c', '#0d9488'];
+
   return (
     <div className="min-h-screen bg-transparent text-gray-900 font-sans">
 
@@ -455,6 +477,89 @@ const Dashboard: React.FC = () => {
                 <div className="bg-white border-2 border-yellow-600 p-6 shadow-[4px_4px_0_0_#ca8a04]">
                   <p className="font-mono text-sm text-yellow-600 uppercase tracking-widest mb-1">Maintenance</p>
                   <p className="text-4xl font-bold font-mono">{stats.maintenance}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Analytics Grid */}
+            {user?.role === 'ADMIN' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                {/* 1. Asset Distribution */}
+                <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
+                  <h3 className="font-mono text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-gray-900 pb-2">Asset Distribution</h3>
+                  <div className="h-[250px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={stats.categoryStats}
+                          innerRadius={60}
+                          outerRadius={90}
+                          paddingAngle={2}
+                          dataKey="value"
+                          stroke="#111827"
+                          strokeWidth={2}
+                        >
+                          {stats.categoryStats.map((_: any, index: number) => (
+                            <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip content={<BrutalistTooltip />} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* 2. Status Breakdown */}
+                <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
+                  <h3 className="font-mono text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-gray-900 pb-2">Status Breakdown</h3>
+                  <div className="h-[250px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={[
+                        { name: 'Available', count: stats.available, fill: '#16a34a' },
+                        { name: 'Deployed', count: stats.assigned, fill: '#3b82f6' },
+                        { name: 'Maintenance', count: stats.maintenance, fill: '#ca8a04' },
+                        { name: 'Retired', count: stats.retired, fill: '#dc2626' }
+                      ]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
+                        <XAxis dataKey="name" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
+                        <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
+                        <Tooltip content={<BrutalistTooltip />} cursor={{ fill: '#f3f4f6' }} />
+                        <Bar dataKey="count" stroke="#111827" strokeWidth={2} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* 3. Hardware Aging */}
+                <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
+                  <h3 className="font-mono text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-gray-900 pb-2">Hardware Aging (By Purchase Year)</h3>
+                  <div className="h-[250px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={stats.agingStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
+                        <XAxis dataKey="year" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
+                        <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} allowDecimals={false} />
+                        <Tooltip content={<BrutalistTooltip />} cursor={{ fill: '#f3f4f6' }} />
+                        <Bar dataKey="count" fill="#9333ea" stroke="#111827" strokeWidth={2} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* 4. Utilization Timeline */}
+                <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
+                  <h3 className="font-mono text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-gray-900 pb-2">Assignments (Last 6 Months)</h3>
+                  <div className="h-[250px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={stats.timelineStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
+                        <XAxis dataKey="month" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
+                        <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} allowDecimals={false} />
+                        <Tooltip content={<BrutalistTooltip />} />
+                        <Area type="monotone" dataKey="assignments" stroke="#ea580c" strokeWidth={2} fill="#ffedd5" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
             )}
