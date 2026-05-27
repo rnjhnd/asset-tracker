@@ -87,6 +87,7 @@ const Dashboard: React.FC = () => {
   const [assignAssetId, setAssignAssetId] = useState('');
   const [assignUserId, setAssignUserId] = useState('');
   const [assignSearchQuery, setAssignSearchQuery] = useState('');
+  const [showAssignDropdown, setShowAssignDropdown] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'EMPLOYEE', department: '' });
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
@@ -271,8 +272,8 @@ const Dashboard: React.FC = () => {
       setNewUser({ name: '', email: '', password: '', role: 'EMPLOYEE', department: '' });
       fetchUsers();
       toast.success('Employee account created!');
-    } catch (error) {
-      toast.error('Failed to create user. Email may already exist.');
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to create user.');
     } finally {
       setIsSubmitting(false);
     }
@@ -1385,25 +1386,43 @@ const Dashboard: React.FC = () => {
             <form onSubmit={handleAssignAsset} className="space-y-4">
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Search & Select Employee</label>
-                <input 
-                  type="text" 
-                  list="employee-list"
-                  value={assignSearchQuery}
-                  onChange={(e) => {
-                    setAssignSearchQuery(e.target.value);
-                    const match = users.find(u => `${u.name} (${u.email})` === e.target.value);
-                    if (match) setAssignUserId(match.id);
-                    else setAssignUserId('');
-                  }}
-                  className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white transition-colors"
-                  placeholder="Type to search employee..."
-                  required
-                />
-                <datalist id="employee-list">
-                  {users.filter(u => u.isActive && u.role !== 'ADMIN').map(u => (
-                    <option key={u.id} value={`${u.name} (${u.email})`} />
-                  ))}
-                </datalist>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={assignSearchQuery}
+                    onChange={(e) => {
+                      setAssignSearchQuery(e.target.value);
+                      setShowAssignDropdown(true);
+                      setAssignUserId('');
+                    }}
+                    onFocus={() => setShowAssignDropdown(true)}
+                    className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white transition-colors"
+                    placeholder="Type to search employee..."
+                    required={!assignUserId}
+                  />
+                  {showAssignDropdown && (
+                    <ul className="absolute z-10 w-full bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] mt-1 max-h-48 overflow-y-auto">
+                      {users.filter(u => u.isActive && u.role !== 'ADMIN' && (u.name.toLowerCase().includes(assignSearchQuery.toLowerCase()) || u.email.toLowerCase().includes(assignSearchQuery.toLowerCase()))).length === 0 ? (
+                        <li className="p-3 font-mono text-sm text-gray-500">No employees found.</li>
+                      ) : (
+                        users.filter(u => u.isActive && u.role !== 'ADMIN' && (u.name.toLowerCase().includes(assignSearchQuery.toLowerCase()) || u.email.toLowerCase().includes(assignSearchQuery.toLowerCase()))).map(u => (
+                          <li 
+                            key={u.id} 
+                            onClick={() => {
+                              setAssignUserId(u.id);
+                              setAssignSearchQuery(`${u.name} (${u.email})`);
+                              setShowAssignDropdown(false);
+                            }}
+                            className="p-3 border-b border-gray-100 last:border-0 hover:bg-blue-50 cursor-pointer font-mono text-sm transition-colors text-left"
+                          >
+                            <div className="font-bold text-gray-900">{u.name}</div>
+                            <div className="text-xs text-gray-500">{u.email}</div>
+                          </li>
+                        ))
+                      )}
+                    </ul>
+                  )}
+                </div>
               </div>
               <button type="submit" className="w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors">Confirm Assignment</button>
             </form>
@@ -1450,7 +1469,22 @@ const Dashboard: React.FC = () => {
             <form onSubmit={handleCreateUser} className="space-y-4">
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Full Name</label>
-                <input required type="text" pattern="^[A-Za-z\s]+$" title="Only letters and spaces are allowed." value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value.replace(/[^A-Za-z\s]/g, '')})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. John Doe" />
+                <input 
+                  required 
+                  type="text" 
+                  pattern="^[A-Za-z\s]+$" 
+                  title="Only letters and spaces are allowed." 
+                  value={newUser.name} 
+                  onChange={e => {
+                    const rawVal = e.target.value;
+                    if (/[^A-Za-z\s]/.test(rawVal)) {
+                      toast.error('Only letters and spaces are allowed for Full Name', { id: 'name-val-err' });
+                    }
+                    setNewUser({...newUser, name: rawVal.replace(/[^A-Za-z\s]/g, '')});
+                  }} 
+                  className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" 
+                  placeholder="e.g. John Doe" 
+                />
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Email Address</label>
