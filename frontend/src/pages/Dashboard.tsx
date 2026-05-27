@@ -87,7 +87,7 @@ const Dashboard: React.FC = () => {
   const [newUser, setNewUser] = useState({ email: '', password: '', role: 'EMPLOYEE', department: '' });
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, showAbove: false });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
   const [forceResetUserId, setForceResetUserId] = useState('');
   const [forceResetUserEmail, setForceResetUserEmail] = useState('');
@@ -865,9 +865,12 @@ const Dashboard: React.FC = () => {
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   const rect = e.currentTarget.getBoundingClientRect();
+                                  const showAbove = (window.innerHeight - rect.bottom) < 260;
+                                  
                                   setDropdownPos({ 
-                                    top: rect.bottom + window.scrollY + 8, 
-                                    left: rect.right + window.scrollX - 192 
+                                    top: showAbove ? rect.top + window.scrollY : rect.bottom + window.scrollY, 
+                                    left: rect.right + window.scrollX - 192,
+                                    showAbove
                                   });
                                   setActiveDropdownId(activeDropdownId === asset.id ? null : asset.id);
                                 }}
@@ -878,7 +881,12 @@ const Dashboard: React.FC = () => {
 
                               {activeDropdownId === asset.id && createPortal(
                                 <div 
-                                  style={{ top: `${dropdownPos.top}px`, left: `${dropdownPos.left}px` }}
+                                  style={{ 
+                                    top: `${dropdownPos.top}px`, 
+                                    left: `${dropdownPos.left}px`,
+                                    transform: dropdownPos.showAbove ? 'translateY(-100%)' : 'none',
+                                    marginTop: dropdownPos.showAbove ? '-8px' : '8px'
+                                  }}
                                   className="absolute z-[9999] w-48 bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] flex flex-col p-1 text-left action-dropdown-container"
                                   onClick={(e) => e.stopPropagation()}
                                 >
