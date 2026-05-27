@@ -8,24 +8,24 @@ datasource db {
 }
 
 enum Role {
-  EMPLOYEE
   ADMIN
+  EMPLOYEE
 }
 
 enum AssetCategory {
-  LAPTOP
+  ACCESSORY
   DESKTOP
+  LAPTOP
   MONITOR
-  TABLET
+  NETWORK
   PHONE
   SERVER
-  NETWORK
-  ACCESSORY
+  TABLET
 }
 
 enum AssetStatus {
-  AVAILABLE
   ASSIGNED
+  AVAILABLE
   MAINTENANCE
   RETIRED
 }
