@@ -49,9 +49,12 @@ router.put('/:id/status', authenticateToken, requireAdmin, async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    // Prevent admin from deactivating themselves
+    // Prevent admin from deactivating themselves or other admins
     if (user.id === req.user?.userId) {
       return res.status(400).json({ error: 'You cannot deactivate your own account.' });
+    }
+    if (user.role === 'ADMIN' && user.isActive) {
+      return res.status(400).json({ error: 'Cannot deactivate an ADMIN account.' });
     }
 
     const updatedUser = await prisma.user.update({

@@ -735,7 +735,7 @@ const Dashboard: React.FC = () => {
                       <th className="p-4 bg-gray-50">Role</th>
                       <th className="p-4 bg-gray-50">Status</th>
                       <th className="p-4 bg-gray-50">Account Created</th>
-                      <th className="p-4 text-right bg-gray-50">System ID</th>
+                      <th className="p-4 text-right bg-gray-50">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e4e4e7]">
@@ -761,8 +761,9 @@ const Dashboard: React.FC = () => {
                       <td className="p-4 flex items-center justify-end gap-3">
                         <button 
                           onClick={() => handleToggleUserStatus(u.id)}
-                          className={`${u.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-500 hover:text-green-700'} font-mono text-sm uppercase transition-colors`}
-                          title={u.isActive ? "Deactivate User" : "Reactivate User"}
+                          disabled={u.role === 'ADMIN' && u.isActive}
+                          className={`${u.role === 'ADMIN' && u.isActive ? 'text-gray-300 cursor-not-allowed' : (u.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-500 hover:text-green-700')} font-mono text-sm uppercase transition-colors`}
+                          title={u.role === 'ADMIN' && u.isActive ? "Cannot deactivate ADMIN" : (u.isActive ? "Deactivate User" : "Reactivate User")}
                         >
                           {u.isActive ? <UserX size={16} /> : <UserCheck size={16} />}
                         </button>
