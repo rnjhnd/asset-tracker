@@ -15,7 +15,7 @@ type Asset = {
   category: string;
   status: 'AVAILABLE' | 'ASSIGNED' | 'MAINTENANCE' | 'RETIRED';
   purchaseDate: string;
-  assignments: { user: { email: string } }[];
+  assignments: { user: { email: string; name: string } }[];
 };
 
 type UserAccount = {
@@ -33,7 +33,7 @@ type AuditLog = {
   id: string;
   checkoutDate: string;
   returnDate: string | null;
-  user: { email: string };
+  user: { email: string; name: string };
 };
 
 const Dashboard: React.FC = () => {
@@ -448,7 +448,7 @@ const Dashboard: React.FC = () => {
         asset.serialNumber,
         asset.category,
         asset.status,
-        asset.assignments.length > 0 ? asset.assignments[0].user.email : 'None'
+        asset.assignments.length > 0 ? (asset.assignments[0].user.name || asset.assignments[0].user.email) : 'None'
       ]);
 
       const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
@@ -890,8 +890,8 @@ const Dashboard: React.FC = () => {
                           </span>
                         </td>
                         {user?.role === 'ADMIN' && (
-                          <td className="p-4 font-mono text-sm">
-                            {asset.assignments.length > 0 ? asset.assignments[0].user.email : '--'}
+                          <td className="p-4 font-mono text-sm text-gray-900 font-bold">
+                            {asset.assignments.length > 0 ? (asset.assignments[0].user.name || asset.assignments[0].user.email) : '--'}
                           </td>
                         )}
                         {user?.role === 'ADMIN' && (
@@ -1295,14 +1295,21 @@ const Dashboard: React.FC = () => {
                 historyLogs.map(log => (
                   <div key={log.id} className="border-l-2 border-gray-200 pl-4 py-2 relative">
                     <div className={`absolute w-3 h-3 rounded-full -left-[7px] top-4 border-2 border-white ${log.returnDate ? 'bg-gray-400' : 'bg-green-500'}`}></div>
-                    <p className="font-bold text-sm mb-1">{log.user.email}</p>
-                    <div className="font-mono text-xs text-gray-500 flex flex-col gap-1">
-                      <span>CHECKOUT: {new Date(log.checkoutDate).toLocaleString()}</span>
-                      {log.returnDate ? (
-                        <span className="text-gray-400">RETURNED: {new Date(log.returnDate).toLocaleString()}</span>
-                      ) : (
-                        <span className="text-green-600 font-bold">STATUS: ACTIVE</span>
-                      )}
+                    <div className="flex items-start gap-4">
+                      <div className="bg-gray-100 p-2 border border-gray-200">
+                        <User size={20} className="text-gray-500" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm mb-1">{log.user.name || log.user.email}</p>
+                        <div className="font-mono text-xs text-gray-500 flex flex-col gap-1">
+                          <span>CHECKOUT: {new Date(log.checkoutDate).toLocaleString()}</span>
+                          {log.returnDate ? (
+                            <span className="text-gray-400">RETURNED: {new Date(log.returnDate).toLocaleString()}</span>
+                          ) : (
+                            <span className="text-green-600 font-bold">STATUS: ACTIVE</span>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))
@@ -1424,7 +1431,7 @@ const Dashboard: React.FC = () => {
             <form onSubmit={handleCreateUser} className="space-y-4">
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Full Name</label>
-                <input required type="text" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. John Doe" />
+                <input required type="text" pattern="^[A-Za-z\s]+$" title="Only letters and spaces are allowed." value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. John Doe" />
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Email Address</label>

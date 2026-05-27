@@ -71,7 +71,7 @@ router.get('/', authenticateToken, async (req, res) => {
         category: true,
         assignments: {
           where: { returnDate: null },
-          include: { user: { select: { email: true } } }
+          include: { user: { select: { email: true, name: true } } }
         }
       },
       orderBy: orderByClause,
@@ -343,7 +343,7 @@ router.get('/:id/history', authenticateToken, requireAdmin, async (req, res) => 
     const history = await prisma.assignment.findMany({
       where: { assetId: id },
       include: {
-        user: { select: { email: true } }
+        user: { select: { email: true, name: true } }
       },
       orderBy: {
         checkoutDate: 'desc'
