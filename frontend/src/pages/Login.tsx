@@ -110,6 +110,15 @@ const Login: React.FC = () => {
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
+                <div className="flex justify-end mt-2">
+                  <button 
+                    type="button" 
+                    onClick={() => toast.error('Please contact your IT Administrator at admin@system.com to request a password reset.', { icon: '🔒', duration: 6000 })}
+                    className="font-mono text-xs text-gray-500 hover:text-black uppercase font-bold tracking-widest transition-colors"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
               </div>
               <button 
                 type="submit" 
