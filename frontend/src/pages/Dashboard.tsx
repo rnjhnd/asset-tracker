@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Users, Box, Clock, Download, Wrench, Trash2, Archive, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight, SlidersHorizontal, Edit2, MoreHorizontal, User, ChevronDown } from 'lucide-react';
+import { SelectDropdown } from '../components/SelectDropdown';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid, Legend } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -845,56 +846,58 @@ const Dashboard: React.FC = () => {
                 <div className="bg-gray-50 border-2 border-gray-900 p-4 shadow-[4px_4px_0_0_#111827] flex flex-col sm:flex-row flex-wrap gap-4 items-end mt-2 animate-in slide-in-from-top-2">
                   <div className="flex-1 min-w-[150px]">
                     <label className="block font-mono text-xs font-bold uppercase mb-1">Status</label>
-                    <select 
+                    <SelectDropdown
                       value={filterStatus}
-                      onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
-                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
-                    >
-                      <option value="ALL">All Statuses</option>
-                      <option value="AVAILABLE">Available</option>
-                      <option value="ASSIGNED">Assigned</option>
-                      <option value="MAINTENANCE">Maintenance</option>
-                      <option value="RETIRED">Retired</option>
-                    </select>
+                      onChange={(val) => { setFilterStatus(val); setCurrentPage(1); }}
+                      options={[
+                        { value: 'ALL', label: 'All Statuses' },
+                        { value: 'AVAILABLE', label: 'Available' },
+                        { value: 'ASSIGNED', label: 'Assigned' },
+                        { value: 'MAINTENANCE', label: 'Maintenance' },
+                        { value: 'RETIRED', label: 'Retired' }
+                      ]}
+                      className="w-full"
+                    />
                   </div>
                   <div className="flex-1 min-w-[150px]">
                     <label className="block font-mono text-xs font-bold uppercase mb-1">Category</label>
-                    <select 
+                    <SelectDropdown
                       value={assetFilterCategory}
-                      onChange={(e) => { setAssetFilterCategory(e.target.value); setCurrentPage(1); }}
-                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
-                    >
-                      <option value="ALL">All Categories</option>
-                      {categories.map(c => (
-                        <option key={c.id} value={c.name}>{c.name}</option>
-                      ))}
-                    </select>
+                      onChange={(val) => { setAssetFilterCategory(val); setCurrentPage(1); }}
+                      options={[
+                        { value: 'ALL', label: 'All Categories' },
+                        ...categories.map(c => ({ value: c.name, label: c.name }))
+                      ]}
+                      className="w-full"
+                    />
                   </div>
                   <div className="flex-1 min-w-[150px]">
                     <label className="block font-mono text-xs font-bold uppercase mb-1">Sort By</label>
-                    <select 
+                    <SelectDropdown
                       value={assetSortBy}
-                      onChange={(e) => { setAssetSortBy(e.target.value); setCurrentPage(1); }}
-                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
-                    >
-                      <option value="purchaseDate">Purchase Date</option>
-                      <option value="name">Name</option>
-                      <option value="serialNumber">Serial Number</option>
-                      <option value="category">Category</option>
-                      <option value="status">Status</option>
-                      <option value="employee">Assigned Employee</option>
-                    </select>
+                      onChange={(val) => { setAssetSortBy(val); setCurrentPage(1); }}
+                      options={[
+                        { value: 'purchaseDate', label: 'Purchase Date' },
+                        { value: 'name', label: 'Name' },
+                        { value: 'serialNumber', label: 'Serial Number' },
+                        { value: 'category', label: 'Category' },
+                        { value: 'status', label: 'Status' },
+                        { value: 'employee', label: 'Assigned Employee' }
+                      ]}
+                      className="w-full"
+                    />
                   </div>
                   <div className="flex-1 min-w-[150px]">
                     <label className="block font-mono text-xs font-bold uppercase mb-1">Order</label>
-                    <select 
+                    <SelectDropdown
                       value={assetSortOrder}
-                      onChange={(e) => { setAssetSortOrder(e.target.value); setCurrentPage(1); }}
-                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
-                    >
-                      <option value="asc">Ascending</option>
-                      <option value="desc">Descending</option>
-                    </select>
+                      onChange={(val) => { setAssetSortOrder(val); setCurrentPage(1); }}
+                      options={[
+                        { value: 'asc', label: 'Ascending' },
+                        { value: 'desc', label: 'Descending' }
+                      ]}
+                      className="w-full"
+                    />
                   </div>
                   <button 
                     onClick={handleResetFilters}
@@ -1128,53 +1131,57 @@ const Dashboard: React.FC = () => {
                 <div className="bg-gray-50 border-2 border-gray-900 p-4 shadow-[4px_4px_0_0_#111827] flex flex-col sm:flex-row flex-wrap gap-4 items-end mt-2 animate-in slide-in-from-top-2">
                   <div className="flex-1 min-w-[150px]">
                     <label className="block font-mono text-xs font-bold uppercase mb-1">Status</label>
-                    <select 
+                    <SelectDropdown
                       value={userFilterStatus}
-                      onChange={(e) => { setUserFilterStatus(e.target.value); setCurrentPage(1); }}
-                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
-                    >
-                      <option value="ALL">All Statuses</option>
-                      <option value="ACTIVE">Active</option>
-                      <option value="DEACTIVATED">Deactivated</option>
-                    </select>
+                      onChange={(val) => { setUserFilterStatus(val); setCurrentPage(1); }}
+                      options={[
+                        { value: 'ALL', label: 'All Statuses' },
+                        { value: 'ACTIVE', label: 'Active' },
+                        { value: 'DEACTIVATED', label: 'Deactivated' }
+                      ]}
+                      className="w-full"
+                    />
                   </div>
                   <div className="flex-1 min-w-[150px]">
                     <label className="block font-mono text-xs font-bold uppercase mb-1">Role</label>
-                    <select 
+                    <SelectDropdown
                       value={userFilterRole}
-                      onChange={(e) => { setUserFilterRole(e.target.value); setCurrentPage(1); }}
-                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
-                    >
-                      <option value="ALL">All Roles</option>
-                      <option value="ADMIN">Admin</option>
-                      <option value="EMPLOYEE">Employee</option>
-                    </select>
+                      onChange={(val) => { setUserFilterRole(val); setCurrentPage(1); }}
+                      options={[
+                        { value: 'ALL', label: 'All Roles' },
+                        { value: 'ADMIN', label: 'Admin' },
+                        { value: 'EMPLOYEE', label: 'Employee' }
+                      ]}
+                      className="w-full"
+                    />
                   </div>
                   <div className="flex-1 min-w-[150px]">
                     <label className="block font-mono text-xs font-bold uppercase mb-1">Sort By</label>
-                    <select 
+                    <SelectDropdown
                       value={userSortBy}
-                      onChange={(e) => { setUserSortBy(e.target.value); setCurrentPage(1); }}
-                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
-                    >
-                      <option value="createdAt">Date Added</option>
-                      <option value="name">Name</option>
-                      <option value="email">Email</option>
-                      <option value="role">Role</option>
-                      <option value="department">Department</option>
-                      <option value="isActive">Status</option>
-                    </select>
+                      onChange={(val) => { setUserSortBy(val); setCurrentPage(1); }}
+                      options={[
+                        { value: 'createdAt', label: 'Date Added' },
+                        { value: 'name', label: 'Name' },
+                        { value: 'email', label: 'Email' },
+                        { value: 'role', label: 'Role' },
+                        { value: 'department', label: 'Department' },
+                        { value: 'isActive', label: 'Status' }
+                      ]}
+                      className="w-full"
+                    />
                   </div>
                   <div className="flex-1 min-w-[150px]">
                     <label className="block font-mono text-xs font-bold uppercase mb-1">Order</label>
-                    <select 
+                    <SelectDropdown
                       value={userSortOrder}
-                      onChange={(e) => { setUserSortOrder(e.target.value); setCurrentPage(1); }}
-                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
-                    >
-                      <option value="asc">Ascending</option>
-                      <option value="desc">Descending</option>
-                    </select>
+                      onChange={(val) => { setUserSortOrder(val); setCurrentPage(1); }}
+                      options={[
+                        { value: 'asc', label: 'Ascending' },
+                        { value: 'desc', label: 'Descending' }
+                      ]}
+                      className="w-full"
+                    />
                   </div>
                   <button 
                     onClick={handleResetFilters}
@@ -1431,11 +1438,12 @@ const Dashboard: React.FC = () => {
                   </div>
                 ) : (
                   <div className="flex gap-2">
-                    <select value={newAsset.category} onChange={e => setNewAsset({...newAsset, category: e.target.value})} className="flex-1 border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white">
-                      {categories.map(c => (
-                        <option key={c.id} value={c.name}>{c.name}</option>
-                      ))}
-                    </select>
+                    <SelectDropdown
+                      value={newAsset.category}
+                      onChange={val => setNewAsset({...newAsset, category: val})}
+                      options={categories.map(c => ({ value: c.name, label: c.name }))}
+                      className="flex-1"
+                    />
                     <button type="button" onClick={() => setIsCreatingCategory(true)} className="bg-gray-900 text-white px-4 font-bold hover:bg-gray-700 transition-colors whitespace-nowrap">+ NEW</button>
                   </div>
                 )}
@@ -1576,10 +1584,15 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">System Role</label>
-                <select value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white">
-                  <option value="EMPLOYEE">Standard Employee</option>
-                  <option value="ADMIN">System Administrator</option>
-                </select>
+                <SelectDropdown
+                  value={newUser.role}
+                  onChange={val => setNewUser({...newUser, role: val})}
+                  options={[
+                    { value: 'EMPLOYEE', label: 'Standard Employee' },
+                    { value: 'ADMIN', label: 'System Administrator' }
+                  ]}
+                  className="w-full"
+                />
               </div>
               <button disabled={isSubmitting} type="submit" className={`w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isSubmitting ? 'PROCESSING...' : 'Create Account'}
