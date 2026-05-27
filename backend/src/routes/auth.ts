@@ -9,7 +9,7 @@ const router = Router();
 // REGISTER ROUTE
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, role, department } = req.body;
+    const { email, password, name, role, department } = req.body;
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -25,6 +25,7 @@ router.post('/register', async (req, res) => {
     const newUser = await prisma.user.create({
       data: {
         email,
+        name: name || 'Unknown Employee',
         passwordHash,
         role: role || 'EMPLOYEE',
         department: department || 'UNASSIGNED',

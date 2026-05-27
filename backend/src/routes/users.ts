@@ -70,6 +70,7 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
         where: whereClause,
         select: {
           id: true,
+          name: true,
           email: true,
           role: true,
           department: true,

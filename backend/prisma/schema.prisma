@@ -28,6 +28,7 @@ model Category {
 model User {
   id           String       @id @default(uuid())
   email        String       @unique @db.Citext
+  name         String       @default("Unknown Employee")
   passwordHash String
   role         Role         @default(EMPLOYEE)
   department   String       @default("UNASSIGNED")

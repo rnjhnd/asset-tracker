@@ -20,6 +20,7 @@ type Asset = {
 
 type UserAccount = {
   id: string;
+  name: string;
   email: string;
   role: string;
   department: string;
@@ -85,7 +86,7 @@ const Dashboard: React.FC = () => {
   const [editingAsset, setEditingAsset] = useState({ id: '', name: '', serialNumber: '' });
   const [assignAssetId, setAssignAssetId] = useState('');
   const [assignUserId, setAssignUserId] = useState('');
-  const [newUser, setNewUser] = useState({ email: '', password: '', role: 'EMPLOYEE', department: '' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'EMPLOYEE', department: '' });
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -266,7 +267,7 @@ const Dashboard: React.FC = () => {
     try {
       await axios.post(`${API_URL}/api/auth/register`, newUser);
       setIsUserModalOpen(false);
-      setNewUser({ email: '', password: '', role: 'EMPLOYEE', department: '' });
+      setNewUser({ name: '', email: '', password: '', role: 'EMPLOYEE', department: '' });
       fetchUsers();
       toast.success('Employee account created!');
     } catch (error) {
@@ -1133,7 +1134,7 @@ const Dashboard: React.FC = () => {
                 <table className="w-full text-left border-collapse relative">
                   <thead className="sticky top-0 z-10 bg-gray-50 shadow-[0_1px_0_0_#e4e4e7]">
                     <tr className="font-mono text-xs uppercase tracking-wider text-gray-500">
-                      <th className="p-4 bg-gray-50">Email</th>
+                      <th className="p-4 bg-gray-50">Employee</th>
                       <th className="p-4 bg-gray-50">Role</th>
                       <th className="p-4 bg-gray-50">Department</th>
                       <th className="p-4 bg-gray-50">Status</th>
@@ -1144,14 +1145,17 @@ const Dashboard: React.FC = () => {
                   <tbody className="divide-y divide-[#e4e4e7]">
                     {!isLoading && users.map((u) => (
                       <tr key={u.id} className="hover:bg-gray-50 transition-all hover:shadow-[inset_4px_0_0_0_#3b82f6] group">
-                      <td className="p-4 font-bold">
-                        <div className="flex items-center gap-2">
-                          {u.email}
-                          {u.resetRequested && (
-                            <span className="bg-red-100 text-red-700 border border-red-300 font-mono text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 whitespace-nowrap animate-pulse">
-                              Reset Req
-                            </span>
-                          )}
+                      <td className="p-4">
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-gray-900">{u.name}</span>
+                            {u.resetRequested && (
+                              <span className="bg-red-100 text-red-700 border border-red-300 font-mono text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 whitespace-nowrap animate-pulse">
+                                Reset Req
+                              </span>
+                            )}
+                          </div>
+                          <span className="font-mono text-xs text-gray-500 mt-0.5">{u.email}</span>
                         </div>
                       </td>
                       <td className="p-4">
@@ -1363,10 +1367,15 @@ const Dashboard: React.FC = () => {
             <form onSubmit={handleAssignAsset} className="space-y-4">
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Select Employee</label>
-                <select required value={assignUserId} onChange={e => setAssignUserId(e.target.value)} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white transition-colors">
-                  <option value="" disabled>-- Choose an Employee --</option>
-                  {users.filter(u => u.role !== 'ADMIN' && u.isActive).map(u => (
-                    <option key={u.id} value={u.id}>{u.email}</option>
+                <select 
+                  value={assignUserId} 
+                  onChange={(e) => setAssignUserId(e.target.value)}
+                  className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white transition-colors"
+                  required
+                >
+                  <option value="">Select an employee...</option>
+                  {users.filter(u => u.isActive).map(u => (
+                    <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
                   ))}
                 </select>
               </div>
@@ -1413,6 +1422,10 @@ const Dashboard: React.FC = () => {
             </button>
             <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Register Employee</h3>
             <form onSubmit={handleCreateUser} className="space-y-4">
+              <div>
+                <label className="block font-mono text-xs uppercase mb-1 font-bold">Full Name</label>
+                <input required type="text" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. John Doe" />
+              </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Email Address</label>
                 <input required type="email" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="employee@system.com" />
