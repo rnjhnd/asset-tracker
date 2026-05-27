@@ -32,7 +32,7 @@ enum AssetStatus {
 
 model User {
   id           String       @id @default(uuid())
-  email        String       @unique
+  email        String       @unique @db.Citext
   passwordHash String
   role         Role         @default(EMPLOYEE)
   createdAt    DateTime     @default(now())
@@ -42,8 +42,8 @@ model User {
 
 model Asset {
   id           String        @id @default(uuid())
-  name         String
-  serialNumber String        @unique
+  name         String        @db.Citext
+  serialNumber String        @unique @db.Citext
   category     AssetCategory
   status       AssetStatus   @default(AVAILABLE)
   purchaseDate DateTime
