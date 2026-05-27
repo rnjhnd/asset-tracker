@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Filter, Users, Box, Clock, Download, Wrench, Trash2, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid } from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid, Legend } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import API_URL from '../config/api';
@@ -504,6 +504,7 @@ const Dashboard: React.FC = () => {
                           ))}
                         </Pie>
                         <Tooltip content={<BrutalistTooltip />} />
+                        <Legend iconType="square" wrapperStyle={{ fontFamily: 'monospace', fontSize: '10px' }} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
