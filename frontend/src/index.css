@@ -34,5 +34,12 @@ html, body {
     background-repeat: no-repeat;
     background-size: 1.5em 1.5em;
     padding-right: 2.5rem !important;
+    background-color: white !important;
+    transition: none !important;
+  }
+  
+  select option {
+    background-color: white;
+    color: black;
   }
 }
