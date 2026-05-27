@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown } from 'lucide-react';
 
 interface Option {
@@ -17,18 +18,44 @@ interface SelectDropdownProps {
 export const SelectDropdown: React.FC<SelectDropdownProps> = ({ value, onChange, options, className = '', disabled = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [rect, setRect] = useState<DOMRect | null>(null);
 
   const selectedOption = options.find(opt => opt.value === value) || options[0];
 
   useEffect(() => {
+    if (isOpen && dropdownRef.current) {
+      setRect(dropdownRef.current.getBoundingClientRect());
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        // Also check if the click was inside the portal dropdown
+        const portalEl = document.getElementById('dropdown-portal-root');
+        if (portalEl && portalEl.contains(event.target as Node)) return;
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    
+    const handleScroll = (e: Event) => {
+      // Don't close if they are scrolling the dropdown list itself
+      if ((e.target as HTMLElement)?.id === 'dropdown-portal-root') return;
+      setIsOpen(false);
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      window.addEventListener('scroll', handleScroll, true);
+      window.addEventListener('resize', handleScroll);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [isOpen]);
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
@@ -42,8 +69,16 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({ value, onChange,
         <ChevronDown size={16} className={`shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
-      {isOpen && !disabled && (
-        <ul className="absolute z-[100] top-full left-0 w-full mt-1 bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] max-h-60 overflow-y-auto">
+      {isOpen && !disabled && rect && createPortal(
+        <ul 
+          id="dropdown-portal-root"
+          className="fixed z-[9999] bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] max-h-60 overflow-y-auto scrollbar-hide"
+          style={{
+            top: rect.bottom + 4,
+            left: rect.left,
+            width: rect.width
+          }}
+        >
           {options.map((option) => (
             <li
               key={option.value}
@@ -58,7 +93,8 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({ value, onChange,
               {option.label}
             </li>
           ))}
-        </ul>
+        </ul>,
+        document.body
       )}
     </div>
   );
