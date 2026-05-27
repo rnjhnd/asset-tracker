@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Users, Box, Clock, Download, Wrench, Trash2, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight, SlidersHorizontal, Eye, EyeOff, Edit2, MoreHorizontal } from 'lucide-react';
@@ -86,6 +87,7 @@ const Dashboard: React.FC = () => {
   const [newUser, setNewUser] = useState({ email: '', password: '', role: 'EMPLOYEE', department: '' });
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
   const [forceResetUserId, setForceResetUserId] = useState('');
   const [forceResetUserEmail, setForceResetUserEmail] = useState('');
@@ -862,6 +864,11 @@ const Dashboard: React.FC = () => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  setDropdownPos({ 
+                                    top: rect.bottom + window.scrollY + 8, 
+                                    left: rect.right + window.scrollX - 192 
+                                  });
                                   setActiveDropdownId(activeDropdownId === asset.id ? null : asset.id);
                                 }}
                                 className="inline-flex items-center justify-center w-8 h-8 bg-white border-2 border-gray-900 shadow-[2px_2px_0_0_#111827] hover:bg-gray-50 hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0_0_#111827] transition-all"
@@ -869,8 +876,12 @@ const Dashboard: React.FC = () => {
                                 <MoreHorizontal size={16} />
                               </button>
 
-                              {activeDropdownId === asset.id && (
-                                <div className="absolute right-0 top-full mt-2 z-50 w-48 bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] flex flex-col p-1 text-left">
+                              {activeDropdownId === asset.id && createPortal(
+                                <div 
+                                  style={{ top: `${dropdownPos.top}px`, left: `${dropdownPos.left}px` }}
+                                  className="absolute z-[9999] w-48 bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] flex flex-col p-1 text-left action-dropdown-container"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
                                   <button onClick={() => { handleViewHistory(asset.id, asset.name); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors"><Clock size={14}/> Audit Log</button>
                                   
                                   {asset.status === 'AVAILABLE' && <button onClick={() => { setAssignAssetId(asset.id); setIsAssignModalOpen(true); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-[#3b82f6] hover:bg-blue-50 flex items-center gap-3 font-bold uppercase transition-colors"><CheckCircle size={14}/> Assign</button>}
@@ -883,7 +894,8 @@ const Dashboard: React.FC = () => {
                                   {asset.status !== 'AVAILABLE' && <button onClick={() => { handleUpdateStatus(asset.id, 'AVAILABLE'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-green-600 hover:bg-green-50 flex items-center gap-3 transition-colors"><CheckCircle size={14}/> Make Available</button>}
                                   {asset.status !== 'RETIRED' && <button onClick={() => { handleUpdateStatus(asset.id, 'MAINTENANCE'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-yellow-600 hover:bg-yellow-50 flex items-center gap-3 transition-colors"><Wrench size={14}/> Maintenance</button>}
                                   {asset.status !== 'RETIRED' && <button onClick={() => { handleUpdateStatus(asset.id, 'RETIRED'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"><Trash2 size={14}/> Retire</button>}
-                                </div>
+                                </div>,
+                                document.body
                               )}
                             </div>
                           </td>
