@@ -387,5 +387,25 @@ router.put('/:id/status', authenticateToken, requireAdmin, async (req, res) => {
     res.status(500).json({ error: 'Failed to update asset status' });
   }
 });
+// Hard delete an asset (Admin only, requires 0 assignments)
+router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const asset = await prisma.asset.findUnique({
+      where: { id },
+      include: { assignments: true }
+    });
+
+    if (!asset) return res.status(404).json({ error: 'Asset not found' });
+    if (asset.assignments.length > 0) {
+      return res.status(400).json({ error: 'Cannot delete an asset with existing or past assignments. Retire it instead.' });
+    }
+
+    await prisma.asset.delete({ where: { id } });
+    res.json({ message: 'Asset permanently deleted' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete asset' });
+  }
+});
 
 export default router;

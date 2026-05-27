@@ -184,9 +184,8 @@ router.put('/:id/force-password', authenticateToken, requireAdmin, async (req, r
   const { id } = req.params;
   const { newPassword } = req.body;
   
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  if (!newPassword || !passwordRegex.test(newPassword)) {
-    return res.status(400).json({ error: 'Password must be at least 8 characters long and contain at least one uppercase letter, one number, and one special character.' });
+  if (!newPassword || newPassword.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
   }
 
   try {
@@ -206,4 +205,26 @@ router.put('/:id/force-password', authenticateToken, requireAdmin, async (req, r
   }
 });
 
+// Hard delete a user (Admin only, requires 0 assignments)
+router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: { assignments: true }
+    });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.id === req.user?.userId) return res.status(400).json({ error: 'You cannot delete your own account.' });
+    if (user.role === 'ADMIN') return res.status(400).json({ error: 'Cannot delete an ADMIN account.' });
+    if (user.assignments.length > 0) {
+      return res.status(400).json({ error: 'Cannot delete a user with existing or past asset assignments. Deactivate them instead.' });
+    }
+
+    await prisma.user.delete({ where: { id } });
+    res.json({ message: 'User permanently deleted' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
+});
 export default router;

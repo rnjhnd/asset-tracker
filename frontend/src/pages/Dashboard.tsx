@@ -144,7 +144,7 @@ const Dashboard: React.FC = () => {
       await Promise.all([
         currentTab === 'ASSETS' ? fetchAssets() : Promise.resolve(),
         user?.role === 'ADMIN' && currentTab === 'ASSETS' ? fetchTotals() : Promise.resolve(),
-        user?.role === 'ADMIN' && currentTab === 'USERS' ? fetchUsers() : Promise.resolve(),
+        user?.role === 'ADMIN' ? fetchUsers() : Promise.resolve(),
         fetchCategories()
       ]);
       setIsLoading(false);
@@ -297,6 +297,29 @@ const Dashboard: React.FC = () => {
       toast.error(error.response?.data?.error || 'Failed to update employee.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteUser = async (id: string) => {
+    if (!window.confirm("Are you sure you want to permanently delete this employee? This will only work if they have absolutely ZERO asset history.")) return;
+    try {
+      await axios.delete(`${API_URL}/api/users/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      toast.success('Employee permanently deleted!');
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to delete employee.');
+    }
+  };
+
+  const handleDeleteAsset = async (id: string) => {
+    if (!window.confirm("Are you sure you want to permanently delete this asset? This will only work if it has absolutely ZERO assignment history.")) return;
+    try {
+      await axios.delete(`${API_URL}/api/assets/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      toast.success('Asset permanently deleted!');
+      fetchAssets();
+      fetchTotals();
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to delete asset.');
     }
   };
 
@@ -969,6 +992,8 @@ const Dashboard: React.FC = () => {
                                   {asset.status !== 'AVAILABLE' && <button onClick={() => { handleUpdateStatus(asset.id, 'AVAILABLE'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-green-600 hover:bg-green-50 flex items-center gap-3 transition-colors"><CheckCircle size={14}/> Make Available</button>}
                                   {asset.status !== 'RETIRED' && <button onClick={() => { handleUpdateStatus(asset.id, 'MAINTENANCE'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-yellow-600 hover:bg-yellow-50 flex items-center gap-3 transition-colors"><Wrench size={14}/> Maintenance</button>}
                                   {asset.status !== 'RETIRED' && <button onClick={() => { handleUpdateStatus(asset.id, 'RETIRED'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"><Trash2 size={14}/> Retire</button>}
+                                  <div className="h-px bg-gray-200 my-1 mx-2"></div>
+                                  <button onClick={() => { handleDeleteAsset(asset.id); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-red-800 hover:bg-red-100 flex items-center gap-3 transition-colors font-bold"><Trash2 size={14}/> Hard Delete</button>
                                 </div>,
                                 document.body
                               )}
@@ -1245,6 +1270,14 @@ const Dashboard: React.FC = () => {
                           >
                             <Key size={16} />
                           </button>
+                          <div className="h-4 w-px bg-gray-300 mx-1"></div>
+                          <button 
+                            onClick={() => handleDeleteUser(u.id)}
+                            className="text-red-800 hover:text-red-900 transition-colors"
+                            title="Hard Delete Employee"
+                          >
+                            <Trash2 size={16} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -1296,7 +1329,7 @@ const Dashboard: React.FC = () => {
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">New Password</label>
                 <input required type="password" value={passwordForm.newPassword} onChange={e => setPasswordForm({...passwordForm, newPassword: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
-                <p className="font-mono text-[10px] text-gray-500 mt-2">Must be at least 8 chars, 1 uppercase, 1 number, 1 special character.</p>
+                <p className="font-mono text-[10px] text-gray-500 mt-2">Must be at least 8 characters long.</p>
               </div>
               <button disabled={isSubmitting} type="submit" className={`w-full bg-gray-900 text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-black transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isSubmitting ? 'PROCESSING...' : 'Update Password'}
@@ -1319,7 +1352,7 @@ const Dashboard: React.FC = () => {
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">New Temporary Password</label>
                 <input required type="text" value={forceNewPassword} onChange={e => setForceNewPassword(e.target.value)} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. TempPass123!" />
-                <p className="font-mono text-[10px] text-gray-500 mt-2">Must be at least 8 chars, 1 uppercase, 1 number, 1 special character.</p>
+                <p className="font-mono text-[10px] text-gray-500 mt-2">Must be at least 8 characters long.</p>
               </div>
               <button disabled={isSubmitting} type="submit" className={`w-full bg-red-600 text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-red-700 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isSubmitting ? 'PROCESSING...' : 'OVERRIDE PASSWORD'}
@@ -1537,7 +1570,7 @@ const Dashboard: React.FC = () => {
                     {isPasswordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
-                <p className="font-mono text-[10px] text-gray-500">Must be at least 8 chars, 1 uppercase, 1 number, 1 special character.</p>
+                <p className="font-mono text-[10px] text-gray-500">Must be at least 8 characters long.</p>
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Department</label>
