@@ -1431,7 +1431,7 @@ const Dashboard: React.FC = () => {
                   </div>
                 ) : (
                   <div className="flex gap-2">
-                    <select value={newAsset.category} onChange={e => setNewAsset({...newAsset, category: e.target.value})} className="flex-1 border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white transition-colors">
+                    <select value={newAsset.category} onChange={e => setNewAsset({...newAsset, category: e.target.value})} className="flex-1 border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white">
                       {categories.map(c => (
                         <option key={c.id} value={c.name}>{c.name}</option>
                       ))}
@@ -1576,7 +1576,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">System Role</label>
-                <select value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white transition-colors">
+                <select value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white">
                   <option value="EMPLOYEE">Standard Employee</option>
                   <option value="ADMIN">System Administrator</option>
                 </select>

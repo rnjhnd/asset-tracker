@@ -22,6 +22,7 @@ html, body {
   background-size: 24px 24px;
   color: var(--text-color);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color-scheme: light;
 }
 
 @layer base {
@@ -36,6 +37,7 @@ html, body {
     padding-right: 2.5rem !important;
     background-color: white !important;
     transition: none !important;
+    color-scheme: light !important;
   }
   
   select option {
