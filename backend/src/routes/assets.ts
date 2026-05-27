@@ -56,7 +56,10 @@ router.get('/', authenticateToken, async (req, res) => {
     const sortField = validSortFields.includes(sortBy as string) ? (sortBy as string) : 'purchaseDate';
     const sortDir = validSortOrders.includes(sortOrder as string) ? (sortOrder as string) : 'desc';
 
-    const orderByClause = { [sortField]: sortDir };
+    const orderByClause = [
+      { [sortField]: sortDir },
+      { id: 'asc' }
+    ];
 
     const [assets, total] = await Promise.all([
       prisma.asset.findMany({

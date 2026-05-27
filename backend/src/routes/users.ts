@@ -60,7 +60,10 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
     const sortField = validSortFields.includes(sortBy as string) ? (sortBy as string) : 'createdAt';
     const sortDir = validSortOrders.includes(sortOrder as string) ? (sortOrder as string) : 'desc';
 
-    const orderByClause = { [sortField]: sortDir };
+    const orderByClause = [
+      { [sortField]: sortDir },
+      { id: 'asc' }
+    ];
 
     const [users, total] = await Promise.all([
       prisma.user.findMany({
