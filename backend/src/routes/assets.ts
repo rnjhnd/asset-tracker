@@ -10,7 +10,15 @@ router.get('/', authenticateToken, async (req, res) => {
     const role = req.user?.role;
     const userId = req.user?.userId;
 
-    const { page = '1', limit = '15', search = '', status = 'ALL' } = req.query;
+    const { 
+      page = '1', 
+      limit = '15', 
+      search = '', 
+      status = 'ALL',
+      category = 'ALL',
+      sortBy = 'purchaseDate',
+      sortOrder = 'desc'
+    } = req.query;
     
     const pageNumber = parseInt(page as string, 10);
     const limitNumber = parseInt(limit as string, 10);
@@ -21,6 +29,10 @@ router.get('/', authenticateToken, async (req, res) => {
     
     if (status !== 'ALL') {
       whereClause.status = status;
+    }
+
+    if (category !== 'ALL') {
+      whereClause.category = category;
     }
 
     if (search) {
@@ -37,6 +49,15 @@ router.get('/', authenticateToken, async (req, res) => {
       };
     }
 
+    // Build the query orderBy clause
+    const validSortFields = ['name', 'serialNumber', 'category', 'status', 'purchaseDate'];
+    const validSortOrders = ['asc', 'desc'];
+    
+    const sortField = validSortFields.includes(sortBy as string) ? (sortBy as string) : 'purchaseDate';
+    const sortDir = validSortOrders.includes(sortOrder as string) ? (sortOrder as string) : 'desc';
+
+    const orderByClause = { [sortField]: sortDir };
+
     const [assets, total] = await Promise.all([
       prisma.asset.findMany({
         where: whereClause,
@@ -46,7 +67,7 @@ router.get('/', authenticateToken, async (req, res) => {
             include: { user: { select: { email: true } } }
           }
         },
-        orderBy: { purchaseDate: 'desc' },
+        orderBy: orderByClause,
         skip,
         take: limitNumber
       }),

@@ -24,19 +24,67 @@ router.get('/stats', authenticateToken, requireAdmin, async (req, res) => {
 // Get all users (Admin only)
 router.get('/', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        createdAt: true,
-        isActive: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      }
+    const { 
+      page = '1', 
+      limit = '15', 
+      search = '', 
+      role = 'ALL',
+      status = 'ALL',
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
+    } = req.query;
+    
+    const pageNumber = parseInt(page as string, 10);
+    const limitNumber = parseInt(limit as string, 10);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    // Build where clause
+    const whereClause: any = {};
+    
+    if (role !== 'ALL') {
+      whereClause.role = role;
+    }
+
+    if (status !== 'ALL') {
+      whereClause.isActive = status === 'ACTIVE';
+    }
+
+    if (search) {
+      whereClause.email = { contains: search as string, mode: 'insensitive' };
+    }
+
+    // Build orderBy clause
+    const validSortFields = ['email', 'role', 'isActive', 'createdAt'];
+    const validSortOrders = ['asc', 'desc'];
+    
+    const sortField = validSortFields.includes(sortBy as string) ? (sortBy as string) : 'createdAt';
+    const sortDir = validSortOrders.includes(sortOrder as string) ? (sortOrder as string) : 'desc';
+
+    const orderByClause = { [sortField]: sortDir };
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where: whereClause,
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          isActive: true,
+        },
+        orderBy: orderByClause,
+        skip,
+        take: limitNumber
+      }),
+      prisma.user.count({ where: whereClause })
+    ]);
+
+    res.json({
+      data: users,
+      total,
+      page: pageNumber,
+      totalPages: Math.ceil(total / limitNumber)
     });
-    res.json(users);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch users' });
   }

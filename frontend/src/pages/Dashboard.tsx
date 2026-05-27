@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Filter, Users, Box, Clock, Download, Wrench, Trash2, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Users, Box, Clock, Download, Wrench, Trash2, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid, Legend } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -45,11 +45,24 @@ const Dashboard: React.FC = () => {
   const [userStats, setUserStats] = useState({ total: 0, active: 0, deactivated: 0, admins: 0 });
   const [currentTab, setCurrentTab] = useState<'ASSETS' | 'USERS'>('ASSETS');
 
-  // Search, Filter & Pagination State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState('ALL');
+  // Shared Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Advanced Filter/Sort State - ASSETS
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('ALL');
+  const [assetFilterCategory, setAssetFilterCategory] = useState('ALL');
+  const [assetSortBy, setAssetSortBy] = useState('purchaseDate');
+  const [assetSortOrder, setAssetSortOrder] = useState('desc');
+
+  // Advanced Filter/Sort State - USERS
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [userFilterRole, setUserFilterRole] = useState('ALL');
+  const [userFilterStatus, setUserFilterStatus] = useState('ALL');
+  const [userSortBy, setUserSortBy] = useState('createdAt');
+  const [userSortOrder, setUserSortOrder] = useState('desc');
 
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -78,6 +91,13 @@ const Dashboard: React.FC = () => {
   const [historyLogs, setHistoryLogs] = useState<AuditLog[]>([]);
   const [activeHistoryAssetName, setActiveHistoryAssetName] = useState('');
 
+  // Tab switching helper
+  const handleTabSwitch = (tab: 'ASSETS' | 'USERS') => {
+    setCurrentTab(tab);
+    setCurrentPage(1);
+    setShowFilters(false);
+  };
+
   useEffect(() => {
     if (!token) {
       navigate('/login');
@@ -87,32 +107,44 @@ const Dashboard: React.FC = () => {
     const loadAll = async () => {
       setIsLoading(true);
       await Promise.all([
-        fetchAssets(),
-        user?.role === 'ADMIN' ? fetchTotals() : Promise.resolve(),
-        user?.role === 'ADMIN' ? fetchUsers() : Promise.resolve()
+        currentTab === 'ASSETS' ? fetchAssets() : Promise.resolve(),
+        user?.role === 'ADMIN' && currentTab === 'ASSETS' ? fetchTotals() : Promise.resolve(),
+        user?.role === 'ADMIN' && currentTab === 'USERS' ? fetchUsers() : Promise.resolve()
       ]);
       setIsLoading(false);
     };
     
     loadAll();
-  }, [token, navigate, user?.role, currentPage, filterStatus]);
+  }, [
+    token, navigate, user?.role, currentTab, currentPage, 
+    filterStatus, assetFilterCategory, assetSortBy, assetSortOrder,
+    userFilterRole, userFilterStatus, userSortBy, userSortOrder
+  ]);
 
-  // Debounced Search Effect
+  // Debounced Search Effects
   useEffect(() => {
-    setCurrentPage(1); // Reset to page 1 on new search
+    setCurrentPage(1);
     const delayDebounceFn = setTimeout(() => {
-      if (token) fetchAssets();
+      if (token && currentTab === 'ASSETS') fetchAssets();
     }, 500);
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+    const delayDebounceFn = setTimeout(() => {
+      if (token && currentTab === 'USERS') fetchUsers();
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, [userSearchQuery]);
+
   const fetchAssets = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/assets?page=${currentPage}&limit=15&search=${searchQuery}&status=${filterStatus}`, {
+      const response = await axios.get(`${API_URL}/api/assets?page=${currentPage}&limit=15&search=${searchQuery}&status=${filterStatus}&category=${assetFilterCategory}&sortBy=${assetSortBy}&sortOrder=${assetSortOrder}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAssets(response.data.data);
-      setTotalPages(response.data.totalPages);
+      if (currentTab === 'ASSETS') setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error('Failed to fetch assets');
     }
@@ -133,10 +165,11 @@ const Dashboard: React.FC = () => {
   const fetchUsers = async () => {
     try {
       const [usersRes, statsRes] = await Promise.all([
-        axios.get(`${API_URL}/api/users`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${API_URL}/api/users?page=${currentPage}&limit=15&search=${userSearchQuery}&role=${userFilterRole}&status=${userFilterStatus}&sortBy=${userSortBy}&sortOrder=${userSortOrder}`, { headers: { Authorization: `Bearer ${token}` } }),
         axios.get(`${API_URL}/api/users/stats`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
-      setUsers(usersRes.data);
+      setUsers(usersRes.data.data);
+      if (currentTab === 'USERS') setTotalPages(usersRes.data.totalPages);
       setUserStats(statsRes.data);
     } catch (error) {
       console.error('Failed to fetch users or stats');
@@ -442,13 +475,13 @@ const Dashboard: React.FC = () => {
         {user?.role === 'ADMIN' && (
           <div className="flex flex-col sm:flex-row gap-4 mb-6 sm:mb-8">
             <button 
-              onClick={() => setCurrentTab('ASSETS')}
+              onClick={() => handleTabSwitch('ASSETS')}
               className={`flex items-center justify-center sm:justify-start gap-2 font-mono text-sm uppercase tracking-wider font-bold transition-colors w-full sm:w-auto px-6 py-3 border-2 ${currentTab === 'ASSETS' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-[#e4e4e7] hover:border-gray-400 hover:text-black'}`}
             >
               <Box size={16} /> Hardware
             </button>
             <button 
-              onClick={() => setCurrentTab('USERS')}
+              onClick={() => handleTabSwitch('USERS')}
               className={`flex items-center justify-center sm:justify-start gap-2 font-mono text-sm uppercase tracking-wider font-bold transition-colors w-full sm:w-auto px-6 py-3 border-2 ${currentTab === 'USERS' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-[#e4e4e7] hover:border-gray-400 hover:text-black'}`}
             >
               <Users size={16} /> Employees
@@ -567,31 +600,68 @@ const Dashboard: React.FC = () => {
               </div>
             )}
 
-            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end mb-6 gap-4">
-              <div className="bg-gray-900 px-4 sm:px-6 py-2 shadow-[4px_4px_0_0_#d4d4d8]">
-                <h2 className="text-xl sm:text-3xl font-bold uppercase tracking-tight whitespace-nowrap text-white">
-                  {user?.role === 'ADMIN' ? 'Inventory Log' : 'My Equipment'}
-                </h2>
-              </div>
-              
-              {user?.role === 'ADMIN' && (
-                <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-end gap-4 w-full xl:w-auto">
-                  <div className="relative w-full sm:w-auto sm:flex-1 min-w-[200px]">
-                    <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input 
-                      type="text" 
-                      placeholder="Search SN or Name..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border-2 border-[#e4e4e7] bg-white font-mono text-sm focus:border-[#3b82f6] outline-none"
-                    />
+            <div className="flex flex-col mb-6 gap-4">
+              <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-4">
+                <div className="bg-gray-900 px-4 sm:px-6 py-2 shadow-[4px_4px_0_0_#d4d4d8]">
+                  <h2 className="text-xl sm:text-3xl font-bold uppercase tracking-tight whitespace-nowrap text-white">
+                    {user?.role === 'ADMIN' ? 'Inventory Log' : 'My Equipment'}
+                  </h2>
+                </div>
+                
+                {user?.role === 'ADMIN' && (
+                  <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-end gap-4 w-full xl:w-auto">
+                    <div className="relative w-full sm:w-auto sm:flex-1 min-w-[200px]">
+                      <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input 
+                        type="text" 
+                        placeholder="Search SN or Name..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border-2 border-[#e4e4e7] bg-white font-mono text-sm focus:border-[#3b82f6] outline-none"
+                      />
+                    </div>
+                    <button 
+                      onClick={() => setShowFilters(!showFilters)}
+                      className={`w-full sm:w-auto border-2 px-4 py-2.5 font-mono text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${showFilters ? 'bg-gray-900 text-white border-gray-900' : 'bg-white border-[#e4e4e7] text-gray-600 hover:bg-gray-50 hover:text-black'}`}
+                    >
+                      <SlidersHorizontal size={16} /> Filters
+                    </button>
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                      <input type="file" accept=".csv" ref={fileInputRef} onChange={handleBulkImport} className="hidden" />
+                      <button 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full sm:w-auto bg-white border-2 border-[#e4e4e7] text-gray-600 px-4 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-50 hover:text-black transition-colors flex items-center justify-center gap-2"
+                        title="Bulk Import CSV"
+                      >
+                        <Upload size={16} /> Import
+                      </button>
+                      <button 
+                        onClick={handleExportCSV}
+                        className="w-full sm:w-auto bg-white border-2 border-[#e4e4e7] text-gray-600 px-4 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-50 hover:text-black transition-colors flex items-center justify-center gap-2"
+                        title="Export CSV"
+                      >
+                        <Download size={16} /> Export
+                      </button>
+                      <button 
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="w-full sm:w-auto bg-gray-900 text-white px-6 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-800 transition-colors whitespace-nowrap flex justify-center items-center"
+                      >
+                        + Register Asset
+                      </button>
+                    </div>
                   </div>
-                  <div className="relative w-full sm:w-auto sm:flex-1 min-w-[150px]">
-                    <Filter size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                )}
+              </div>
+
+              {/* Advanced Filters Panel - ASSETS */}
+              {user?.role === 'ADMIN' && showFilters && (
+                <div className="bg-gray-50 border-2 border-gray-900 p-4 shadow-[4px_4px_0_0_#111827] flex flex-col sm:flex-row flex-wrap gap-4 items-end mt-2 animate-in slide-in-from-top-2">
+                  <div className="flex-1 min-w-[150px]">
+                    <label className="block font-mono text-xs font-bold uppercase mb-1">Status</label>
                     <select 
                       value={filterStatus}
                       onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
-                      className="w-full pl-10 pr-4 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white appearance-none"
+                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
                     >
                       <option value="ALL">All Statuses</option>
                       <option value="AVAILABLE">Available</option>
@@ -600,28 +670,48 @@ const Dashboard: React.FC = () => {
                       <option value="RETIRED">Retired</option>
                     </select>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                    <input type="file" accept=".csv" ref={fileInputRef} onChange={handleBulkImport} className="hidden" />
-                    <button 
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-full sm:w-auto bg-white border-2 border-[#e4e4e7] text-gray-600 px-4 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-50 hover:text-black transition-colors flex items-center justify-center gap-2"
-                      title="Bulk Import CSV"
+                  <div className="flex-1 min-w-[150px]">
+                    <label className="block font-mono text-xs font-bold uppercase mb-1">Category</label>
+                    <select 
+                      value={assetFilterCategory}
+                      onChange={(e) => { setAssetFilterCategory(e.target.value); setCurrentPage(1); }}
+                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
                     >
-                      <Upload size={16} /> Import
-                    </button>
-                    <button 
-                      onClick={handleExportCSV}
-                      className="w-full sm:w-auto bg-white border-2 border-[#e4e4e7] text-gray-600 px-4 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-50 hover:text-black transition-colors flex items-center justify-center gap-2"
-                      title="Export CSV"
+                      <option value="ALL">All Categories</option>
+                      <option value="LAPTOP">Laptop</option>
+                      <option value="MONITOR">Monitor</option>
+                      <option value="PHONE">Phone</option>
+                      <option value="TABLET">Tablet</option>
+                      <option value="KEYBOARD">Keyboard</option>
+                      <option value="MOUSE">Mouse</option>
+                      <option value="SERVER">Server</option>
+                      <option value="NETWORK">Network</option>
+                    </select>
+                  </div>
+                  <div className="flex-1 min-w-[150px]">
+                    <label className="block font-mono text-xs font-bold uppercase mb-1">Sort By</label>
+                    <select 
+                      value={assetSortBy}
+                      onChange={(e) => { setAssetSortBy(e.target.value); setCurrentPage(1); }}
+                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
                     >
-                      <Download size={16} /> Export
-                    </button>
-                    <button 
-                      onClick={() => setIsAddModalOpen(true)}
-                      className="w-full sm:w-auto bg-gray-900 text-white px-6 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-800 transition-colors whitespace-nowrap flex justify-center items-center"
+                      <option value="purchaseDate">Purchase Date</option>
+                      <option value="name">Name</option>
+                      <option value="serialNumber">Serial Number</option>
+                      <option value="category">Category</option>
+                      <option value="status">Status</option>
+                    </select>
+                  </div>
+                  <div className="flex-1 min-w-[150px]">
+                    <label className="block font-mono text-xs font-bold uppercase mb-1">Order</label>
+                    <select 
+                      value={assetSortOrder}
+                      onChange={(e) => { setAssetSortOrder(e.target.value); setCurrentPage(1); }}
+                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
                     >
-                      + Register Asset
-                    </button>
+                      <option value="desc">Descending</option>
+                      <option value="asc">Ascending</option>
+                    </select>
                   </div>
                 </div>
               )}
@@ -808,16 +898,91 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
-              <div className="bg-gray-900 px-4 sm:px-6 py-2 shadow-[4px_4px_0_0_#d4d4d8]">
-                <h2 className="text-xl sm:text-3xl font-bold uppercase tracking-tight text-white">Employee Directory</h2>
+            <div className="flex flex-col mb-6 gap-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                <div className="bg-gray-900 px-4 sm:px-6 py-2 shadow-[4px_4px_0_0_#d4d4d8]">
+                  <h2 className="text-xl sm:text-3xl font-bold uppercase tracking-tight text-white">Employee Directory</h2>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-end gap-4 w-full sm:w-auto">
+                  <div className="relative w-full sm:w-auto sm:flex-1 min-w-[200px]">
+                    <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input 
+                      type="text" 
+                      placeholder="Search Email..."
+                      value={userSearchQuery}
+                      onChange={(e) => setUserSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border-2 border-[#e4e4e7] bg-white font-mono text-sm focus:border-[#3b82f6] outline-none"
+                    />
+                  </div>
+                  <button 
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`w-full sm:w-auto border-2 px-4 py-2.5 font-mono text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${showFilters ? 'bg-gray-900 text-white border-gray-900' : 'bg-white border-[#e4e4e7] text-gray-600 hover:bg-gray-50 hover:text-black'}`}
+                  >
+                    <SlidersHorizontal size={16} /> Filters
+                  </button>
+                  <button 
+                    onClick={() => setIsUserModalOpen(true)}
+                    className="w-full sm:w-auto bg-gray-900 text-white px-6 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-800 transition-colors whitespace-nowrap flex justify-center items-center"
+                  >
+                    + Register User
+                  </button>
+                </div>
               </div>
-              <button 
-                onClick={() => setIsUserModalOpen(true)}
-                className="w-full sm:w-auto bg-gray-900 text-white px-6 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-800 transition-colors whitespace-nowrap flex justify-center items-center"
-              >
-                + Register User
-              </button>
+
+              {/* Advanced Filters Panel - USERS */}
+              {showFilters && (
+                <div className="bg-gray-50 border-2 border-gray-900 p-4 shadow-[4px_4px_0_0_#111827] flex flex-col sm:flex-row flex-wrap gap-4 items-end mt-2 animate-in slide-in-from-top-2">
+                  <div className="flex-1 min-w-[150px]">
+                    <label className="block font-mono text-xs font-bold uppercase mb-1">Status</label>
+                    <select 
+                      value={userFilterStatus}
+                      onChange={(e) => { setUserFilterStatus(e.target.value); setCurrentPage(1); }}
+                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
+                    >
+                      <option value="ALL">All Statuses</option>
+                      <option value="ACTIVE">Active</option>
+                      <option value="DEACTIVATED">Deactivated</option>
+                    </select>
+                  </div>
+                  <div className="flex-1 min-w-[150px]">
+                    <label className="block font-mono text-xs font-bold uppercase mb-1">Role</label>
+                    <select 
+                      value={userFilterRole}
+                      onChange={(e) => { setUserFilterRole(e.target.value); setCurrentPage(1); }}
+                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
+                    >
+                      <option value="ALL">All Roles</option>
+                      <option value="ADMIN">Admin</option>
+                      <option value="EMPLOYEE">Employee</option>
+                    </select>
+                  </div>
+                  <div className="flex-1 min-w-[150px]">
+                    <label className="block font-mono text-xs font-bold uppercase mb-1">Sort By</label>
+                    <select 
+                      value={userSortBy}
+                      onChange={(e) => { setUserSortBy(e.target.value); setCurrentPage(1); }}
+                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
+                    >
+                      <option value="createdAt">Date Added</option>
+                      <option value="email">Email</option>
+                      <option value="role">Role</option>
+                      <option value="isActive">Status</option>
+                    </select>
+                  </div>
+                  <div className="flex-1 min-w-[150px]">
+                    <label className="block font-mono text-xs font-bold uppercase mb-1">Order</label>
+                    <select 
+                      value={userSortOrder}
+                      onChange={(e) => { setUserSortOrder(e.target.value); setCurrentPage(1); }}
+                      className="w-full px-3 py-2 border-2 border-[#e4e4e7] font-mono text-sm focus:border-[#3b82f6] outline-none bg-white"
+                    >
+                      <option value="desc">Descending</option>
+                      <option value="asc">Ascending</option>
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="bg-white border border-[#e4e4e7] shadow-sm overflow-hidden mb-12">
