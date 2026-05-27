@@ -67,7 +67,7 @@ const Dashboard: React.FC = () => {
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [userFilterRole, setUserFilterRole] = useState('ALL');
   const [userFilterStatus, setUserFilterStatus] = useState('ACTIVE');
-  const [userSortBy, setUserSortBy] = useState('createdAt');
+  const [userSortBy, setUserSortBy] = useState('name');
   const [userSortOrder, setUserSortOrder] = useState('asc');
 
   // Modal States
@@ -127,7 +127,7 @@ const Dashboard: React.FC = () => {
       setUserSearchQuery('');
       setUserFilterStatus('ACTIVE');
       setUserFilterRole('ALL');
-      setUserSortBy('createdAt');
+      setUserSortBy('name');
       setUserSortOrder('asc');
     }
     setCurrentPage(1);

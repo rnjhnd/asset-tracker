@@ -57,7 +57,7 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
     const validSortFields = ['name', 'email', 'role', 'isActive', 'createdAt', 'department'];
     const validSortOrders = ['asc', 'desc'];
     
-    const sortField = validSortFields.includes(sortBy as string) ? (sortBy as string) : 'createdAt';
+    const sortField = validSortFields.includes(sortBy as string) ? (sortBy as string) : 'name';
     const sortDir = validSortOrders.includes(sortOrder as string) ? (sortOrder as string) : 'desc';
 
     const orderByClause = [
