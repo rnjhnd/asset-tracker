@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Users, Box, Clock, Download, Wrench, Trash2, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight, SlidersHorizontal, Eye, EyeOff, Edit2, MoreHorizontal, User, ChevronDown } from 'lucide-react';
+import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Users, Box, Clock, Download, Wrench, Trash2, Archive, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight, SlidersHorizontal, Edit2, MoreHorizontal, User, ChevronDown } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid, Legend } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -66,7 +66,7 @@ const Dashboard: React.FC = () => {
   // Advanced Filter/Sort State - USERS
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [userFilterRole, setUserFilterRole] = useState('ALL');
-  const [userFilterStatus, setUserFilterStatus] = useState('ALL');
+  const [userFilterStatus, setUserFilterStatus] = useState('ACTIVE');
   const [userSortBy, setUserSortBy] = useState('createdAt');
   const [userSortOrder, setUserSortOrder] = useState('asc');
 
@@ -81,6 +81,7 @@ const Dashboard: React.FC = () => {
   const [isForceResetModalOpen, setIsForceResetModalOpen] = useState(false);
   
   // Form States
+  const [deleteConfirmInfo, setDeleteConfirmInfo] = useState<{ id: string, type: 'USER' | 'ASSET' } | null>(null);
   const [newAsset, setNewAsset] = useState({ name: '', serialNumber: '', category: '', purchaseDate: new Date().toISOString().split('T')[0] });
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -91,7 +92,6 @@ const Dashboard: React.FC = () => {
   const [assignSearchQuery, setAssignSearchQuery] = useState('');
   const [showAssignDropdown, setShowAssignDropdown] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'EMPLOYEE', department: '' });
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, showAbove: false });
@@ -125,7 +125,7 @@ const Dashboard: React.FC = () => {
       setAssetSortOrder('asc');
     } else {
       setUserSearchQuery('');
-      setUserFilterStatus('ALL');
+      setUserFilterStatus('ACTIVE');
       setUserFilterRole('ALL');
       setUserSortBy('createdAt');
       setUserSortOrder('asc');
@@ -300,26 +300,25 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleDeleteUser = async (id: string) => {
-    if (!window.confirm("Are you sure you want to permanently delete this employee? This will only work if they have absolutely ZERO asset history.")) return;
+  const executeDelete = async () => {
+    if (!deleteConfirmInfo) return;
+    setIsSubmitting(true);
     try {
-      await axios.delete(`${API_URL}/api/users/${id}`, { headers: { Authorization: `Bearer ${token}` } });
-      toast.success('Employee permanently deleted!');
-      fetchUsers();
+      if (deleteConfirmInfo.type === 'USER') {
+        await axios.delete(`${API_URL}/api/users/${deleteConfirmInfo.id}`, { headers: { Authorization: `Bearer ${token}` } });
+        toast.success('Employee permanently deleted!');
+        fetchUsers();
+      } else {
+        await axios.delete(`${API_URL}/api/assets/${deleteConfirmInfo.id}`, { headers: { Authorization: `Bearer ${token}` } });
+        toast.success('Asset permanently deleted!');
+        fetchAssets();
+        fetchTotals();
+      }
+      setDeleteConfirmInfo(null);
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to delete employee.');
-    }
-  };
-
-  const handleDeleteAsset = async (id: string) => {
-    if (!window.confirm("Are you sure you want to permanently delete this asset? This will only work if it has absolutely ZERO assignment history.")) return;
-    try {
-      await axios.delete(`${API_URL}/api/assets/${id}`, { headers: { Authorization: `Bearer ${token}` } });
-      toast.success('Asset permanently deleted!');
-      fetchAssets();
-      fetchTotals();
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to delete asset.');
+      toast.error(error.response?.data?.error || `Failed to delete ${deleteConfirmInfo.type.toLowerCase()}.`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -628,7 +627,7 @@ const Dashboard: React.FC = () => {
             className="w-full sm:w-auto flex justify-between sm:justify-center items-center gap-2 bg-white border-2 border-gray-900 text-gray-900 font-mono text-xs font-bold uppercase tracking-wider px-4 py-2.5 transition-colors shadow-[4px_4px_0_0_#111827] hover:bg-gray-50 hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[2px_2px_0_0_#111827]"
           >
             <div className="flex items-center gap-2">
-              <User size={14} /> {user?.role} Profile
+              <User size={14} /> Hi, {user?.name?.split(' ')[0] || user?.role}
             </div>
             <ChevronDown size={14} className={`transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
           </button>
@@ -637,7 +636,8 @@ const Dashboard: React.FC = () => {
             <div className="absolute right-0 top-full mt-2 w-full sm:w-56 bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] flex flex-col p-1 text-left z-50">
               <div className="px-3 py-2 border-b border-gray-200 mb-1">
                 <p className="font-mono text-[10px] text-gray-500 uppercase font-bold tracking-widest">Signed in as</p>
-                <p className="font-mono text-sm truncate text-gray-900 font-bold" title={user?.email}>{user?.email}</p>
+                <p className="font-mono text-sm truncate text-gray-900 font-bold" title={user?.name}>{user?.name}</p>
+                <p className="font-mono text-xs truncate text-gray-500" title={user?.email}>{user?.email}</p>
               </div>
               <button 
                 onClick={() => { setIsPasswordModalOpen(true); setIsProfileDropdownOpen(false); }}
@@ -991,9 +991,9 @@ const Dashboard: React.FC = () => {
                                   
                                   {asset.status !== 'AVAILABLE' && <button onClick={() => { handleUpdateStatus(asset.id, 'AVAILABLE'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-green-600 hover:bg-green-50 flex items-center gap-3 transition-colors"><CheckCircle size={14}/> Make Available</button>}
                                   {asset.status !== 'RETIRED' && <button onClick={() => { handleUpdateStatus(asset.id, 'MAINTENANCE'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-yellow-600 hover:bg-yellow-50 flex items-center gap-3 transition-colors"><Wrench size={14}/> Maintenance</button>}
-                                  {asset.status !== 'RETIRED' && <button onClick={() => { handleUpdateStatus(asset.id, 'RETIRED'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"><Trash2 size={14}/> Retire</button>}
+                                  {asset.status !== 'RETIRED' && <button onClick={() => { handleUpdateStatus(asset.id, 'RETIRED'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors"><Archive size={14}/> Retire</button>}
                                   <div className="h-px bg-gray-200 my-1 mx-2"></div>
-                                  <button onClick={() => { handleDeleteAsset(asset.id); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-red-800 hover:bg-red-100 flex items-center gap-3 transition-colors font-bold"><Trash2 size={14}/> Hard Delete</button>
+                                  <button onClick={() => { setDeleteConfirmInfo({ id: asset.id, type: 'ASSET' }); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-red-800 hover:bg-red-100 flex items-center gap-3 transition-colors font-bold"><Trash2 size={14}/> Hard Delete</button>
                                 </div>,
                                 document.body
                               )}
@@ -1272,7 +1272,7 @@ const Dashboard: React.FC = () => {
                           </button>
                           <div className="h-4 w-px bg-gray-300 mx-1"></div>
                           <button 
-                            onClick={() => handleDeleteUser(u.id)}
+                            onClick={() => setDeleteConfirmInfo({ id: u.id, type: 'USER' })}
                             className="text-red-800 hover:text-red-900 transition-colors"
                             title="Hard Delete Employee"
                           >
@@ -1565,10 +1565,7 @@ const Dashboard: React.FC = () => {
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Initial Password</label>
                 <div className="relative mb-2">
-                  <input required type={isPasswordVisible ? "text" : "password"} value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="secure_password" />
-                  <button type="button" onClick={() => setIsPasswordVisible(!isPasswordVisible)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black focus:outline-none">
-                    {isPasswordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
+                  <input required type="text" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. temporary123" />
                 </div>
                 <p className="font-mono text-[10px] text-gray-500">Must be at least 8 characters long.</p>
               </div>
@@ -1641,6 +1638,39 @@ const Dashboard: React.FC = () => {
                 {isSubmitting ? 'PROCESSING...' : 'Save Changes'}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+    {/* Delete Confirmation Modal */}
+      {deleteConfirmInfo && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center">
+          <div className="bg-white border-2 border-red-600 shadow-[8px_8px_0_0_#dc2626] p-6 sm:p-8 w-full max-w-md relative mx-4">
+            <div className="flex items-center gap-4 mb-4 text-red-600">
+              <Trash2 size={32} />
+              <h2 className="text-2xl font-bold font-mono tracking-tight uppercase">Hard Delete</h2>
+            </div>
+            <p className="text-gray-700 font-mono text-sm mb-6">
+              Are you absolutely sure? This will permanently delete this {deleteConfirmInfo.type.toLowerCase()} from the database.
+              <br/><br/>
+              <span className="font-bold text-red-600">WARNING:</span> This will only succeed if the {deleteConfirmInfo.type.toLowerCase()} has <span className="font-bold underline">ZERO</span> assignment history. Otherwise, you must Retire/Deactivate them instead to preserve audit logs.
+            </p>
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setDeleteConfirmInfo(null)}
+                className="flex-1 bg-gray-100 text-gray-700 border-2 border-gray-300 font-mono uppercase font-bold py-3 hover:bg-gray-200 transition-colors"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={executeDelete}
+                className={`flex-1 bg-red-600 text-white font-mono uppercase font-bold py-3 hover:bg-red-700 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'DELETING...' : 'YES, DELETE'}
+              </button>
+            </div>
           </div>
         </div>
       )}
