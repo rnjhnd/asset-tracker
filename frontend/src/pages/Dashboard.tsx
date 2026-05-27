@@ -110,6 +110,31 @@ const Dashboard: React.FC = () => {
   const [historyLogs, setHistoryLogs] = useState<AuditLog[]>([]);
   const [activeHistoryAssetName, setActiveHistoryAssetName] = useState('');
 
+  const closeAllModals = () => {
+    setIsAddModalOpen(false);
+    setIsAssignModalOpen(false);
+    setIsEditModalOpen(false);
+    setIsUserModalOpen(false);
+    setIsEditUserModalOpen(false);
+    setIsHistoryModalOpen(false);
+    setIsPasswordModalOpen(false);
+    setIsForceResetModalOpen(false);
+    
+    setNewAsset({ name: '', serialNumber: '', category: '', purchaseDate: new Date().toISOString().split('T')[0] });
+    setIsCreatingCategory(false);
+    setNewCategoryName('');
+    setEditingAsset({ id: '', name: '', serialNumber: '' });
+    setEditingUser({ id: '', name: '', email: '', role: 'EMPLOYEE', department: '' });
+    setAssignAssetId('');
+    setAssignUserId('');
+    setAssignSearchQuery('');
+    setNewUser({ name: '', email: '', password: '', role: 'EMPLOYEE', department: '' });
+    setPasswordForm({ currentPassword: '', newPassword: '' });
+    setForceResetUserId('');
+    setForceResetUserEmail('');
+    setForceNewPassword('');
+  };
+
   // Tab switching helper
   const handleTabSwitch = (tab: 'ASSETS' | 'USERS') => {
     setCurrentTab(tab);
@@ -141,13 +166,18 @@ const Dashboard: React.FC = () => {
     }
     
     const loadAll = async () => {
-      setIsLoading(true);
+      // Only show the big loading spinner if we literally have 0 data in memory
+      // This allows instant tab switching using cached data while it refreshes silently in the background
+      const isInitialLoad = (currentTab === 'ASSETS' && assets.length === 0) || (currentTab === 'USERS' && users.length === 0);
+      if (isInitialLoad) setIsLoading(true);
+
       await Promise.all([
         currentTab === 'ASSETS' ? fetchAssets() : Promise.resolve(),
         user?.role === 'ADMIN' && currentTab === 'ASSETS' ? fetchTotals() : Promise.resolve(),
         user?.role === 'ADMIN' ? fetchUsers() : Promise.resolve(),
         fetchCategories()
       ]);
+      
       setIsLoading(false);
     };
     
@@ -253,7 +283,7 @@ const Dashboard: React.FC = () => {
       await axios.post(`${API_URL}/api/assets`, newAsset, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setIsAddModalOpen(false);
+      closeAllModals();
       setNewAsset({ name: '', serialNumber: '', category: categories.length > 0 ? categories[0].name : '', purchaseDate: new Date().toISOString().split('T')[0] });
       fetchAssets();
       fetchTotals();
@@ -271,7 +301,7 @@ const Dashboard: React.FC = () => {
     setIsSubmitting(true);
     try {
       await axios.post(`${API_URL}/api/auth/register`, newUser);
-      setIsUserModalOpen(false);
+      closeAllModals();
       setNewUser({ name: '', email: '', password: '', role: 'EMPLOYEE', department: '' });
       fetchUsers();
       toast.success('Employee account created!');
@@ -290,7 +320,7 @@ const Dashboard: React.FC = () => {
       await axios.put(`${API_URL}/api/users/${editingUser.id}`, editingUser, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setIsEditUserModalOpen(false);
+      closeAllModals();
       setEditingUser({ id: '', name: '', email: '', role: 'EMPLOYEE', department: '' });
       fetchUsers();
       toast.success('Employee updated successfully!');
@@ -358,7 +388,7 @@ const Dashboard: React.FC = () => {
       await axios.post(`${API_URL}/api/assets/${assignAssetId}/assign`, { userId: assignUserId }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setIsAssignModalOpen(false);
+      closeAllModals();
       setAssignAssetId('');
       setAssignUserId('');
       setAssignSearchQuery('');
@@ -383,7 +413,7 @@ const Dashboard: React.FC = () => {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setIsEditModalOpen(false);
+      closeAllModals();
       fetchAssets();
       toast.success('Asset updated successfully!');
     } catch (error: any) {
@@ -454,7 +484,7 @@ const Dashboard: React.FC = () => {
       await axios.put(`${API_URL}/api/auth/password`, passwordForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setIsPasswordModalOpen(false);
+      closeAllModals();
       setPasswordForm({ currentPassword: '', newPassword: '' });
       toast.success('Password changed securely.');
     } catch (error: any) {
@@ -473,7 +503,7 @@ const Dashboard: React.FC = () => {
         { newPassword: forceNewPassword }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setIsForceResetModalOpen(false);
+      closeAllModals();
       setForceNewPassword('');
       fetchUsers();
       toast.success(`PASSWORD RESET FOR ${forceResetUserEmail}`, { id: 'force-reset' });
@@ -1325,7 +1355,7 @@ const Dashboard: React.FC = () => {
       {isPasswordModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => setIsPasswordModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
             <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Security Settings</h3>
@@ -1351,7 +1381,7 @@ const Dashboard: React.FC = () => {
       {isForceResetModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => setIsForceResetModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
             <h3 className="text-xl font-bold uppercase tracking-tight mb-2 border-b pb-4">Force Reset Password</h3>
@@ -1374,7 +1404,7 @@ const Dashboard: React.FC = () => {
       {isHistoryModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-lg relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => setIsHistoryModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
             <h3 className="text-xl font-bold uppercase tracking-tight mb-2 pr-8">{activeHistoryAssetName}</h3>
@@ -1415,7 +1445,7 @@ const Dashboard: React.FC = () => {
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => setIsAddModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
             <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Register New Hardware</h3>
@@ -1434,7 +1464,7 @@ const Dashboard: React.FC = () => {
                   <div className="flex gap-2">
                     <input required autoFocus type="text" value={newCategoryName} onChange={handleCategoryNameChange} className="flex-1 border-2 border-[#3b82f6] p-3 font-mono text-sm focus:border-blue-600 outline-none transition-colors" placeholder="E.g. VR HEADSET" />
                     <button type="button" onClick={handleCreateCategory} disabled={isSubmitting || !newCategoryName.trim()} className="bg-[#3b82f6] text-white px-4 font-bold hover:bg-blue-600 transition-colors">ADD</button>
-                    <button type="button" onClick={() => setIsCreatingCategory(false)} className="bg-gray-200 text-gray-700 px-4 font-bold hover:bg-gray-300 transition-colors">CANCEL</button>
+                    <button type="button" onClick={() => { setIsCreatingCategory(false); setNewCategoryName(''); }} className="bg-gray-200 text-gray-700 px-4 font-bold hover:bg-gray-300 transition-colors">CANCEL</button>
                   </div>
                 ) : (
                   <div className="flex gap-2">
@@ -1460,7 +1490,7 @@ const Dashboard: React.FC = () => {
       {isAssignModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => setIsAssignModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
             <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Assign Hardware</h3>
@@ -1515,7 +1545,7 @@ const Dashboard: React.FC = () => {
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => setIsEditModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
             <h2 className="text-xl sm:text-2xl font-bold font-mono tracking-tight uppercase mb-6 flex items-center gap-3">
@@ -1543,7 +1573,7 @@ const Dashboard: React.FC = () => {
       {isUserModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => setIsUserModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
             <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Register Employee</h3>
@@ -1606,7 +1636,7 @@ const Dashboard: React.FC = () => {
       {isEditUserModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => setIsEditUserModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
             <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Edit Employee</h3>
