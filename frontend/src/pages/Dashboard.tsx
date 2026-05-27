@@ -13,6 +13,7 @@ type Asset = {
   serialNumber: string;
   category: string;
   status: 'AVAILABLE' | 'ASSIGNED' | 'MAINTENANCE' | 'RETIRED';
+  purchaseDate: string;
   assignments: { user: { email: string } }[];
 };
 
@@ -820,6 +821,7 @@ const Dashboard: React.FC = () => {
                       <th className="p-4 bg-gray-50">Asset Name</th>
                       <th className="p-4 bg-gray-50">Category</th>
                       <th className="p-4 bg-gray-50">Serial / ID</th>
+                      <th className="p-4 bg-gray-50">Purchase Date</th>
                       <th className="p-4 bg-gray-50">Status</th>
                       {user?.role === 'ADMIN' && <th className="p-4 bg-gray-50">Assigned To</th>}
                       {user?.role === 'ADMIN' && <th className="p-4 text-right min-w-[250px] bg-gray-50">Actions</th>}
@@ -834,6 +836,9 @@ const Dashboard: React.FC = () => {
                         </td>
                         <td className="p-4 font-mono text-sm">{asset.category}</td>
                         <td className="p-4 font-mono text-xs text-gray-500">{asset.serialNumber}</td>
+                        <td className="p-4 font-mono text-xs text-gray-600">
+                          {asset.purchaseDate ? new Date(asset.purchaseDate).toLocaleDateString() : 'N/A'}
+                        </td>
                         <td className="p-4">
                           <span className={`inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs border rounded-full ${
                             asset.status === 'AVAILABLE' ? 'border-green-300 bg-green-50 text-green-700' :
