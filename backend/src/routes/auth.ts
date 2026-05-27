@@ -22,24 +22,19 @@ router.post('/register', async (req, res) => {
         .join(' ');
     }
 
-    // Check if user exists
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email },
-          { name: name || 'Unknown Employee' }
-        ]
-      }
+    // Check if name or email exists separately
+    const existingNameUser = await prisma.user.findFirst({
+      where: { name: name || 'Unknown Employee' }
     });
+    if (existingNameUser) {
+      return res.status(400).json({ error: 'Name already exists' });
+    }
 
-    if (existingUser) {
-      if (existingUser.name === (name || 'Unknown Employee')) {
-        return res.status(400).json({ error: 'Name already exists' });
-      }
-      if (existingUser.email === email) {
-        return res.status(400).json({ error: 'Email already exists' });
-      }
-      return res.status(400).json({ error: 'User already exists' });
+    const existingEmailUser = await prisma.user.findUnique({
+      where: { email }
+    });
+    if (existingEmailUser) {
+      return res.status(400).json({ error: 'Email already exists' });
     }
 
     // Validate password

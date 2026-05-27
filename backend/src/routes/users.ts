@@ -113,25 +113,25 @@ router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
         .join(' ');
     }
 
-    // Check for duplicate name or email
-    const existingUser = await prisma.user.findFirst({
+    // Check for duplicate name or email separately
+    const existingNameUser = await prisma.user.findFirst({
       where: {
         id: { not: id },
-        OR: [
-          { email },
-          { name: name || user.name }
-        ]
+        name: name || user.name
       }
     });
+    if (existingNameUser) {
+      return res.status(400).json({ error: 'Name already exists' });
+    }
 
-    if (existingUser) {
-      if (existingUser.name === (name || user.name)) {
-        return res.status(400).json({ error: 'Name already exists' });
+    const existingEmailUser = await prisma.user.findFirst({
+      where: {
+        id: { not: id },
+        email
       }
-      if (existingUser.email === email) {
-        return res.status(400).json({ error: 'Email already exists' });
-      }
-      return res.status(400).json({ error: 'User already exists' });
+    });
+    if (existingEmailUser) {
+      return res.status(400).json({ error: 'Email already exists' });
     }
 
     const updatedUser = await prisma.user.update({

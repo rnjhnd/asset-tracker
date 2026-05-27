@@ -1224,6 +1224,7 @@ const Dashboard: React.FC = () => {
                           >
                             <Edit2 size={16} />
                           </button>
+                          <div className="h-4 w-px bg-gray-300 mx-1"></div>
                           <button 
                             onClick={() => handleToggleUserStatus(u.id)}
                             disabled={u.role === 'ADMIN' && u.isActive}
