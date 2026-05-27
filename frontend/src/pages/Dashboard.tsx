@@ -75,6 +75,7 @@ const Dashboard: React.FC = () => {
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isForceResetModalOpen, setIsForceResetModalOpen] = useState(false);
@@ -84,6 +85,7 @@ const Dashboard: React.FC = () => {
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingAsset, setEditingAsset] = useState({ id: '', name: '', serialNumber: '' });
+  const [editingUser, setEditingUser] = useState({ id: '', name: '', email: '', role: 'EMPLOYEE', department: '' });
   const [assignAssetId, setAssignAssetId] = useState('');
   const [assignUserId, setAssignUserId] = useState('');
   const [assignSearchQuery, setAssignSearchQuery] = useState('');
@@ -274,6 +276,25 @@ const Dashboard: React.FC = () => {
       toast.success('Employee account created!');
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to create user.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await axios.put(`${API_URL}/api/users/${editingUser.id}`, editingUser, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setIsEditUserModalOpen(false);
+      setEditingUser({ id: '', name: '', email: '', role: 'EMPLOYEE', department: '' });
+      fetchUsers();
+      toast.success('Employee updated successfully!');
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to update employee.');
     } finally {
       setIsSubmitting(false);
     }
@@ -1188,6 +1209,22 @@ const Dashboard: React.FC = () => {
                       <td className="p-4 align-middle">
                         <div className="flex items-center justify-end gap-3">
                           <button 
+                            onClick={() => {
+                              setEditingUser({
+                                id: u.id,
+                                name: u.name,
+                                email: u.email,
+                                role: u.role,
+                                department: u.department
+                              });
+                              setIsEditUserModalOpen(true);
+                            }}
+                            className="text-blue-500 hover:text-blue-700 transition-colors"
+                            title="Edit User"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button 
                             onClick={() => handleToggleUserStatus(u.id)}
                             disabled={u.role === 'ADMIN' && u.isActive}
                             className={`${u.role === 'ADMIN' && u.isActive ? 'text-gray-300 cursor-not-allowed' : (u.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-500 hover:text-green-700')} font-mono text-sm uppercase transition-colors`}
@@ -1401,7 +1438,7 @@ const Dashboard: React.FC = () => {
                     placeholder="Type to search employee..."
                     required={!assignUserId}
                   />
-                  {showAssignDropdown && (
+                  {showAssignDropdown && assignSearchQuery.trim().length > 0 && (
                     <ul className="w-full bg-white border-2 border-gray-900 border-t-0 shadow-[4px_4px_0_0_#111827] mt-0 max-h-48 overflow-y-auto">
                       {users.filter(u => u.isActive && u.role !== 'ADMIN' && (u.name.toLowerCase().includes(assignSearchQuery.toLowerCase()) || u.email.toLowerCase().includes(assignSearchQuery.toLowerCase()))).length === 0 ? (
                         <li className="p-3 font-mono text-sm text-gray-500">No employees found.</li>
@@ -1514,6 +1551,60 @@ const Dashboard: React.FC = () => {
               </div>
               <button disabled={isSubmitting} type="submit" className={`w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isSubmitting ? 'PROCESSING...' : 'Create Account'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {isEditUserModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
+            <button onClick={() => setIsEditUserModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+              <X size={24} />
+            </button>
+            <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Edit Employee</h3>
+            <form onSubmit={handleEditUser} className="space-y-4">
+              <div>
+                <label className="block font-mono text-xs uppercase mb-1 font-bold">Full Name</label>
+                <input 
+                  required 
+                  type="text" 
+                  value={editingUser.name} 
+                  onChange={e => {
+                    const rawVal = e.target.value;
+                    if (/[^A-Za-z\s]/.test(rawVal)) {
+                      toast('Only letters and spaces are allowed for Full Name', { icon: '⚠️', id: 'edit-name-val-err' });
+                    }
+                    setEditingUser({...editingUser, name: rawVal.replace(/[^A-Za-z\s]/g, '')});
+                  }} 
+                  className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" 
+                  placeholder="e.g. John Doe" 
+                />
+              </div>
+              <div>
+                <label className="block font-mono text-xs uppercase mb-1 font-bold">Email Address</label>
+                <input required type="email" value={editingUser.email} onChange={e => setEditingUser({...editingUser, email: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. john@company.com" />
+              </div>
+              <div>
+                <label className="block font-mono text-xs uppercase mb-1 font-bold">Department</label>
+                <input 
+                  required 
+                  type="text" 
+                  value={editingUser.department} 
+                  onChange={e => {
+                    const raw = e.target.value;
+                    const sanitized = raw.replace(/[^A-Za-z\s]/g, '');
+                    if (raw !== sanitized) toast('Only letters and spaces allowed', { icon: '⚠️', id: 'edit-dept-val-err' });
+                    setEditingUser({...editingUser, department: sanitized.toUpperCase()});
+                  }} 
+                  className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" 
+                  placeholder="e.g. ENGINEERING" 
+                />
+              </div>
+              <button disabled={isSubmitting} type="submit" className={`w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                {isSubmitting ? 'PROCESSING...' : 'Save Changes'}
               </button>
             </form>
           </div>

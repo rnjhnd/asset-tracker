@@ -33,11 +33,11 @@ router.post('/register', async (req, res) => {
     });
 
     if (existingUser) {
-      if (existingUser.email === email) {
-        return res.status(400).json({ error: 'Email already exists' });
-      }
       if (existingUser.name === (name || 'Unknown Employee')) {
         return res.status(400).json({ error: 'Name already exists' });
+      }
+      if (existingUser.email === email) {
+        return res.status(400).json({ error: 'Email already exists' });
       }
       return res.status(400).json({ error: 'User already exists' });
     }

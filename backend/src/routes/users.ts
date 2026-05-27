@@ -95,6 +95,63 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch users' });
   }
 });
+// Edit user details (Admin only)
+router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  let { name, email, role, department } = req.body;
+  
+  try {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Auto-capitalize name
+    if (name) {
+      name = name
+        .toLowerCase()
+        .split(' ')
+        .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
+
+    // Check for duplicate name or email
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        id: { not: id },
+        OR: [
+          { email },
+          { name: name || user.name }
+        ]
+      }
+    });
+
+    if (existingUser) {
+      if (existingUser.name === (name || user.name)) {
+        return res.status(400).json({ error: 'Name already exists' });
+      }
+      if (existingUser.email === email) {
+        return res.status(400).json({ error: 'Email already exists' });
+      }
+      return res.status(400).json({ error: 'User already exists' });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: {
+        name: name || user.name,
+        email: email || user.email,
+        role: role || user.role,
+        department: department || user.department
+      },
+      select: {
+        id: true, email: true, name: true, role: true, department: true, isActive: true, createdAt: true
+      }
+    });
+
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
 
 // Toggle user active status (Admin only)
 router.put('/:id/status', authenticateToken, requireAdmin, async (req, res) => {
