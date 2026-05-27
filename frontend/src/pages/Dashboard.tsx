@@ -381,22 +381,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-transparent text-gray-900 font-sans">
-      <Toaster 
-        position="bottom-right" 
-        toastOptions={{
-          style: {
-            borderRadius: '0',
-            background: '#111827',
-            color: '#fff',
-            fontFamily: 'monospace',
-            textTransform: 'uppercase',
-            border: '2px solid #000',
-            boxShadow: '4px 4px 0 0 #000',
-            fontSize: '12px',
-            fontWeight: 'bold'
-          },
-        }}
-      />
+
       <header className="bg-white border-b-4 border-gray-900 px-4 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10 sticky top-0 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-[#3b82f6] text-white flex items-center justify-center font-mono shrink-0 shadow-[4px_4px_0_0_#1e3a8a]">

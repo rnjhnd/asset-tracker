@@ -9,9 +9,27 @@ const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   return token ? <>{children}</> : <Navigate to="/login" />;
 };
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
     <AuthProvider>
+      <Toaster 
+        position="bottom-right" 
+        toastOptions={{
+          style: {
+            borderRadius: '0',
+            background: '#111827',
+            color: '#fff',
+            fontFamily: 'monospace',
+            textTransform: 'uppercase',
+            border: '2px solid #000',
+            boxShadow: '4px 4px 0 0 #000',
+            fontSize: '12px',
+            fontWeight: 'bold'
+          },
+        }}
+      />
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
