@@ -59,7 +59,7 @@ const Dashboard: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [assetFilterCategory, setAssetFilterCategory] = useState('ALL');
   const [assetSortBy, setAssetSortBy] = useState('purchaseDate');
-  const [assetSortOrder, setAssetSortOrder] = useState('asc');
+  const [assetSortOrder, setAssetSortOrder] = useState('desc');
 
   // Advanced Filter/Sort State - USERS
   const [userSearchQuery, setUserSearchQuery] = useState('');
