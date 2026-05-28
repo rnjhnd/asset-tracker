@@ -1528,7 +1528,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Purchase Date</label>
-                <DatePicker value={newAsset.purchaseDate} onChange={val => setNewAsset({...newAsset, purchaseDate: val})} className="w-full" />
+                <DatePicker maxDate={new Date()} value={newAsset.purchaseDate} onChange={val => setNewAsset({...newAsset, purchaseDate: val})} className="w-full" />
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Category</label>
@@ -1637,7 +1637,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Purchase Date</label>
-                <DatePicker value={editingAsset.purchaseDate} onChange={val => setEditingAsset({...editingAsset, purchaseDate: val})} className="w-full" />
+                <DatePicker maxDate={new Date()} value={editingAsset.purchaseDate} onChange={val => setEditingAsset({...editingAsset, purchaseDate: val})} className="w-full" />
               </div>
               <button disabled={isSubmitting} type="submit" className={`w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isSubmitting ? 'PROCESSING...' : 'Save Changes'}

@@ -116,6 +116,10 @@ router.post('/', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { name, serialNumber, category, purchaseDate } = req.body;
     
+    if (purchaseDate && new Date(purchaseDate).getTime() > new Date().getTime()) {
+      return res.status(400).json({ error: 'Purchase date cannot be in the future.' });
+    }
+
     // Find or create category
     let catRecord = await prisma.category.findUnique({ where: { name: category } });
     if (!catRecord) {
@@ -142,6 +146,10 @@ router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
     const { id } = req.params;
     const { name, serialNumber, purchaseDate } = req.body;
     
+    if (purchaseDate && new Date(purchaseDate).getTime() > new Date().getTime()) {
+      return res.status(400).json({ error: 'Purchase date cannot be in the future.' });
+    }
+
     // Check if serial number belongs to another asset
     if (serialNumber) {
       const existing = await prisma.asset.findUnique({ where: { serialNumber } });
@@ -256,6 +264,13 @@ router.post('/bulk', authenticateToken, requireAdmin, async (req, res) => {
     const assets = req.body; // Array of { name, serialNumber, category }
     if (!Array.isArray(assets) || assets.length === 0) {
       return res.status(400).json({ error: 'Invalid data format' });
+    }
+
+    // Validate that no purchaseDate is in the future
+    const now = new Date().getTime();
+    const hasFutureDate = assets.some(a => a.purchaseDate && new Date(a.purchaseDate).getTime() > now);
+    if (hasFutureDate) {
+      return res.status(400).json({ error: 'One or more rows contain a purchase date in the future. Please fix your CSV and try again.' });
     }
 
     // Pre-fetch or create all needed categories

@@ -9,9 +9,10 @@ interface DatePickerProps {
   value: string;
   onChange: (value: string) => void;
   className?: string;
+  maxDate?: Date;
 }
 
-export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, className = '' }) => {
+export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, className = '', maxDate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [rect, setRect] = useState<DOMRect | null>(null);
@@ -67,6 +68,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
 
   const selectedDate = value ? parseISO(value) : null;
 
+  const maxDateNormalized = maxDate ? new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate(), 23, 59, 59, 999) : null;
+
   const renderHeader = () => {
     if (viewMode === 'days') {
       return (
@@ -120,14 +123,17 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
             {days.map(day => {
               const isSelected = selectedDate && isSameDay(day, selectedDate);
               const isCurrentMonth = isSameMonth(day, currentMonth);
+              const isDisabled = maxDateNormalized && day.getTime() > maxDateNormalized.getTime();
               return (
                 <button
                   key={day.toString()}
                   type="button"
+                  disabled={!!isDisabled}
                   onClick={(e) => { e.stopPropagation(); handleSelectDate(day); }}
                   className={`
                     p-2 text-center transition-colors border border-transparent
-                    ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-900 hover:border-gray-300'}
+                    ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-900'}
+                    ${isDisabled ? 'opacity-20 cursor-not-allowed bg-gray-50' : 'hover:border-gray-300'}
                     ${isSelected ? 'bg-black text-white hover:bg-black font-bold shadow-[2px_2px_0_0_#3b82f6]' : ''}
                   `}
                 >
@@ -144,18 +150,22 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
         <div className="grid grid-cols-3 gap-2">
           {months.map((month, index) => {
             const isSelected = selectedDate && selectedDate.getMonth() === index && selectedDate.getFullYear() === currentMonth.getFullYear();
+            const targetMonth = setMonth(currentMonth, index);
+            const isDisabled = maxDateNormalized && startOfMonth(targetMonth).getTime() > maxDateNormalized.getTime();
             return (
               <button
                 key={month}
                 type="button"
+                disabled={!!isDisabled}
                 onClick={(e) => { 
                   e.stopPropagation(); 
-                  setCurrentMonth(setMonth(currentMonth, index));
+                  setCurrentMonth(targetMonth);
                   setViewMode('days');
                 }}
                 className={`
                   p-4 text-center transition-colors border border-transparent
-                  hover:border-gray-300 text-gray-900
+                  text-gray-900
+                  ${isDisabled ? 'opacity-20 cursor-not-allowed bg-gray-50' : 'hover:border-gray-300'}
                   ${isSelected ? 'bg-black text-white hover:bg-black font-bold shadow-[2px_2px_0_0_#3b82f6]' : ''}
                 `}
               >
@@ -172,10 +182,16 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
           {years.map((year) => {
             const isSelected = selectedDate && selectedDate.getFullYear() === year;
             const isCurrentDecade = year >= decadeStart && year <= decadeStart + 9;
+            const targetYearDate = setYear(new Date(), year);
+            targetYearDate.setMonth(0, 1);
+            targetYearDate.setHours(0,0,0,0);
+            const isDisabled = maxDateNormalized && targetYearDate.getTime() > maxDateNormalized.getTime();
+            
             return (
               <button
                 key={year}
                 type="button"
+                disabled={!!isDisabled}
                 onClick={(e) => { 
                   e.stopPropagation(); 
                   setCurrentMonth(setYear(currentMonth, year));
@@ -183,7 +199,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
                 }}
                 className={`
                   p-4 text-center transition-colors border border-transparent
-                  ${!isCurrentDecade ? 'text-gray-300' : 'text-gray-900 hover:border-gray-300'}
+                  ${!isCurrentDecade ? 'text-gray-400' : 'text-gray-900'}
+                  ${isDisabled ? 'opacity-20 cursor-not-allowed bg-gray-50' : 'hover:border-gray-300'}
                   ${isSelected ? 'bg-black text-white hover:bg-black font-bold shadow-[2px_2px_0_0_#3b82f6]' : ''}
                 `}
               >
