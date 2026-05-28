@@ -82,6 +82,11 @@ router.get('/', authenticateToken, async (req, res) => {
       assets.sort((a: any, b: any) => {
         const nameA = a.assignments[0]?.user?.name || a.assignments[0]?.user?.email || '';
         const nameB = b.assignments[0]?.user?.name || b.assignments[0]?.user?.email || '';
+        
+        if (!nameA && nameB) return 1;
+        if (nameA && !nameB) return -1;
+        if (!nameA && !nameB) return 0;
+
         return sortDir === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
       });
     } else if (sortField === 'category') {
