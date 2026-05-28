@@ -87,7 +87,7 @@ const Dashboard: React.FC = () => {
   const [newAsset, setNewAsset] = useState({ name: '', serialNumber: '', category: '', purchaseDate: new Date().toISOString().split('T')[0] });
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
-  const [editingAsset, setEditingAsset] = useState({ id: '', name: '', serialNumber: '', purchaseDate: '' });
+  const [editingAsset, setEditingAsset] = useState({ id: '', name: '', serialNumber: '', purchaseDate: '', category: '' });
   const [editingUser, setEditingUser] = useState({ id: '', name: '', email: '', role: 'EMPLOYEE', department: '' });
   const [assignAssetId, setAssignAssetId] = useState('');
   const [assignUserId, setAssignUserId] = useState('');
@@ -127,7 +127,7 @@ const Dashboard: React.FC = () => {
     setNewAsset({ name: '', serialNumber: '', category: '', purchaseDate: new Date().toISOString().split('T')[0] });
     setIsCreatingCategory(false);
     setNewCategoryName('');
-    setEditingAsset({ id: '', name: '', serialNumber: '', purchaseDate: '' });
+    setEditingAsset({ id: '', name: '', serialNumber: '', purchaseDate: '', category: '' });
     setEditingUser({ id: '', name: '', email: '', role: 'EMPLOYEE', department: '' });
     setAssignAssetId('');
     setAssignUserId('');
@@ -1065,7 +1065,7 @@ const Dashboard: React.FC = () => {
                                   
                                   <div className="h-px bg-gray-200 my-1 mx-2"></div>
                                   
-                                  <button onClick={() => { setEditingAsset({ id: asset.id, name: asset.name, serialNumber: asset.serialNumber, purchaseDate: asset.purchaseDate ? new Date(asset.purchaseDate).toISOString().split('T')[0] : '' }); setIsEditModalOpen(true); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors"><Edit2 size={14}/> Edit Asset</button>
+                                  <button onClick={() => { setEditingAsset({ id: asset.id, name: asset.name, serialNumber: asset.serialNumber, category: asset.category, purchaseDate: asset.purchaseDate ? new Date(asset.purchaseDate).toISOString().split('T')[0] : '' }); setIsEditModalOpen(true); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors"><Edit2 size={14}/> Edit Asset</button>
                                   
                                   {asset.status !== 'AVAILABLE' && <button onClick={() => { handleUpdateStatus(asset.id, 'AVAILABLE'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-green-600 hover:bg-green-50 flex items-center gap-3 transition-colors"><CheckCircle size={14}/> Make Available</button>}
                                   {asset.status !== 'RETIRED' && <button onClick={() => { handleUpdateStatus(asset.id, 'MAINTENANCE'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-yellow-600 hover:bg-yellow-50 flex items-center gap-3 transition-colors"><Wrench size={14}/> Maintenance</button>}
@@ -1638,6 +1638,26 @@ const Dashboard: React.FC = () => {
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Purchase Date</label>
                 <DatePicker maxDate={new Date()} value={editingAsset.purchaseDate} onChange={val => setEditingAsset({...editingAsset, purchaseDate: val})} className="w-full" />
+              </div>
+              <div>
+                <label className="block font-mono text-xs uppercase mb-1 font-bold">Category</label>
+                {isCreatingCategory ? (
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input required autoFocus type="text" value={newCategoryName} onChange={handleCategoryNameChange} className="flex-1 border-2 border-[#3b82f6] p-3 font-mono text-sm focus:border-blue-600 outline-none transition-colors" placeholder="E.g. VR HEADSET" />
+                    <button type="button" onClick={handleCreateCategory} disabled={isSubmitting || !newCategoryName.trim()} className="w-full sm:w-auto bg-[#3b82f6] text-white px-4 py-3 font-bold hover:bg-blue-600 transition-colors">ADD</button>
+                    <button type="button" onClick={() => { setIsCreatingCategory(false); setNewCategoryName(''); }} className="w-full sm:w-auto bg-gray-200 text-gray-700 px-4 py-3 font-bold hover:bg-gray-300 transition-colors">CANCEL</button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <SelectDropdown
+                      value={editingAsset.category}
+                      onChange={val => setEditingAsset({...editingAsset, category: val})}
+                      options={categories.map(c => ({ value: c.name, label: c.name }))}
+                      className="flex-1"
+                    />
+                    <button type="button" onClick={() => setIsCreatingCategory(true)} className="w-full sm:w-auto bg-gray-900 text-white px-4 py-3 font-bold hover:bg-gray-700 transition-colors whitespace-nowrap">+ NEW</button>
+                  </div>
+                )}
               </div>
               <button disabled={isSubmitting} type="submit" className={`w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isSubmitting ? 'PROCESSING...' : 'Save Changes'}

@@ -144,7 +144,7 @@ router.post('/', authenticateToken, requireAdmin, async (req, res) => {
 router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, serialNumber, purchaseDate } = req.body;
+    const { name, serialNumber, purchaseDate, category } = req.body;
     
     if (purchaseDate && new Date(purchaseDate).getTime() > new Date().getTime()) {
       return res.status(400).json({ error: 'Purchase date cannot be in the future.' });
@@ -158,11 +158,21 @@ router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
       }
     }
 
+    let categoryId = undefined;
+    if (category) {
+      let catRecord = await prisma.category.findUnique({ where: { name: category } });
+      if (!catRecord) {
+        catRecord = await prisma.category.create({ data: { name: category } });
+      }
+      categoryId = catRecord.id;
+    }
+
     const updatedAsset = await prisma.asset.update({
       where: { id },
       data: {
         ...(name && { name }),
         ...(serialNumber && { serialNumber }),
+        ...(categoryId && { categoryId }),
         ...(purchaseDate && { purchaseDate: new Date(purchaseDate) })
       }
     });
