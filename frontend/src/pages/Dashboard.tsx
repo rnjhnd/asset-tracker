@@ -91,6 +91,8 @@ const Dashboard: React.FC = () => {
   const [assignAssetId, setAssignAssetId] = useState('');
   const [assignUserId, setAssignUserId] = useState('');
   const [assignSearchQuery, setAssignSearchQuery] = useState('');
+  const [assignSearchResults, setAssignSearchResults] = useState<any[]>([]);
+  const [isSearchingAssign, setIsSearchingAssign] = useState(false);
   const [showAssignDropdown, setShowAssignDropdown] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'EMPLOYEE', department: '' });
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
@@ -218,6 +220,29 @@ const Dashboard: React.FC = () => {
     }, 500);
     return () => clearTimeout(delayDebounceFn);
   }, [userSearchQuery]);
+
+  useEffect(() => {
+    if (!assignSearchQuery) {
+      setAssignSearchResults([]);
+      return;
+    }
+    
+    const delayDebounceFn = setTimeout(async () => {
+      setIsSearchingAssign(true);
+      try {
+        const res = await axios.get(`${API_URL}/api/users?search=${assignSearchQuery}&limit=20&status=ACTIVE`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setAssignSearchResults(res.data.data.filter((u: any) => u.role !== 'ADMIN'));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsSearchingAssign(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [assignSearchQuery, token]);
 
   const fetchCategories = async () => {
     try {
@@ -1553,12 +1578,12 @@ const Dashboard: React.FC = () => {
                   />
                   {showAssignDropdown && assignSearchQuery.trim().length > 0 && (
                     <ul className="w-full bg-white border-2 border-gray-900 border-t-0 shadow-[4px_4px_0_0_#111827] mt-0 max-h-48 overflow-y-auto">
-                      {users.filter(u => u.isActive && u.role !== 'ADMIN' && (u.name.toLowerCase().includes(assignSearchQuery.toLowerCase()) || u.email.toLowerCase().includes(assignSearchQuery.toLowerCase()))).length === 0 ? (
+                      {isSearchingAssign ? (
+                        <li className="p-3 font-mono text-sm text-gray-500">Searching...</li>
+                      ) : assignSearchResults.length === 0 ? (
                         <li className="p-3 font-mono text-sm text-gray-500">No employees found.</li>
                       ) : (
-                        users.filter(u => u.isActive && u.role !== 'ADMIN' && (u.name.toLowerCase().includes(assignSearchQuery.toLowerCase()) || u.email.toLowerCase().includes(assignSearchQuery.toLowerCase())))
-                          .sort((a, b) => a.name.localeCompare(b.name))
-                          .map(u => (
+                        assignSearchResults.map(u => (
                           <li 
                             key={u.id} 
                             onClick={() => {
