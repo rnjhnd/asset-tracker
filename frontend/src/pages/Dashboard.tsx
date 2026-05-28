@@ -86,7 +86,7 @@ const Dashboard: React.FC = () => {
   const [newAsset, setNewAsset] = useState({ name: '', serialNumber: '', category: '', purchaseDate: new Date().toISOString().split('T')[0] });
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
-  const [editingAsset, setEditingAsset] = useState({ id: '', name: '', serialNumber: '' });
+  const [editingAsset, setEditingAsset] = useState({ id: '', name: '', serialNumber: '', purchaseDate: '' });
   const [editingUser, setEditingUser] = useState({ id: '', name: '', email: '', role: 'EMPLOYEE', department: '' });
   const [assignAssetId, setAssignAssetId] = useState('');
   const [assignUserId, setAssignUserId] = useState('');
@@ -126,7 +126,7 @@ const Dashboard: React.FC = () => {
     setNewAsset({ name: '', serialNumber: '', category: '', purchaseDate: new Date().toISOString().split('T')[0] });
     setIsCreatingCategory(false);
     setNewCategoryName('');
-    setEditingAsset({ id: '', name: '', serialNumber: '' });
+    setEditingAsset({ id: '', name: '', serialNumber: '', purchaseDate: '' });
     setEditingUser({ id: '', name: '', email: '', role: 'EMPLOYEE', department: '' });
     setAssignAssetId('');
     setAssignUserId('');
@@ -450,7 +450,8 @@ const Dashboard: React.FC = () => {
     try {
       await axios.put(`${API_URL}/api/assets/${editingAsset.id}`, {
         name: editingAsset.name,
-        serialNumber: editingAsset.serialNumber
+        serialNumber: editingAsset.serialNumber,
+        purchaseDate: editingAsset.purchaseDate
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -1062,7 +1063,7 @@ const Dashboard: React.FC = () => {
                                   
                                   <div className="h-px bg-gray-200 my-1 mx-2"></div>
                                   
-                                  <button onClick={() => { setEditingAsset({ id: asset.id, name: asset.name, serialNumber: asset.serialNumber }); setIsEditModalOpen(true); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors"><Edit2 size={14}/> Edit Asset</button>
+                                  <button onClick={() => { setEditingAsset({ id: asset.id, name: asset.name, serialNumber: asset.serialNumber, purchaseDate: asset.purchaseDate ? new Date(asset.purchaseDate).toISOString().split('T')[0] : '' }); setIsEditModalOpen(true); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors"><Edit2 size={14}/> Edit Asset</button>
                                   
                                   {asset.status !== 'AVAILABLE' && <button onClick={() => { handleUpdateStatus(asset.id, 'AVAILABLE'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-green-600 hover:bg-green-50 flex items-center gap-3 transition-colors"><CheckCircle size={14}/> Make Available</button>}
                                   {asset.status !== 'RETIRED' && <button onClick={() => { handleUpdateStatus(asset.id, 'MAINTENANCE'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-yellow-600 hover:bg-yellow-50 flex items-center gap-3 transition-colors"><Wrench size={14}/> Maintenance</button>}
@@ -1524,6 +1525,10 @@ const Dashboard: React.FC = () => {
                 <input required type="text" value={newAsset.serialNumber} onChange={e => setNewAsset({...newAsset, serialNumber: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. MBP-2024-001" />
               </div>
               <div>
+                <label className="block font-mono text-xs uppercase mb-1 font-bold">Purchase Date</label>
+                <input required type="date" value={newAsset.purchaseDate} onChange={e => setNewAsset({...newAsset, purchaseDate: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
+              </div>
+              <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Category</label>
                 {isCreatingCategory ? (
                   <div className="flex flex-col sm:flex-row gap-2">
@@ -1627,6 +1632,10 @@ const Dashboard: React.FC = () => {
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Serial Number</label>
                 <input required type="text" value={editingAsset.serialNumber} onChange={e => setEditingAsset({...editingAsset, serialNumber: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
+              </div>
+              <div>
+                <label className="block font-mono text-xs uppercase mb-1 font-bold">Purchase Date</label>
+                <input required type="date" value={editingAsset.purchaseDate} onChange={e => setEditingAsset({...editingAsset, purchaseDate: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
               </div>
               <button disabled={isSubmitting} type="submit" className={`w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isSubmitting ? 'PROCESSING...' : 'Save Changes'}

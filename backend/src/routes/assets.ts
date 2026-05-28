@@ -140,7 +140,7 @@ router.post('/', authenticateToken, requireAdmin, async (req, res) => {
 router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, serialNumber } = req.body;
+    const { name, serialNumber, purchaseDate } = req.body;
     
     // Check if serial number belongs to another asset
     if (serialNumber) {
@@ -154,7 +154,8 @@ router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
       where: { id },
       data: {
         ...(name && { name }),
-        ...(serialNumber && { serialNumber })
+        ...(serialNumber && { serialNumber }),
+        ...(purchaseDate && { purchaseDate: new Date(purchaseDate) })
       }
     });
     
