@@ -876,7 +876,7 @@ const Dashboard: React.FC = () => {
                         type="text" 
                         placeholder="Search SN or Name..."
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                         className="w-full pl-10 pr-4 py-2 border-2 border-[#e4e4e7] bg-white font-mono text-sm focus:border-[#3b82f6] outline-none"
                       />
                     </div>
@@ -1179,7 +1179,7 @@ const Dashboard: React.FC = () => {
                       type="text" 
                       placeholder="Search Email..."
                       value={userSearchQuery}
-                      onChange={(e) => setUserSearchQuery(e.target.value)}
+                      onChange={(e) => { setUserSearchQuery(e.target.value); setCurrentPage(1); }}
                       className="w-full pl-10 pr-4 py-2 border-2 border-[#e4e4e7] bg-white font-mono text-sm focus:border-[#3b82f6] outline-none"
                     />
                   </div>
