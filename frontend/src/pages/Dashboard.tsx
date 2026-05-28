@@ -873,7 +873,7 @@ const Dashboard: React.FC = () => {
 
               {/* Advanced Filters Panel - ASSETS */}
               {user?.role === 'ADMIN' && showFilters && (
-                <div className="bg-gray-50 border-2 border-gray-900 p-4 shadow-[4px_4px_0_0_#111827] flex flex-col sm:flex-row flex-wrap gap-4 items-end mt-2 animate-in slide-in-from-top-2">
+                <div className="bg-gray-50 border-2 border-gray-900 p-4 shadow-[4px_4px_0_0_#111827] flex flex-col sm:flex-row flex-wrap gap-4 items-stretch sm:items-end mt-2 animate-in slide-in-from-top-2">
                   <div className="flex-1 min-w-[150px]">
                     <label className="block font-mono text-xs font-bold uppercase mb-1">Status</label>
                     <SelectDropdown
@@ -931,7 +931,7 @@ const Dashboard: React.FC = () => {
                   </div>
                   <button 
                     onClick={handleResetFilters}
-                    className="flex-none px-4 py-2 border-2 border-red-500 text-red-500 font-mono text-sm uppercase tracking-wider font-bold hover:bg-red-50 transition-colors"
+                    className="w-full sm:w-auto flex-none px-4 py-2 border-2 border-red-500 text-red-500 font-mono text-sm uppercase tracking-wider font-bold hover:bg-red-50 transition-colors"
                   >
                     Reset
                   </button>
@@ -1158,7 +1158,7 @@ const Dashboard: React.FC = () => {
 
               {/* Advanced Filters Panel - USERS */}
               {showFilters && (
-                <div className="bg-gray-50 border-2 border-gray-900 p-4 shadow-[4px_4px_0_0_#111827] flex flex-col sm:flex-row flex-wrap gap-4 items-end mt-2 animate-in slide-in-from-top-2">
+                <div className="bg-gray-50 border-2 border-gray-900 p-4 shadow-[4px_4px_0_0_#111827] flex flex-col sm:flex-row flex-wrap gap-4 items-stretch sm:items-end mt-2 animate-in slide-in-from-top-2">
                   <div className="flex-1 min-w-[150px]">
                     <label className="block font-mono text-xs font-bold uppercase mb-1">Status</label>
                     <SelectDropdown
@@ -1214,8 +1214,8 @@ const Dashboard: React.FC = () => {
                     />
                   </div>
                   <button 
-                    onClick={handleResetFilters}
-                    className="flex-none px-4 py-2 border-2 border-red-500 text-red-500 font-mono text-sm uppercase tracking-wider font-bold hover:bg-red-50 transition-colors"
+                    onClick={handleResetUserFilters}
+                    className="w-full sm:w-auto flex-none px-4 py-2 border-2 border-red-500 text-red-500 font-mono text-sm uppercase tracking-wider font-bold hover:bg-red-50 transition-colors"
                   >
                     Reset
                   </button>
@@ -1443,7 +1443,7 @@ const Dashboard: React.FC = () => {
 
       {/* Add Asset Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
             <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
@@ -1461,20 +1461,20 @@ const Dashboard: React.FC = () => {
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Category</label>
                 {isCreatingCategory ? (
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <input required autoFocus type="text" value={newCategoryName} onChange={handleCategoryNameChange} className="flex-1 border-2 border-[#3b82f6] p-3 font-mono text-sm focus:border-blue-600 outline-none transition-colors" placeholder="E.g. VR HEADSET" />
-                    <button type="button" onClick={handleCreateCategory} disabled={isSubmitting || !newCategoryName.trim()} className="bg-[#3b82f6] text-white px-4 font-bold hover:bg-blue-600 transition-colors">ADD</button>
-                    <button type="button" onClick={() => { setIsCreatingCategory(false); setNewCategoryName(''); }} className="bg-gray-200 text-gray-700 px-4 font-bold hover:bg-gray-300 transition-colors">CANCEL</button>
+                    <button type="button" onClick={handleCreateCategory} disabled={isSubmitting || !newCategoryName.trim()} className="w-full sm:w-auto bg-[#3b82f6] text-white px-4 py-3 font-bold hover:bg-blue-600 transition-colors">ADD</button>
+                    <button type="button" onClick={() => { setIsCreatingCategory(false); setNewCategoryName(''); }} className="w-full sm:w-auto bg-gray-200 text-gray-700 px-4 py-3 font-bold hover:bg-gray-300 transition-colors">CANCEL</button>
                   </div>
                 ) : (
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <SelectDropdown
                       value={newAsset.category}
                       onChange={val => setNewAsset({...newAsset, category: val})}
                       options={categories.map(c => ({ value: c.name, label: c.name }))}
                       className="flex-1"
                     />
-                    <button type="button" onClick={() => setIsCreatingCategory(true)} className="bg-gray-900 text-white px-4 font-bold hover:bg-gray-700 transition-colors whitespace-nowrap">+ NEW</button>
+                    <button type="button" onClick={() => setIsCreatingCategory(true)} className="w-full sm:w-auto bg-gray-900 text-white px-4 py-3 font-bold hover:bg-gray-700 transition-colors whitespace-nowrap">+ NEW</button>
                   </div>
                 )}
               </div>
@@ -1488,7 +1488,7 @@ const Dashboard: React.FC = () => {
 
       {/* Assign Asset Modal */}
       {isAssignModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
             <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
@@ -1543,7 +1543,7 @@ const Dashboard: React.FC = () => {
 
       {/* Edit Asset Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
             <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
@@ -1571,7 +1571,7 @@ const Dashboard: React.FC = () => {
 
       {/* Add User Modal */}
       {isUserModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
             <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
@@ -1634,7 +1634,7 @@ const Dashboard: React.FC = () => {
 
       {/* Edit User Modal */}
       {isEditUserModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
             <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
