@@ -350,13 +350,13 @@ const Dashboard: React.FC = () => {
     setIsSubmitting(true);
     try {
       if (deleteConfirmInfo.type === 'USER') {
-        setUsers(prev => prev.filter(u => u.id !== deleteConfirmInfo.id));
         await axios.delete(`${API_URL}/api/users/${deleteConfirmInfo.id}`, { headers: { Authorization: `Bearer ${token}` } });
+        setUsers(prev => prev.filter(u => u.id !== deleteConfirmInfo.id));
         toast.success('Employee permanently deleted!');
         fetchUsers();
       } else {
-        setAssets(prev => prev.filter(a => a.id !== deleteConfirmInfo.id));
         await axios.delete(`${API_URL}/api/assets/${deleteConfirmInfo.id}`, { headers: { Authorization: `Bearer ${token}` } });
+        setAssets(prev => prev.filter(a => a.id !== deleteConfirmInfo.id));
         toast.success('Asset permanently deleted!');
         fetchAssets();
         fetchTotals();
