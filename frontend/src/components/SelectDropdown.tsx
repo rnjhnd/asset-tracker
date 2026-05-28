@@ -69,16 +69,19 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({ value, onChange,
         <ChevronDown size={16} className={`shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
-      {isOpen && !disabled && rect && createPortal(
-        <ul 
-          id="dropdown-portal-root"
-          className="fixed z-[9999] bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] max-h-60 overflow-y-auto custom-scrollbar"
-          style={{
-            top: rect.bottom + 4,
-            left: rect.left,
-            width: rect.width
-          }}
-        >
+      {isOpen && !disabled && rect && (() => {
+        const showAbove = (window.innerHeight - rect.bottom) < 260;
+        return createPortal(
+          <ul 
+            id="dropdown-portal-root"
+            className="fixed z-[9999] bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] max-h-60 overflow-y-auto custom-scrollbar"
+            style={{
+              top: showAbove ? rect.top - 4 : rect.bottom + 4,
+              left: rect.left,
+              width: rect.width,
+              transform: showAbove ? 'translateY(-100%)' : 'none'
+            }}
+          >
           {options.map((option) => (
             <li
               key={option.value}
@@ -95,7 +98,7 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({ value, onChange,
           ))}
         </ul>,
         document.body
-      )}
+      )})()}
     </div>
   );
 };
