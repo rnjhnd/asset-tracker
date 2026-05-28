@@ -1274,7 +1274,7 @@ const Dashboard: React.FC = () => {
                           {u.role}
                         </span>
                       </td>
-                      <td className="p-4 font-mono text-sm">{u.department}</td>
+                      <td className="p-4 font-mono text-sm">{u.role === 'ADMIN' ? '--' : u.department}</td>
                       <td className="p-4">
                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs border rounded-full ${
                           u.isActive ? 'border-green-300 bg-green-50 text-green-700' : 'border-red-300 bg-red-50 text-red-700'
@@ -1531,7 +1531,9 @@ const Dashboard: React.FC = () => {
                       {users.filter(u => u.isActive && u.role !== 'ADMIN' && (u.name.toLowerCase().includes(assignSearchQuery.toLowerCase()) || u.email.toLowerCase().includes(assignSearchQuery.toLowerCase()))).length === 0 ? (
                         <li className="p-3 font-mono text-sm text-gray-500">No employees found.</li>
                       ) : (
-                        users.filter(u => u.isActive && u.role !== 'ADMIN' && (u.name.toLowerCase().includes(assignSearchQuery.toLowerCase()) || u.email.toLowerCase().includes(assignSearchQuery.toLowerCase()))).map(u => (
+                        users.filter(u => u.isActive && u.role !== 'ADMIN' && (u.name.toLowerCase().includes(assignSearchQuery.toLowerCase()) || u.email.toLowerCase().includes(assignSearchQuery.toLowerCase())))
+                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .map(u => (
                           <li 
                             key={u.id} 
                             onClick={() => {
@@ -1623,10 +1625,12 @@ const Dashboard: React.FC = () => {
                 </div>
                 <p className="font-mono text-[10px] text-gray-500">Must be at least 8 characters long.</p>
               </div>
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Department</label>
-                <input required type="text" value={newUser.department} onChange={handleDepartmentChange} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. ENGINEERING" />
-              </div>
+              {newUser.role !== 'ADMIN' && (
+                <div>
+                  <label className="block font-mono text-xs uppercase mb-1 font-bold">Department</label>
+                  <input required type="text" value={newUser.department} onChange={handleDepartmentChange} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. ENGINEERING" />
+                </div>
+              )}
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">System Role</label>
                 <SelectDropdown
@@ -1677,22 +1681,24 @@ const Dashboard: React.FC = () => {
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Email Address</label>
                 <input required type="email" value={editingUser.email} onChange={e => setEditingUser({...editingUser, email: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. john@company.com" />
               </div>
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Department</label>
-                <input 
-                  required 
-                  type="text" 
-                  value={editingUser.department} 
-                  onChange={e => {
-                    const raw = e.target.value;
-                    const sanitized = raw.replace(/[^A-Za-z\s]/g, '');
-                    if (raw !== sanitized) toast('Only letters and spaces allowed', { icon: '⚠️', id: 'edit-dept-val-err' });
-                    setEditingUser({...editingUser, department: sanitized.toUpperCase()});
-                  }} 
-                  className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" 
-                  placeholder="e.g. ENGINEERING" 
-                />
-              </div>
+              {editingUser.role !== 'ADMIN' && (
+                <div>
+                  <label className="block font-mono text-xs uppercase mb-1 font-bold">Department</label>
+                  <input 
+                    required 
+                    type="text" 
+                    value={editingUser.department} 
+                    onChange={e => {
+                      const raw = e.target.value;
+                      const sanitized = raw.replace(/[^A-Za-z\s]/g, '');
+                      if (raw !== sanitized) toast('Only letters and spaces allowed', { icon: '🚧', id: 'edit-dept-val-err' });
+                      setEditingUser({...editingUser, department: sanitized.toUpperCase()});
+                    }} 
+                    className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" 
+                    placeholder="e.g. ENGINEERING" 
+                  />
+                </div>
+              )}
               <button disabled={isSubmitting} type="submit" className={`w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isSubmitting ? 'PROCESSING...' : 'Save Changes'}
               </button>
