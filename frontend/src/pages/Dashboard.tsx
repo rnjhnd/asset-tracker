@@ -1238,7 +1238,7 @@ const Dashboard: React.FC = () => {
               )}
             </div>
 
-            <div className="bg-white border border-[#e4e4e7] shadow-sm overflow-hidden mb-12">
+            <div className="bg-white border border-[#e4e4e7] shadow-sm overflow-hidden mb-6">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse relative">
                   <thead className="sticky top-0 z-10 bg-gray-50 shadow-[0_1px_0_0_#e4e4e7]">
@@ -1359,6 +1359,29 @@ const Dashboard: React.FC = () => {
               </table>
             </div>
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-4 mb-12">
+                <button 
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="bg-white border-2 border-[#e4e4e7] p-2 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <span className="font-mono text-sm font-bold">
+                  PAGE {currentPage} OF {totalPages}
+                </span>
+                <button 
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="bg-white border-2 border-[#e4e4e7] p-2 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            )}
           </>
         )}
 
