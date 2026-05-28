@@ -1543,7 +1543,7 @@ const Dashboard: React.FC = () => {
                     <SelectDropdown
                       value={newAsset.category}
                       onChange={val => setNewAsset({...newAsset, category: val})}
-                      options={categories.map(c => ({ value: c.name, label: c.name }))}
+                      options={categories.filter(c => c.name !== 'UNASSIGNED').map(c => ({ value: c.name, label: c.name }))}
                       className="flex-1"
                     />
                     <button type="button" onClick={() => setIsCreatingCategory(true)} className="w-full sm:w-auto bg-gray-900 text-white px-4 py-3 font-bold hover:bg-gray-700 transition-colors whitespace-nowrap">+ NEW</button>
@@ -1652,7 +1652,7 @@ const Dashboard: React.FC = () => {
                     <SelectDropdown
                       value={editingAsset.category}
                       onChange={val => setEditingAsset({...editingAsset, category: val})}
-                      options={categories.map(c => ({ value: c.name, label: c.name }))}
+                      options={categories.filter(c => c.name !== 'UNASSIGNED').map(c => ({ value: c.name, label: c.name }))}
                       className="flex-1"
                     />
                     <button type="button" onClick={() => setIsCreatingCategory(true)} className="w-full sm:w-auto bg-gray-900 text-white px-4 py-3 font-bold hover:bg-gray-700 transition-colors whitespace-nowrap">+ NEW</button>
