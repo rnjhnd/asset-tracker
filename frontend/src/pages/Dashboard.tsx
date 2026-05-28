@@ -102,6 +102,7 @@ const Dashboard: React.FC = () => {
   const [forceNewPassword, setForceNewPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasAnimated, setHasAnimated] = useState(false);
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -191,6 +192,7 @@ const Dashboard: React.FC = () => {
       ]);
       
       setIsLoading(false);
+      setTimeout(() => setHasAnimated(true), 1500);
     };
     
     loadAll();
@@ -735,6 +737,7 @@ const Dashboard: React.FC = () => {
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
+                            isAnimationActive={!hasAnimated}
                             data={stats.categoryStats}
                             innerRadius={60}
                             outerRadius={90}
@@ -771,7 +774,7 @@ const Dashboard: React.FC = () => {
                           <XAxis dataKey="name" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
                           <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
                           <Tooltip content={<BrutalistTooltip />} cursor={{ fill: '#f3f4f6' }} />
-                          <Bar dataKey="count" stroke="#111827" strokeWidth={2} />
+                          <Bar isAnimationActive={!hasAnimated} dataKey="count" stroke="#111827" strokeWidth={2} />
                         </BarChart>
                       </ResponsiveContainer>
                     )}
@@ -789,7 +792,7 @@ const Dashboard: React.FC = () => {
                           <XAxis dataKey="year" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
                           <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} allowDecimals={false} />
                           <Tooltip content={<BrutalistTooltip />} cursor={{ fill: '#f3f4f6' }} />
-                          <Bar dataKey="count" fill="#9333ea" stroke="#111827" strokeWidth={2} />
+                          <Bar isAnimationActive={!hasAnimated} dataKey="count" fill="#9333ea" stroke="#111827" strokeWidth={2} />
                         </BarChart>
                       </ResponsiveContainer>
                     )}
