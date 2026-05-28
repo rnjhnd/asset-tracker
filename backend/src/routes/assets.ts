@@ -257,11 +257,24 @@ router.post('/bulk', authenticateToken, requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'Invalid data format' });
     }
 
+    // Pre-fetch or create all needed categories
+    const categoryNames = [...new Set(assets.map(a => a.category || 'LAPTOP'))];
+    const categoryMap = new Map();
+    
+    for (const name of categoryNames) {
+      let cat = await prisma.category.findUnique({ where: { name } });
+      if (!cat) {
+        cat = await prisma.category.create({ data: { name } });
+      }
+      categoryMap.set(name, cat.id);
+    }
+
     const created = await prisma.asset.createMany({
       data: assets.map(a => ({
         name: a.name,
         serialNumber: a.serialNumber,
-        category: a.category || 'LAPTOP',
+        categoryId: categoryMap.get(a.category || 'LAPTOP'),
+        purchaseDate: new Date(),
         status: 'AVAILABLE'
       })),
       skipDuplicates: true // Ignores duplicate serial numbers safely
@@ -269,6 +282,7 @@ router.post('/bulk', authenticateToken, requireAdmin, async (req, res) => {
 
     res.status(201).json({ message: `Successfully imported ${created.count} assets` });
   } catch (error) {
+    console.error('Bulk import error:', error);
     res.status(500).json({ error: 'Failed to bulk import assets' });
   }
 });
