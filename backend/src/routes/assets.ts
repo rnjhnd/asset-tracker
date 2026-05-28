@@ -275,7 +275,7 @@ router.post('/bulk', authenticateToken, requireAdmin, async (req, res) => {
         name: a.name,
         serialNumber: a.serialNumber,
         categoryId: categoryMap.get(a.category || 'LAPTOP'),
-        purchaseDate: new Date(),
+        purchaseDate: a.purchaseDate ? new Date(a.purchaseDate) : new Date(),
         status: 'AVAILABLE'
       })),
       skipDuplicates: true // Ignores duplicate serial numbers safely

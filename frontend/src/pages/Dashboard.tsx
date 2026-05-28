@@ -603,15 +603,16 @@ const Dashboard: React.FC = () => {
         const text = event.target?.result as string;
         const lines = text.split('\n').filter(line => line.trim());
         
-        // Very simple CSV parser (Assumes: name,serial,category)
-        const parsedAssets = lines.slice(1).map(line => {
-          const values = line.split(',').map(v => v.trim());
-          return {
-            name: values[0],
-            serialNumber: values[1],
-            category: values[2]?.toUpperCase() || 'LAPTOP'
-          };
-        }).filter(a => a.name && a.serialNumber);
+          // Very simple CSV parser (Assumes: name,serial,category,purchaseDate)
+          const parsedAssets = lines.slice(1).map(line => {
+            const values = line.split(',').map(v => v.trim());
+            return {
+              name: values[0],
+              serialNumber: values[1],
+              category: values[2]?.toUpperCase() || 'LAPTOP',
+              purchaseDate: values[3] || undefined
+            };
+          }).filter(a => a.name && a.serialNumber);
 
         if (parsedAssets.length === 0) return toast.error('No valid rows found in CSV.');
 
