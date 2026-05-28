@@ -80,9 +80,9 @@ router.get('/', authenticateToken, async (req, res) => {
     // Handle JS sorting for complex relations
     if (sortField === 'employee') {
       assets.sort((a: any, b: any) => {
-        const emailA = a.assignments[0]?.user?.email || '';
-        const emailB = b.assignments[0]?.user?.email || '';
-        return sortDir === 'asc' ? emailA.localeCompare(emailB) : emailB.localeCompare(emailA);
+        const nameA = a.assignments[0]?.user?.name || a.assignments[0]?.user?.email || '';
+        const nameB = b.assignments[0]?.user?.name || b.assignments[0]?.user?.email || '';
+        return sortDir === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
       });
     } else if (sortField === 'category') {
       assets.sort((a: any, b: any) => {

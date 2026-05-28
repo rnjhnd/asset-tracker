@@ -50,7 +50,10 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
     }
 
     if (search) {
-      whereClause.email = { contains: search as string, mode: 'insensitive' };
+      whereClause.OR = [
+        { email: { contains: search as string, mode: 'insensitive' } },
+        { name: { contains: search as string, mode: 'insensitive' } }
+      ];
     }
 
     // Build orderBy clause
