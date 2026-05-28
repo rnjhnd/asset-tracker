@@ -158,6 +158,18 @@ const Dashboard: React.FC = () => {
     }
     setCurrentPage(1);
   };
+  const anyModalOpen = isAddModalOpen || isEditModalOpen || isAssignModalOpen || isUserModalOpen || isEditUserModalOpen || showForcePasswordModal;
+
+  useEffect(() => {
+    if (anyModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [anyModalOpen]);
 
   useEffect(() => {
     if (!token) {
