@@ -1679,7 +1679,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Email Address</label>
-                <input required type="email" value={editingUser.email} onChange={e => setEditingUser({...editingUser, email: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. john@company.com" />
+                <input disabled required type="email" value={editingUser.email} onChange={e => setEditingUser({...editingUser, email: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors bg-gray-100 cursor-not-allowed text-gray-500" placeholder="e.g. john@company.com" title="Email address cannot be changed after creation." />
               </div>
               {editingUser.role !== 'ADMIN' && (
                 <div>
