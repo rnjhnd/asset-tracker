@@ -1214,7 +1214,7 @@ const Dashboard: React.FC = () => {
                     />
                   </div>
                   <button 
-                    onClick={handleResetUserFilters}
+                    onClick={handleResetFilters}
                     className="w-full sm:w-auto flex-none px-4 py-2 border-2 border-red-500 text-red-500 font-mono text-sm uppercase tracking-wider font-bold hover:bg-red-50 transition-colors"
                   >
                     Reset
