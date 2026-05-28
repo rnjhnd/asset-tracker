@@ -41,7 +41,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return Promise.reject(error);
       }
     );
-    return () => axios.interceptors.response.eject(interceptor);
+    
+    // Cross-tab synchronization
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'token') {
+        if (!e.newValue) {
+          setUser(null);
+          setToken(null);
+        } else {
+          setToken(e.newValue);
+          const storedUser = localStorage.getItem('user');
+          if (storedUser) setUser(JSON.parse(storedUser));
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const login = (userData: User, authToken: string) => {
