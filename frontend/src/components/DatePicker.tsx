@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, parseISO } from 'date-fns';
 
@@ -11,6 +12,7 @@ interface DatePickerProps {
 export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, className = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [rect, setRect] = useState<DOMRect | null>(null);
   
   // Try to parse the input value, fallback to today
   const [currentMonth, setCurrentMonth] = useState(() => {
@@ -22,14 +24,36 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
   });
 
   useEffect(() => {
+    if (isOpen && containerRef.current) {
+      setRect(containerRef.current.getBoundingClientRect());
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        const portalEl = document.getElementById('datepicker-portal-root');
+        if (portalEl && portalEl.contains(event.target as Node)) return;
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    
+    const handleScroll = (e: Event) => {
+      if ((e.target as HTMLElement)?.closest('#datepicker-portal-root')) return;
+      setIsOpen(false);
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      window.addEventListener('scroll', handleScroll, true);
+      window.addEventListener('resize', handleScroll);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [isOpen]);
 
   const handlePrevMonth = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -67,42 +91,54 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
         <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
-      {isOpen && (
-        <div className="absolute z-[9999] mt-1 w-72 bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] p-4 text-sm font-mono left-0 sm:left-auto sm:right-0">
-          <div className="flex justify-between items-center mb-4">
-            <button type="button" onClick={handlePrevMonth} className="p-1 hover:bg-gray-100 transition-colors"><ChevronLeft size={16}/></button>
-            <span className="font-bold">{format(currentMonth, 'MMMM yyyy')}</span>
-            <button type="button" onClick={handleNextMonth} className="p-1 hover:bg-gray-100 transition-colors"><ChevronRight size={16}/></button>
-          </div>
-          
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {weekDays.map(day => (
-              <div key={day} className="text-center font-bold text-gray-500 text-xs">{day}</div>
-            ))}
-          </div>
-          
-          <div className="grid grid-cols-7 gap-1">
-            {days.map(day => {
-              const isSelected = selectedDate && isSameDay(day, selectedDate);
-              const isCurrentMonth = isSameMonth(day, currentMonth);
-              return (
-                <button
-                  key={day.toString()}
-                  type="button"
-                  onClick={() => handleSelectDate(day)}
-                  className={`
-                    p-2 text-center transition-colors border border-transparent
-                    ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-900 hover:border-gray-300'}
-                    ${isSelected ? 'bg-black text-white hover:bg-black font-bold shadow-[2px_2px_0_0_#3b82f6]' : ''}
-                  `}
-                >
-                  {format(day, 'd')}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      {isOpen && rect && (() => {
+        const showAbove = (window.innerHeight - rect.bottom) < 320;
+        return createPortal(
+          <div 
+            id="datepicker-portal-root"
+            className="fixed z-[9999] w-72 bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] p-4 text-sm font-mono"
+            style={{
+              top: showAbove ? rect.top - 4 : rect.bottom + 4,
+              left: Math.min(rect.left, window.innerWidth - 288 - 16),
+              transform: showAbove ? 'translateY(-100%)' : 'none'
+            }}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <button type="button" onClick={handlePrevMonth} className="p-1 hover:bg-gray-100 transition-colors"><ChevronLeft size={16}/></button>
+              <span className="font-bold">{format(currentMonth, 'MMMM yyyy')}</span>
+              <button type="button" onClick={handleNextMonth} className="p-1 hover:bg-gray-100 transition-colors"><ChevronRight size={16}/></button>
+            </div>
+            
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {weekDays.map(day => (
+                <div key={day} className="text-center font-bold text-gray-500 text-xs">{day}</div>
+              ))}
+            </div>
+            
+            <div className="grid grid-cols-7 gap-1">
+              {days.map(day => {
+                const isSelected = selectedDate && isSameDay(day, selectedDate);
+                const isCurrentMonth = isSameMonth(day, currentMonth);
+                return (
+                  <button
+                    key={day.toString()}
+                    type="button"
+                    onClick={() => handleSelectDate(day)}
+                    className={`
+                      p-2 text-center transition-colors border border-transparent
+                      ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-900 hover:border-gray-300'}
+                      ${isSelected ? 'bg-black text-white hover:bg-black font-bold shadow-[2px_2px_0_0_#3b82f6]' : ''}
+                    `}
+                  >
+                    {format(day, 'd')}
+                  </button>
+                );
+              })}
+            </div>
+          </div>,
+          document.body
+        );
+      })()}
     </div>
   );
 };
