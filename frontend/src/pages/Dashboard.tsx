@@ -187,7 +187,7 @@ const Dashboard: React.FC = () => {
       await Promise.all([
         currentTab === 'ASSETS' ? fetchAssets() : Promise.resolve(),
         user?.role === 'ADMIN' && currentTab === 'ASSETS' ? fetchTotals() : Promise.resolve(),
-        user?.role === 'ADMIN' ? fetchUsers() : Promise.resolve(),
+        user?.role === 'ADMIN' && currentTab === 'USERS' ? fetchUsers() : Promise.resolve(),
         fetchCategories()
       ]);
       
@@ -1108,19 +1108,19 @@ const Dashboard: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
               <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
                 <p className="font-mono text-sm text-gray-500 uppercase tracking-widest mb-1">Total Users</p>
-                {isLoading ? <div className="h-10 w-16 bg-gray-200 animate-pulse mt-1"></div> : <p className="text-4xl font-bold font-mono">{userStats.total}</p>}
+                {isLoading ? <div className="h-10 w-16 bg-gray-200 animate-pulse mt-1"></div> : <p className="text-4xl font-bold font-mono">{userStats?.total ?? '--'}</p>}
               </div>
               <div className="bg-white border-2 border-green-600 p-6 shadow-[4px_4px_0_0_#16a34a]">
                 <p className="font-mono text-sm text-green-600 uppercase tracking-widest mb-1">Active Accounts</p>
-                {isLoading ? <div className="h-10 w-16 bg-green-100 animate-pulse mt-1"></div> : <p className="text-4xl font-bold font-mono">{userStats.active}</p>}
+                {isLoading ? <div className="h-10 w-16 bg-green-100 animate-pulse mt-1"></div> : <p className="text-4xl font-bold font-mono">{userStats?.active ?? '--'}</p>}
               </div>
               <div className="bg-white border-2 border-red-600 p-6 shadow-[4px_4px_0_0_#dc2626]">
                 <p className="font-mono text-sm text-red-600 uppercase tracking-widest mb-1">Deactivated</p>
-                {isLoading ? <div className="h-10 w-16 bg-red-100 animate-pulse mt-1"></div> : <p className="text-4xl font-bold font-mono">{userStats.deactivated}</p>}
+                {isLoading ? <div className="h-10 w-16 bg-red-100 animate-pulse mt-1"></div> : <p className="text-4xl font-bold font-mono">{userStats?.deactivated ?? '--'}</p>}
               </div>
               <div className="bg-white border-2 border-purple-600 p-6 shadow-[4px_4px_0_0_#9333ea]">
                 <p className="font-mono text-sm text-purple-600 uppercase tracking-widest mb-1">System Admins</p>
-                {isLoading ? <div className="h-10 w-16 bg-purple-100 animate-pulse mt-1"></div> : <p className="text-4xl font-bold font-mono">{userStats.admins}</p>}
+                {isLoading ? <div className="h-10 w-16 bg-purple-100 animate-pulse mt-1"></div> : <p className="text-4xl font-bold font-mono">{userStats?.admins ?? '--'}</p>}
               </div>
             </div>
 
