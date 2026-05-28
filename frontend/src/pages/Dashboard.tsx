@@ -610,7 +610,7 @@ const Dashboard: React.FC = () => {
             return {
               name: values[0],
               serialNumber: values[1],
-              category: values[2]?.toUpperCase() || 'LAPTOP',
+              category: values[2]?.toUpperCase() || 'UNASSIGNED',
               purchaseDate: values[3] || undefined
             };
           }).filter(a => a.name && a.serialNumber);

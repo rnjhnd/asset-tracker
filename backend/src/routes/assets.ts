@@ -280,7 +280,7 @@ router.post('/bulk', authenticateToken, requireAdmin, async (req, res) => {
     }
 
     // Pre-fetch or create all needed categories
-    const categoryNames = [...new Set(assets.map(a => a.category || 'LAPTOP'))];
+    const categoryNames = [...new Set(assets.map((a: any) => a.category || 'UNASSIGNED'))];
     const categoryMap = new Map();
     
     for (const name of categoryNames) {
@@ -295,7 +295,7 @@ router.post('/bulk', authenticateToken, requireAdmin, async (req, res) => {
       data: assets.map(a => ({
         name: a.name,
         serialNumber: a.serialNumber,
-        categoryId: categoryMap.get(a.category || 'LAPTOP'),
+        categoryId: categoryMap.get(a.category || 'UNASSIGNED'),
         purchaseDate: a.purchaseDate ? new Date(a.purchaseDate) : new Date(),
         status: 'AVAILABLE'
       })),
