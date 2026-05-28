@@ -65,6 +65,13 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
     setCurrentMonth(addMonths(currentMonth, 1));
   };
 
+  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newYear = parseInt(e.target.value, 10);
+    const newDate = new Date(currentMonth);
+    newDate.setFullYear(newYear);
+    setCurrentMonth(newDate);
+  };
+
   const handleSelectDate = (date: Date) => {
     onChange(format(date, 'yyyy-MM-dd'));
     setIsOpen(false);
@@ -105,7 +112,18 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
           >
             <div className="flex justify-between items-center mb-4">
               <button type="button" onClick={handlePrevMonth} className="p-1 hover:bg-gray-100 transition-colors"><ChevronLeft size={16}/></button>
-              <span className="font-bold">{format(currentMonth, 'MMMM yyyy')}</span>
+              <div className="font-bold flex items-center gap-1">
+                <span>{format(currentMonth, 'MMMM')}</span>
+                <select 
+                  value={currentMonth.getFullYear()} 
+                  onChange={handleYearChange}
+                  className="font-bold outline-none cursor-pointer bg-transparent hover:bg-gray-100 p-1 rounded"
+                >
+                  {Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - 20 + i).map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              </div>
               <button type="button" onClick={handleNextMonth} className="p-1 hover:bg-gray-100 transition-colors"><ChevronRight size={16}/></button>
             </div>
             
