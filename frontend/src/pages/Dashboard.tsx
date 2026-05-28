@@ -624,8 +624,8 @@ const Dashboard: React.FC = () => {
         toast.success(`Bulk import successful!`);
         fetchAssets();
         fetchTotals();
-      } catch (error) {
-        toast.error('Failed to import CSV. Check format.');
+      } catch (error: any) {
+        toast.error(error.response?.data?.error || 'Failed to import CSV. Check format.');
       }
       if (fileInputRef.current) fileInputRef.current.value = '';
     };

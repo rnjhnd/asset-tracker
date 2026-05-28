@@ -266,9 +266,15 @@ router.post('/bulk', authenticateToken, requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'Invalid data format' });
     }
 
+    // Validate that there are no invalid date strings
+    const invalidAsset = assets.find((a: any) => a.purchaseDate && isNaN(new Date(a.purchaseDate).getTime()));
+    if (invalidAsset) {
+      return res.status(400).json({ error: `Row for asset "${invalidAsset.name}" has an invalid purchase date format: "${invalidAsset.purchaseDate}". Please use YYYY-MM-DD.` });
+    }
+
     // Validate that no purchaseDate is in the future
     const now = new Date().getTime();
-    const hasFutureDate = assets.some(a => a.purchaseDate && new Date(a.purchaseDate).getTime() > now);
+    const hasFutureDate = assets.some((a: any) => a.purchaseDate && new Date(a.purchaseDate).getTime() > now);
     if (hasFutureDate) {
       return res.status(400).json({ error: 'One or more rows contain a purchase date in the future. Please fix your CSV and try again.' });
     }
