@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Users, Box, Clock, Download, Wrench, Trash2, Archive, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight, SlidersHorizontal, Edit2, MoreHorizontal, User, ChevronDown } from 'lucide-react';
 import { SelectDropdown } from '../components/SelectDropdown';
+import { DatePicker } from '../components/DatePicker';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid, Legend } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -1527,7 +1528,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Purchase Date</label>
-                <input required type="date" value={newAsset.purchaseDate} onChange={e => setNewAsset({...newAsset, purchaseDate: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
+                <DatePicker value={newAsset.purchaseDate} onChange={val => setNewAsset({...newAsset, purchaseDate: val})} className="w-full" />
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Category</label>
@@ -1636,7 +1637,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Purchase Date</label>
-                <input required type="date" value={editingAsset.purchaseDate} onChange={e => setEditingAsset({...editingAsset, purchaseDate: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
+                <DatePicker value={editingAsset.purchaseDate} onChange={val => setEditingAsset({...editingAsset, purchaseDate: val})} className="w-full" />
               </div>
               <button disabled={isSubmitting} type="submit" className={`w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isSubmitting ? 'PROCESSING...' : 'Save Changes'}
