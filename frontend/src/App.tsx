@@ -11,6 +11,9 @@ const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 import { Toaster } from 'react-hot-toast';
 
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
+
 function App() {
   return (
     <AuthProvider>
@@ -43,6 +46,8 @@ function App() {
           />
         </Routes>
       </BrowserRouter>
+      <Analytics />
+      <SpeedInsights />
     </AuthProvider>
   );
 }
