@@ -35,13 +35,14 @@ const globalLimiter = rateLimit({
 });
 app.use(globalLimiter);
 
-// Strict API Limiter for Write Operations (POST, PUT, DELETE): Max 30 per 15 minutes
+// Strict API Limiter for Write Operations (POST, PUT, DELETE): Max 100 per 15 minutes
 const strictLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 30,
+  max: 100,
   message: { error: 'Too many write operations. Action blocked.' },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.method === 'GET', // Only limit mutating requests
 });
 
 // Routes
