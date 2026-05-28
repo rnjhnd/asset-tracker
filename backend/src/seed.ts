@@ -10,14 +10,16 @@ async function main() {
   await prisma.assignment.deleteMany({});
   await prisma.asset.deleteMany({});
   await prisma.user.deleteMany({});
+  await prisma.category.deleteMany({});
 
-  console.log('🧹 Database cleared. Injecting pristine demo data...');
+  console.log('🗑️ Database cleared. Injecting pristine demo data...');
 
   // 2. Create the Master Admin account
   const adminPassword = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.create({
     data: {
       email: 'admin@system.com',
+      name: 'System Administrator',
       passwordHash: adminPassword,
       role: 'ADMIN',
       isActive: true,
@@ -29,6 +31,7 @@ async function main() {
   const employee1 = await prisma.user.create({
     data: {
       email: 'employee1@system.com',
+      name: 'Sarah Connor',
       passwordHash: employeePassword,
       role: 'EMPLOYEE',
       isActive: true,
@@ -38,6 +41,7 @@ async function main() {
   const employee2 = await prisma.user.create({
     data: {
       email: 'employee2@system.com',
+      name: 'John Smith',
       passwordHash: employeePassword,
       role: 'EMPLOYEE',
       isActive: true,
@@ -64,7 +68,12 @@ async function main() {
       data: {
         name: assetData.name,
         serialNumber: assetData.serialNumber,
-        category: assetData.category as any,
+        category: {
+          connectOrCreate: {
+            where: { name: assetData.category },
+            create: { name: assetData.category }
+          }
+        },
         status: assetData.status as any,
         purchaseDate: assetData.purchaseDate
       }
