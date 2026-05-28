@@ -158,7 +158,7 @@ const Dashboard: React.FC = () => {
     }
     setCurrentPage(1);
   };
-  const anyModalOpen = isAddModalOpen || isEditModalOpen || isAssignModalOpen || isUserModalOpen || isEditUserModalOpen || showForcePasswordModal;
+  const anyModalOpen = isAddModalOpen || isEditModalOpen || isAssignModalOpen || isUserModalOpen || isEditUserModalOpen || isHistoryModalOpen || isPasswordModalOpen || isForceResetModalOpen;
 
   useEffect(() => {
     if (anyModalOpen) {
