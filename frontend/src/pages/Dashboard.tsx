@@ -302,6 +302,20 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      response => response,
+      error => {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          toast.error('Session expired. Please log in again.', { id: 'session-expired' });
+          handleLogout();
+        }
+        return Promise.reject(error);
+      }
+    );
+    return () => axios.interceptors.response.eject(interceptor);
+  }, []);
+
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (!target.closest('.action-dropdown-container')) {
