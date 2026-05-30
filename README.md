@@ -7,7 +7,7 @@ A full-stack enterprise Internal Asset Tracking system built with React, Express
 | Account | Email | Password |
 |---------|-------|----------|
 | Admin | admin@system.com | admin123 |
-| Employee 1 | employee1@system.com | employee123 |
+| Employee | employee1@system.com | employee123 |
 
 ## Tech Stack
 
