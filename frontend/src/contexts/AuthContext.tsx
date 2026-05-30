@@ -17,14 +17,33 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const isTokenExpired = (token: string) => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp * 1000 < Date.now();
+  } catch (e) {
+    return true;
+  }
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
+    const storedToken = localStorage.getItem('token');
+    if (!storedToken || isTokenExpired(storedToken)) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      return null;
+    }
     const storedUser = localStorage.getItem('user');
     return storedUser ? JSON.parse(storedUser) : null;
   });
   
   const [token, setToken] = useState<string | null>(() => {
-    return localStorage.getItem('token');
+    const storedToken = localStorage.getItem('token');
+    if (!storedToken || isTokenExpired(storedToken)) {
+      return null;
+    }
+    return storedToken;
   });
 
   React.useEffect(() => {
