@@ -108,6 +108,8 @@ const Dashboard: React.FC = () => {
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isFirstMountAssetSearch = useRef(true);
+  const isFirstMountUserSearch = useRef(true);
 
   // History State
   const [historyLogs, setHistoryLogs] = useState<AuditLog[]>([]);
@@ -205,6 +207,10 @@ const Dashboard: React.FC = () => {
 
   // Debounced Search Effects
   useEffect(() => {
+    if (isFirstMountAssetSearch.current) {
+      isFirstMountAssetSearch.current = false;
+      return;
+    }
     setCurrentPage(1);
     const delayDebounceFn = setTimeout(() => {
       if (token && currentTab === 'ASSETS') fetchAssets();
@@ -213,6 +219,10 @@ const Dashboard: React.FC = () => {
   }, [searchQuery]);
 
   useEffect(() => {
+    if (isFirstMountUserSearch.current) {
+      isFirstMountUserSearch.current = false;
+      return;
+    }
     setCurrentPage(1);
     const delayDebounceFn = setTimeout(() => {
       if (token && currentTab === 'USERS') fetchUsers();
