@@ -195,7 +195,7 @@ const Dashboard: React.FC = () => {
       ]);
       
       setIsLoading(false);
-      setTimeout(() => setHasAnimated(true), 1500);
+      setTimeout(() => setHasAnimated(true), 2500);
     };
     
     loadAll();
@@ -782,6 +782,8 @@ const Dashboard: React.FC = () => {
                         <PieChart>
                           <Pie
                             isAnimationActive={!hasAnimated}
+                            animationDuration={1500}
+                            animationEasing="ease-out"
                             data={stats.categoryStats}
                             innerRadius={60}
                             outerRadius={90}
