@@ -820,7 +820,7 @@ const Dashboard: React.FC = () => {
                           <XAxis dataKey="name" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
                           <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
                           <Tooltip content={<BrutalistTooltip />} cursor={{ fill: '#f3f4f6' }} />
-                          <Bar isAnimationActive={!hasAnimated} dataKey="count" stroke="#111827" strokeWidth={2} />
+                          <Bar isAnimationActive={!hasAnimated} animationDuration={1500} animationEasing="ease-out" dataKey="count" stroke="#111827" strokeWidth={2} />
                         </BarChart>
                       </ResponsiveContainer>
                     )}
@@ -838,7 +838,7 @@ const Dashboard: React.FC = () => {
                           <XAxis dataKey="year" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
                           <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} allowDecimals={false} />
                           <Tooltip content={<BrutalistTooltip />} cursor={{ fill: '#f3f4f6' }} />
-                          <Bar isAnimationActive={!hasAnimated} dataKey="count" fill="#9333ea" stroke="#111827" strokeWidth={2} />
+                          <Bar isAnimationActive={!hasAnimated} animationDuration={1500} animationEasing="ease-out" dataKey="count" fill="#9333ea" stroke="#111827" strokeWidth={2} />
                         </BarChart>
                       </ResponsiveContainer>
                     )}
@@ -856,7 +856,7 @@ const Dashboard: React.FC = () => {
                           <XAxis dataKey="month" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
                           <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} allowDecimals={false} />
                           <Tooltip content={<BrutalistTooltip />} />
-                          <Area type="monotone" dataKey="assignments" stroke="#ea580c" strokeWidth={2} fill="#ffedd5" />
+                          <Area isAnimationActive={!hasAnimated} animationDuration={1500} animationEasing="ease-out" type="monotone" dataKey="assignments" stroke="#ea580c" strokeWidth={2} fill="#ffedd5" />
                         </AreaChart>
                       </ResponsiveContainer>
                     )}
