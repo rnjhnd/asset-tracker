@@ -1476,7 +1476,7 @@ const Dashboard: React.FC = () => {
               <X size={24} />
             </button>
             <h3 className="text-xl font-bold uppercase tracking-tight mb-2 border-b pb-4">Force Reset Password</h3>
-            <p className="font-mono text-xs text-gray-500 mb-6 uppercase">Target Account: {forceResetUserEmail}</p>
+            <p className="font-mono text-xs text-gray-500 mb-6 uppercase">Target Account: {forceResetUserEmployeeId}</p>
             <form onSubmit={handleForceResetPassword} className="space-y-4">
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">New Temporary Password</label>
@@ -1513,7 +1513,7 @@ const Dashboard: React.FC = () => {
                         <User size={20} className="text-gray-500" />
                       </div>
                       <div>
-                        <p className="font-bold text-sm mb-1">{log.user.name || log.user.email}</p>
+                        <p className="font-bold text-sm mb-1">{log.user.name || log.user.employeeId}</p>
                         <div className="font-mono text-xs text-gray-500 flex flex-col gap-1">
                           <span>CHECKOUT: {new Date(log.checkoutDate).toLocaleString()}</span>
                           {log.returnDate ? (
@@ -1618,13 +1618,13 @@ const Dashboard: React.FC = () => {
                             key={u.id} 
                             onClick={() => {
                               setAssignUserId(u.id);
-                              setAssignSearchQuery(`${u.name} (${u.email})`);
+                              setAssignSearchQuery(`${u.name} (${u.employeeId})`);
                               setShowAssignDropdown(false);
                             }}
                             className="p-3 border-b border-gray-100 last:border-0 hover:bg-blue-50 cursor-pointer font-mono text-sm transition-colors text-left"
                           >
                             <div className="font-bold text-gray-900">{u.name}</div>
-                            <div className="text-xs text-gray-500">{u.email}</div>
+                            <div className="text-xs text-gray-500">{u.employeeId}</div>
                           </li>
                         ))
                       )}
@@ -1719,8 +1719,8 @@ const Dashboard: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Email Address</label>
-                <input required type="email" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="employee@system.com" />
+                <label className="block font-mono text-xs uppercase mb-1 font-bold">Employee ID</label>
+                <input required type="text" value={newUser.employeeId} onChange={e => setNewUser({...newUser, employeeId: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="EMP-001" />
               </div>
               <div>
                 <label className="block font-mono text-xs uppercase mb-1 font-bold">Initial Password</label>
@@ -1782,8 +1782,8 @@ const Dashboard: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Email Address</label>
-                <input disabled required type="email" value={editingUser.email} onChange={e => setEditingUser({...editingUser, email: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors bg-gray-100 cursor-not-allowed text-gray-500" placeholder="e.g. john@company.com" title="Email address cannot be changed after creation." />
+                <label className="block font-mono text-xs uppercase mb-1 font-bold">Employee ID</label>
+                <input disabled required type="text" value={editingUser.employeeId} onChange={e => setEditingUser({...editingUser, employeeId: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors bg-gray-100 cursor-not-allowed text-gray-500" placeholder="EMP-001" title="Employee ID cannot be changed after creation." />
               </div>
               {editingUser.role !== 'ADMIN' && (
                 <div>
