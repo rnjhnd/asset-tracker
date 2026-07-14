@@ -3,7 +3,7 @@ import axios from 'axios';
 
 type User = {
   id: string;
-  email: string;
+  employeeId: string;
   name?: string;
   role: string;
 };

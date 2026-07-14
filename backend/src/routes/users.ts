@@ -51,13 +51,13 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
 
     if (search) {
       whereClause.OR = [
-        { email: { contains: search as string, mode: 'insensitive' } },
+        { employeeId: { contains: search as string, mode: 'insensitive' } },
         { name: { contains: search as string, mode: 'insensitive' } }
       ];
     }
 
     // Build orderBy clause
-    const validSortFields = ['name', 'email', 'role', 'isActive', 'createdAt', 'department'];
+    const validSortFields = ['name', 'employeeId', 'role', 'isActive', 'createdAt', 'department'];
     const validSortOrders = ['asc', 'desc'];
     
     const sortField = validSortFields.includes(sortBy as string) ? (sortBy as string) : 'createdAt';
@@ -74,7 +74,7 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
         select: {
           id: true,
           name: true,
-          email: true,
+          employeeId: true,
           role: true,
           department: true,
           createdAt: true,
@@ -101,14 +101,14 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
 // Edit user details (Admin only)
 router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
   const { id } = req.params;
-  let { name, email, role, department } = req.body;
+  let { name, employeeId, role, department } = req.body;
   
   try {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const protectedAccounts = ['admin@system.com', 'employee1@system.com'];
-    if (protectedAccounts.includes(user.email.toLowerCase())) {
+    const protectedAccounts = ['emp-001', 'emp-002'];
+    if (protectedAccounts.includes(user.employeeId.toLowerCase())) {
       return res.status(403).json({ error: 'Modifying core demo accounts is disabled.' });
     }
 
@@ -135,23 +135,23 @@ router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
     const existingEmailUser = await prisma.user.findFirst({
       where: {
         id: { not: id },
-        email
+        employeeId
       }
     });
     if (existingEmailUser) {
-      return res.status(400).json({ error: 'Email already exists' });
+      return res.status(400).json({ error: 'Employee ID already exists' });
     }
 
     const updatedUser = await prisma.user.update({
       where: { id },
       data: {
         name: name || user.name,
-        email: email || user.email,
+        employeeId: employeeId || user.employeeId,
         role: role || user.role,
         department: department || user.department
       },
       select: {
-        id: true, email: true, name: true, role: true, department: true, isActive: true, createdAt: true
+        id: true, employeeId: true, name: true, role: true, department: true, isActive: true, createdAt: true
       }
     });
 
@@ -168,8 +168,8 @@ router.put('/:id/status', authenticateToken, requireAdmin, async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const protectedAccounts = ['admin@system.com', 'employee1@system.com'];
-    if (protectedAccounts.includes(user.email.toLowerCase())) {
+    const protectedAccounts = ['emp-001', 'emp-002'];
+    if (protectedAccounts.includes(user.employeeId.toLowerCase())) {
       return res.status(403).json({ error: 'Deactivating core demo accounts is disabled.' });
     }
 
@@ -205,8 +205,8 @@ router.put('/:id/force-password', authenticateToken, requireAdmin, async (req, r
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const protectedAccounts = ['admin@system.com', 'employee1@system.com'];
-    if (protectedAccounts.includes(user.email.toLowerCase())) {
+    const protectedAccounts = ['emp-001', 'emp-002'];
+    if (protectedAccounts.includes(user.employeeId.toLowerCase())) {
       return res.status(403).json({ error: 'Resetting the password of core demo accounts is disabled.' });
     }
 
@@ -234,8 +234,8 @@ router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
 
     if (!user) return res.status(404).json({ error: 'User not found' });
     
-    const protectedAccounts = ['admin@system.com', 'employee1@system.com'];
-    if (protectedAccounts.includes(user.email.toLowerCase())) {
+    const protectedAccounts = ['emp-001', 'emp-002'];
+    if (protectedAccounts.includes(user.employeeId.toLowerCase())) {
       return res.status(403).json({ error: 'Deleting core demo accounts is disabled.' });
     }
 

@@ -17,13 +17,13 @@ type Asset = {
   category: string;
   status: 'AVAILABLE' | 'ASSIGNED' | 'MAINTENANCE' | 'RETIRED';
   purchaseDate: string;
-  assignments: { user: { email: string; name: string } }[];
+  assignments: { user: { employeeId: string; name: string } }[];
 };
 
 type UserAccount = {
   id: string;
   name: string;
-  email: string;
+  employeeId: string;
   role: string;
   department: string;
   createdAt: string;
@@ -35,7 +35,7 @@ type AuditLog = {
   id: string;
   checkoutDate: string;
   returnDate: string | null;
-  user: { email: string; name: string };
+  user: { employeeId: string; name: string };
 };
 
 const Dashboard: React.FC = () => {
@@ -88,20 +88,20 @@ const Dashboard: React.FC = () => {
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingAsset, setEditingAsset] = useState({ id: '', name: '', serialNumber: '', purchaseDate: '', category: '' });
-  const [editingUser, setEditingUser] = useState({ id: '', name: '', email: '', role: 'EMPLOYEE', department: '' });
+  const [editingUser, setEditingUser] = useState({ id: '', name: '', employeeId: '', role: 'EMPLOYEE', department: '' });
   const [assignAssetId, setAssignAssetId] = useState('');
   const [assignUserId, setAssignUserId] = useState('');
   const [assignSearchQuery, setAssignSearchQuery] = useState('');
   const [assignSearchResults, setAssignSearchResults] = useState<any[]>([]);
   const [isSearchingAssign, setIsSearchingAssign] = useState(false);
   const [showAssignDropdown, setShowAssignDropdown] = useState(false);
-  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'EMPLOYEE', department: '' });
+  const [newUser, setNewUser] = useState({ name: '', employeeId: '', password: '', role: 'EMPLOYEE', department: '' });
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, showAbove: false });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
   const [forceResetUserId, setForceResetUserId] = useState('');
-  const [forceResetUserEmail, setForceResetUserEmail] = useState('');
+  const [forceResetUserEmployeeId, setForceResetUserEmployeeId] = useState('');
   const [forceNewPassword, setForceNewPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -129,14 +129,14 @@ const Dashboard: React.FC = () => {
     setIsCreatingCategory(false);
     setNewCategoryName('');
     setEditingAsset({ id: '', name: '', serialNumber: '', purchaseDate: '', category: '' });
-    setEditingUser({ id: '', name: '', email: '', role: 'EMPLOYEE', department: '' });
+    setEditingUser({ id: '', name: '', employeeId: '', role: 'EMPLOYEE', department: '' });
     setAssignAssetId('');
     setAssignUserId('');
     setAssignSearchQuery('');
-    setNewUser({ name: '', email: '', password: '', role: 'EMPLOYEE', department: '' });
+    setNewUser({ name: '', employeeId: '', password: '', role: 'EMPLOYEE', department: '' });
     setPasswordForm({ currentPassword: '', newPassword: '' });
     setForceResetUserId('');
-    setForceResetUserEmail('');
+    setForceResetUserEmployeeId('');
     setForceNewPassword('');
   };
 
@@ -364,7 +364,7 @@ const Dashboard: React.FC = () => {
     try {
       await axios.post(`${API_URL}/api/auth/register`, newUser);
       closeAllModals();
-      setNewUser({ name: '', email: '', password: '', role: 'EMPLOYEE', department: '' });
+      setNewUser({ name: '', employeeId: '', password: '', role: 'EMPLOYEE', department: '' });
       fetchUsers();
       toast.success('Employee account created!');
     } catch (error: any) {
@@ -383,7 +383,7 @@ const Dashboard: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       closeAllModals();
-      setEditingUser({ id: '', name: '', email: '', role: 'EMPLOYEE', department: '' });
+      setEditingUser({ id: '', name: '', employeeId: '', role: 'EMPLOYEE', department: '' });
       fetchUsers();
       toast.success('Employee updated successfully!');
     } catch (error: any) {
@@ -571,7 +571,7 @@ const Dashboard: React.FC = () => {
       closeAllModals();
       setForceNewPassword('');
       fetchUsers();
-      toast.success(`PASSWORD RESET FOR ${forceResetUserEmail}`, { id: 'force-reset' });
+      toast.success(`PASSWORD RESET FOR ${forceResetUserEmployeeId}`, { id: 'force-reset' });
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to force reset password.', { id: 'force-reset-err' });
     } finally {
@@ -597,7 +597,7 @@ const Dashboard: React.FC = () => {
         asset.serialNumber,
         asset.category,
         asset.status,
-        asset.assignments.length > 0 ? (asset.assignments[0].user.name || asset.assignments[0].user.email) : 'None'
+        asset.assignments.length > 0 ? (asset.assignments[0].user.name || asset.assignments[0].user.employeeId) : 'None'
       ]);
 
       const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
@@ -712,7 +712,7 @@ const Dashboard: React.FC = () => {
                 ONLINE
               </span>
               <span className="text-gray-300 hidden sm:inline">|</span>
-              <span className="font-bold text-gray-900 truncate max-w-[150px] sm:max-w-[250px]" title={user?.email}>{user?.email}</span>
+              <span className="font-bold text-gray-900 truncate max-w-[150px] sm:max-w-[250px]" title={user?.employeeId}>{user?.employeeId}</span>
               <span className="text-gray-300 hidden sm:inline">|</span>
               <span className="bg-gray-100 px-2 py-0.5 border border-gray-300 whitespace-nowrap">{user?.role}</span>
             </div>
@@ -734,7 +734,7 @@ const Dashboard: React.FC = () => {
               <div className="px-3 py-2 border-b border-gray-200 mb-1">
                 <p className="font-mono text-[10px] text-gray-500 uppercase font-bold tracking-widest">Signed in as</p>
                 <p className="font-mono text-sm truncate text-gray-900 font-bold" title={user?.name}>{user?.name}</p>
-                <p className="font-mono text-xs truncate text-gray-500" title={user?.email}>{user?.email}</p>
+                <p className="font-mono text-xs truncate text-gray-500" title={user?.employeeId}>{user?.employeeId}</p>
               </div>
               <button 
                 onClick={() => { setIsPasswordModalOpen(true); setIsProfileDropdownOpen(false); }}
@@ -1046,7 +1046,7 @@ const Dashboard: React.FC = () => {
                         </td>
                         {user?.role === 'ADMIN' && (
                           <td className="p-4 font-mono text-sm text-gray-900 font-bold">
-                            {asset.assignments.length > 0 ? (asset.assignments[0].user.name || asset.assignments[0].user.email) : '--'}
+                            {asset.assignments.length > 0 ? (asset.assignments[0].user.name || asset.assignments[0].user.employeeId) : '--'}
                           </td>
                         )}
                         {user?.role === 'ADMIN' && (
@@ -1203,7 +1203,7 @@ const Dashboard: React.FC = () => {
                     <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     <input 
                       type="text" 
-                      placeholder="Search Email..."
+                      placeholder="Search Employee ID..."
                       value={userSearchQuery}
                       onChange={(e) => { setUserSearchQuery(e.target.value); setCurrentPage(1); }}
                       className="w-full pl-10 pr-4 py-2 border-2 border-[#e4e4e7] bg-white font-mono text-sm focus:border-[#3b82f6] outline-none"
@@ -1261,7 +1261,7 @@ const Dashboard: React.FC = () => {
                       options={[
                         { value: 'createdAt', label: 'Date Added' },
                         { value: 'name', label: 'Name' },
-                        { value: 'email', label: 'Email' },
+                        { value: 'employeeId', label: 'Employee ID' },
                         { value: 'role', label: 'Role' },
                         { value: 'department', label: 'Department' },
                         { value: 'isActive', label: 'Status' }
@@ -1317,7 +1317,7 @@ const Dashboard: React.FC = () => {
                               </span>
                             )}
                           </div>
-                          <span className="font-mono text-xs text-gray-500 mt-0.5">{u.email}</span>
+                          <span className="font-mono text-xs text-gray-500 mt-0.5">{u.employeeId}</span>
                         </div>
                       </td>
                       <td className="p-4">
@@ -1344,7 +1344,7 @@ const Dashboard: React.FC = () => {
                               setEditingUser({
                                 id: u.id,
                                 name: u.name,
-                                email: u.email,
+                                employeeId: u.employeeId,
                                 role: u.role,
                                 department: u.department
                               });
@@ -1368,7 +1368,7 @@ const Dashboard: React.FC = () => {
                           <button 
                             onClick={() => {
                               setForceResetUserId(u.id);
-                              setForceResetUserEmail(u.email);
+                              setForceResetUserEmployeeId(u.employeeId);
                               setIsForceResetModalOpen(true);
                             }}
                             className="text-[#ca8a04] hover:text-yellow-600 transition-colors"

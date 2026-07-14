@@ -18,7 +18,7 @@ async function main() {
   const adminPassword = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@system.com',
+      employeeId: 'EMP-001',
       name: 'System Administrator',
       passwordHash: adminPassword,
       role: 'ADMIN',
@@ -30,7 +30,7 @@ async function main() {
   const employeePassword = await bcrypt.hash('employee123', 10);
   const employee1 = await prisma.user.create({
     data: {
-      email: 'employee1@system.com',
+      employeeId: 'EMP-002',
       name: 'Sarah Connor',
       passwordHash: employeePassword,
       role: 'EMPLOYEE',
@@ -40,7 +40,7 @@ async function main() {
 
   const employee2 = await prisma.user.create({
     data: {
-      email: 'employee2@system.com',
+      employeeId: 'EMP-003',
       name: 'John Smith',
       passwordHash: employeePassword,
       role: 'EMPLOYEE',

@@ -9,7 +9,7 @@ const router = Router();
 // REGISTER ROUTE
 router.post('/register', async (req, res) => {
   try {
-    let { email, password, name, role, department } = req.body;
+    let { employeeId, password, name, role, department } = req.body;
 
 
 
@@ -31,10 +31,10 @@ router.post('/register', async (req, res) => {
     }
 
     const existingEmailUser = await prisma.user.findUnique({
-      where: { email }
+      where: { employeeId }
     });
     if (existingEmailUser) {
-      return res.status(400).json({ error: 'Email already exists' });
+      return res.status(400).json({ error: 'Employee ID already exists' });
     }
 
     // Validate password
@@ -49,7 +49,7 @@ router.post('/register', async (req, res) => {
     // Create user
     const newUser = await prisma.user.create({
       data: {
-        email,
+        employeeId,
         name: name || 'Unknown Employee',
         passwordHash,
         role: role || 'EMPLOYEE',
@@ -68,10 +68,10 @@ router.post('/register', async (req, res) => {
 // LOGIN ROUTE
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { employeeId, password } = req.body;
 
     // Find user
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { employeeId } });
     if (!user) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
@@ -95,7 +95,7 @@ router.post('/login', async (req, res) => {
       token,
       user: {
         id: user.id,
-        email: user.email,
+        employeeId: user.employeeId,
         name: user.name,
         role: user.role,
       },
@@ -121,8 +121,8 @@ router.put('/password', authenticateToken, async (req, res) => {
     if (!isMatch) return res.status(400).json({ error: 'Incorrect current password' });
 
     // Protect core demo accounts from being changed
-    const protectedAccounts = ['admin@system.com', 'employee1@system.com'];
-    if (protectedAccounts.includes(user.email.toLowerCase())) {
+    const protectedAccounts = ['emp-001', 'emp-002'];
+    if (protectedAccounts.includes(user.employeeId.toLowerCase())) {
       return res.status(403).json({ error: 'Changing the password of core demo accounts is disabled.' });
     }
 
@@ -148,11 +148,11 @@ router.put('/password', authenticateToken, async (req, res) => {
 // REQUEST PASSWORD RESET ROUTE
 router.post('/request-reset', async (req, res) => {
   try {
-    const { email } = req.body;
+    const { employeeId } = req.body;
     
     // We intentionally don't return 404 to prevent email enumeration,
     // we just silently succeed or update if user exists.
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { employeeId } });
     if (user) {
       await prisma.user.update({
         where: { id: user.id },

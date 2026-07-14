@@ -7,13 +7,13 @@ import toast from 'react-hot-toast';
 import API_URL from '../config/api';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [employeeId, setEmployeeId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
-  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotEmployeeId, setForgotEmployeeId] = useState('');
   const [isSubmittingForgot, setIsSubmittingForgot] = useState(false);
 
   const { login, token } = useAuth();
@@ -28,14 +28,14 @@ const Login: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password) {
+    if (!employeeId || !password) {
       toast.error('ACCESS DENIED: MISSING CREDENTIALS');
-      setError('Please provide both email and password.');
+      setError('Please provide both Employee ID and password.');
       return;
     }
 
     try {
-      const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
+      const response = await axios.post(`${API_URL}/api/auth/login`, { employeeId, password });
       login(response.data.user, response.data.token);
       toast.success('LOGGED IN SUCCESSFULLY', { id: 'login-toast' });
       navigate('/');
@@ -46,17 +46,17 @@ const Login: React.FC = () => {
 
   const handleForgotSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!forgotEmail) {
-      toast.error('Please enter your email address');
+    if (!forgotEmployeeId) {
+      toast.error('Please enter your Employee ID');
       return;
     }
     
     setIsSubmittingForgot(true);
     try {
-      await axios.post(`${API_URL}/api/auth/request-reset`, { email: forgotEmail });
+      await axios.post(`${API_URL}/api/auth/request-reset`, { employeeId: forgotEmployeeId });
       toast.success('Password reset request sent to Administrators!', { duration: 5000 });
       setIsForgotModalOpen(false);
-      setForgotEmail('');
+      setForgotEmployeeId('');
     } catch (err) {
       toast.error('Failed to send reset request');
     } finally {
@@ -114,13 +114,13 @@ const Login: React.FC = () => {
 
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
-                <label className="block font-mono text-xs font-bold text-gray-900 mb-2 uppercase tracking-widest">Email Address</label>
+                <label className="block font-mono text-xs font-bold text-gray-900 mb-2 uppercase tracking-widest">Employee ID</label>
                 <input 
-                  type="email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="text" 
+                  value={employeeId}
+                  onChange={(e) => setEmployeeId(e.target.value)}
                   className="w-full border-2 border-gray-300 bg-white p-3 sm:p-4 font-mono text-sm focus:border-black outline-none transition-colors"
-                  placeholder="admin@system.com"
+                  placeholder="EMP-001"
                 />
               </div>
               <div>
@@ -168,12 +168,12 @@ const Login: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-gray-400">ADMINISTRATOR</p>
-                <p className="font-bold text-gray-800">admin@system.com</p>
+                <p className="font-bold text-gray-800">EMP-001</p>
                 <p>admin123</p>
               </div>
               <div>
                 <p className="text-gray-400">EMPLOYEE</p>
-                <p className="font-bold text-gray-800">employee1@system.com</p>
+                <p className="font-bold text-gray-800">EMP-002</p>
                 <p>employee123</p>
               </div>
             </div>
@@ -196,17 +196,17 @@ const Login: React.FC = () => {
               <Key size={24} /> Reset Request
             </h2>
             <p className="font-mono text-sm text-gray-600 mb-6">
-              Enter your email address to submit a password reset request to your IT Administrator.
+              Enter your Employee ID to submit a password reset request to your IT Administrator.
             </p>
             <form onSubmit={handleForgotSubmit} className="space-y-4">
               <div>
-                <label className="block font-mono text-xs font-bold text-gray-900 mb-2 uppercase tracking-widest">Email Address</label>
+                <label className="block font-mono text-xs font-bold text-gray-900 mb-2 uppercase tracking-widest">Employee ID</label>
                 <input 
-                  type="email" 
-                  value={forgotEmail}
-                  onChange={(e) => setForgotEmail(e.target.value)}
+                  type="text" 
+                  value={forgotEmployeeId}
+                  onChange={(e) => setForgotEmployeeId(e.target.value)}
                   className="w-full border-2 border-gray-300 bg-white p-3 font-mono text-sm focus:border-black outline-none transition-colors"
-                  placeholder="employee@system.com"
+                  placeholder="EMP-001"
                   required
                 />
               </div>

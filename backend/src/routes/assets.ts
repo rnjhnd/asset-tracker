@@ -71,7 +71,7 @@ router.get('/', authenticateToken, async (req, res) => {
         category: true,
         assignments: {
           where: { returnDate: null },
-          include: { user: { select: { email: true, name: true } } }
+          include: { user: { select: { employeeId: true, name: true } } }
         }
       },
       orderBy: orderByClause,
@@ -80,8 +80,8 @@ router.get('/', authenticateToken, async (req, res) => {
     // Handle JS sorting for complex relations
     if (sortField === 'employee') {
       assets.sort((a: any, b: any) => {
-        const nameA = a.assignments[0]?.user?.name || a.assignments[0]?.user?.email || '';
-        const nameB = b.assignments[0]?.user?.name || b.assignments[0]?.user?.email || '';
+        const nameA = a.assignments[0]?.user?.name || a.assignments[0]?.user?.employeeId || '';
+        const nameB = b.assignments[0]?.user?.name || b.assignments[0]?.user?.employeeId || '';
         
         if (!nameA && nameB) return 1;
         if (nameA && !nameB) return -1;
@@ -394,7 +394,7 @@ router.get('/:id/history', authenticateToken, requireAdmin, async (req, res) => 
     const history = await prisma.assignment.findMany({
       where: { assetId: id },
       include: {
-        user: { select: { email: true, name: true } }
+        user: { select: { employeeId: true, name: true } }
       },
       orderBy: {
         checkoutDate: 'desc'
