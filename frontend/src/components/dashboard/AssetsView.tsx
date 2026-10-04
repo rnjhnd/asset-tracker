@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Search, Download, Upload, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
-import { SelectDropdown } from '../../components/SelectDropdown';
+import { AssetToolbar } from './AssetToolbar';
+import { Pagination } from '../Pagination';
 import { AnalyticsCharts } from './AnalyticsCharts';
 import { AssetTable } from './AssetTable';
 import { AssetModals } from '../modals/AssetModals';
@@ -45,12 +45,10 @@ export const AssetsView = ({ user, token }: { user: any, token: string }) => {
   const [isSearchingAssign, setIsSearchingAssign] = useState(false);
   const [showAssignDropdown, setShowAssignDropdown] = useState(false);
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, showAbove: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [historyLogs, setHistoryLogs] = useState<any[]>([]);
   const [activeHistoryAssetName, setActiveHistoryAssetName] = useState('');
   
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const isFirstMountAssetSearch = useRef(true);
 
   const closeAllModals = () => {
@@ -375,7 +373,7 @@ export const AssetsView = ({ user, token }: { user: any, token: string }) => {
       } catch (error: any) {
         toast.error(error.response?.data?.error || 'Failed to import CSV. Check format.');
       }
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      e.target.value = '';
     };
     reader.readAsText(file);
   };
@@ -398,89 +396,40 @@ export const AssetsView = ({ user, token }: { user: any, token: string }) => {
         </div>
       )}
 
-      <div className="flex flex-col mb-6 gap-4">
-        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-4">
-          <div className="bg-gray-900 px-4 sm:px-6 py-2 shadow-[4px_4px_0_0_#d4d4d8]">
-            <h2 className="text-xl sm:text-3xl font-bold uppercase tracking-tight whitespace-nowrap text-white">
-              {user?.role === 'ADMIN' ? 'Inventory Log' : 'My Equipment'}
-            </h2>
-          </div>
-          {user?.role === 'ADMIN' && (
-            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-end gap-4 w-full xl:w-auto">
-              <div className="relative w-full sm:w-auto sm:flex-1 min-w-[200px]">
-                <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search SN or Name..."
-                  value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                  className="w-full pl-10 pr-4 py-2 border-2 border-[#e4e4e7] bg-white font-mono text-sm focus:border-[#3b82f6] outline-none"
-                />
-              </div>
-              <button 
-                onClick={() => setShowFilters(!showFilters)}
-                className={`w-full sm:w-auto border-2 px-4 py-2.5 font-mono text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${showFilters ? 'bg-gray-900 text-white border-gray-900' : 'bg-white border-[#e4e4e7] text-gray-600 hover:bg-gray-50 hover:text-black'}`}
-              >
-                <SlidersHorizontal size={16} /> Filters
-              </button>
-              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                <input type="file" accept=".csv" ref={fileInputRef} onChange={handleBulkImport} className="hidden" />
-                <button onClick={() => fileInputRef.current?.click()} className="w-full sm:w-auto bg-white border-2 border-[#e4e4e7] text-gray-600 px-4 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-50 hover:text-black transition-colors flex items-center justify-center gap-2">
-                  <Upload size={16} /> Import
-                </button>
-                <button onClick={handleExportCSV} className="w-full sm:w-auto bg-white border-2 border-[#e4e4e7] text-gray-600 px-4 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-50 hover:text-black transition-colors flex items-center justify-center gap-2">
-                  <Download size={16} /> Export
-                </button>
-                <button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto bg-gray-900 text-white px-6 py-2.5 font-mono text-sm uppercase tracking-wider hover:bg-gray-800 transition-colors whitespace-nowrap flex justify-center items-center">
-                  + Register Asset
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-        {user?.role === 'ADMIN' && showFilters && (
-          <div className="bg-gray-50 border-2 border-gray-900 p-4 shadow-[4px_4px_0_0_#111827] flex flex-col sm:flex-row flex-wrap gap-4 items-stretch sm:items-end mt-2 animate-in slide-in-from-top-2">
-            <div className="flex-1 min-w-[150px]">
-              <label className="block font-mono text-xs font-bold uppercase mb-1">Status</label>
-              <SelectDropdown value={filterStatus} onChange={(val: any) => { setFilterStatus(val); setCurrentPage(1); }} options={[{ value: 'ALL', label: 'All Statuses' }, { value: 'AVAILABLE', label: 'Available' }, { value: 'ASSIGNED', label: 'Assigned' }, { value: 'MAINTENANCE', label: 'Maintenance' }, { value: 'RETIRED', label: 'Retired' }]} className="w-full" />
-            </div>
-            <div className="flex-1 min-w-[150px]">
-              <label className="block font-mono text-xs font-bold uppercase mb-1">Category</label>
-              <SelectDropdown value={assetFilterCategory} onChange={(val: any) => { setAssetFilterCategory(val); setCurrentPage(1); }} options={[{ value: 'ALL', label: 'All Categories' }, ...categories.map(c => ({ value: c.name, label: c.name }))]} className="w-full" />
-            </div>
-            <div className="flex-1 min-w-[150px]">
-              <label className="block font-mono text-xs font-bold uppercase mb-1">Sort By</label>
-              <SelectDropdown value={assetSortBy} onChange={(val: any) => { setAssetSortBy(val); setCurrentPage(1); }} options={[{ value: 'purchaseDate', label: 'Purchase Date' }, { value: 'name', label: 'Name' }, { value: 'serialNumber', label: 'Serial Number' }, { value: 'category', label: 'Category' }, { value: 'status', label: 'Status' }, { value: 'employee', label: 'Assigned Employee' }]} className="w-full" />
-            </div>
-            <div className="flex-1 min-w-[150px]">
-              <label className="block font-mono text-xs font-bold uppercase mb-1">Order</label>
-              <SelectDropdown value={assetSortOrder} onChange={(val: any) => { setAssetSortOrder(val); setCurrentPage(1); }} options={[{ value: 'asc', label: 'Ascending' }, { value: 'desc', label: 'Descending' }]} className="w-full" />
-            </div>
-            <button onClick={handleResetFilters} className="w-full sm:w-auto flex-none px-4 py-2 border-2 border-red-500 text-red-500 font-mono text-sm uppercase tracking-wider font-bold hover:bg-red-50 transition-colors">Reset</button>
-          </div>
-        )}
-      </div>
+      <AssetToolbar 
+        userRole={user?.role}
+        searchQuery={searchQuery}
+        onSearchChange={(val) => { setSearchQuery(val); setCurrentPage(1); }}
+        showFilters={showFilters}
+        onToggleFilters={() => setShowFilters(!showFilters)}
+        filterStatus={filterStatus}
+        onFilterStatusChange={(val) => { setFilterStatus(val); setCurrentPage(1); }}
+        filterCategory={assetFilterCategory}
+        onFilterCategoryChange={(val) => { setAssetFilterCategory(val); setCurrentPage(1); }}
+        categories={categories}
+        sortBy={assetSortBy}
+        onSortByChange={(val) => { setAssetSortBy(val); setCurrentPage(1); }}
+        sortOrder={assetSortOrder}
+        onSortOrderChange={(val) => { setAssetSortOrder(val); setCurrentPage(1); }}
+        onResetFilters={handleResetFilters}
+        onExportCSV={handleExportCSV}
+        onBulkImport={handleBulkImport}
+        onOpenAddModal={() => setIsAddModalOpen(true)}
+      />
 
       <AssetTable 
         assets={assets} isLoading={isLoading} user={user}
         activeDropdownId={activeDropdownId} setActiveDropdownId={setActiveDropdownId}
-        dropdownPos={dropdownPos} setDropdownPos={setDropdownPos}
         handleViewHistory={handleViewHistory} setAssignAssetId={setAssignAssetId} setIsAssignModalOpen={setIsAssignModalOpen}
         handleReturnAsset={handleReturnAsset} setEditingAsset={setEditingAsset} setIsEditModalOpen={setIsEditModalOpen}
         handleUpdateStatus={handleUpdateStatus} setDeleteConfirmInfo={setDeleteConfirmInfo}
       />
 
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-4 mb-12">
-          <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="bg-white border-2 border-[#e4e4e7] p-2 hover:bg-gray-50 disabled:opacity-50 transition-colors">
-            <ChevronLeft size={20} />
-          </button>
-          <span className="font-mono text-sm font-bold">PAGE {currentPage} OF {totalPages}</span>
-          <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="bg-white border-2 border-[#e4e4e7] p-2 hover:bg-gray-50 disabled:opacity-50 transition-colors">
-            <ChevronRight size={20} />
-          </button>
-        </div>
-      )}
+      <Pagination 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
 
       <AssetModals 
         isAddModalOpen={isAddModalOpen} newAsset={newAsset} setNewAsset={setNewAsset} categories={categories}
