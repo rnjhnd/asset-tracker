@@ -1,11 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Laptop, Monitor, Mouse, RefreshCw, X, Search, Users, Box, Clock, Download, Wrench, Trash2, Archive, CheckCircle, UserX, UserCheck, Smartphone, Tablet, Server, Network, Key, Upload, ChevronLeft, ChevronRight, SlidersHorizontal, Edit2, MoreHorizontal, User, ChevronDown } from 'lucide-react';
+import { Search, Users, Box, Download, Upload, ChevronLeft, ChevronRight, SlidersHorizontal, Key } from 'lucide-react';
 import { SelectDropdown } from '../components/SelectDropdown';
-import { DatePicker } from '../components/DatePicker';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid, Legend } from 'recharts';
+import { AnalyticsCharts } from '../components/dashboard/AnalyticsCharts';
+import { DashboardHeader } from '../components/dashboard/DashboardHeader';
+import { AssetTable } from '../components/dashboard/AssetTable';
+import { UserTable } from '../components/dashboard/UserTable';
+import { UserModals } from '../components/modals/UserModals';
+import { AssetModals } from '../components/modals/AssetModals';
+import { DeleteModal } from '../components/modals/DeleteModal';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import API_URL from '../config/api';
@@ -667,91 +671,18 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const getIcon = (category: string) => {
-    if (category === 'LAPTOP') return <Laptop size={18} />;
-    if (category === 'DESKTOP') return <Monitor size={18} />;
-    if (category === 'MONITOR') return <Monitor size={18} />;
-    if (category === 'TABLET') return <Tablet size={18} />;
-    if (category === 'PHONE') return <Smartphone size={18} />;
-    if (category === 'SERVER') return <Server size={18} />;
-    if (category === 'NETWORK') return <Network size={18} />;
-    return <Mouse size={18} />;
-  };
 
-  const BrutalistTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] p-3">
-          <p className="font-mono font-bold text-sm uppercase">{label || payload[0].name}</p>
-          {payload.map((p: any, i: number) => (
-            <p key={i} className="font-mono text-sm uppercase text-gray-700">
-              {p.name}: <span className="font-bold text-black">{p.value}</span>
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const chartColors = ['#3b82f6', '#16a34a', '#dc2626', '#ca8a04', '#9333ea', '#ea580c', '#0d9488'];
 
   return (
     <div className="min-h-screen bg-transparent text-gray-900 font-sans">
 
-      <header className="bg-white border-b-4 border-gray-900 px-4 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-40 sticky top-0 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-[#3b82f6] text-white flex items-center justify-center font-mono shrink-0 shadow-[4px_4px_0_0_#1e3a8a]">
-            <Server size={24} />
-          </div>
-          <div className="flex flex-col justify-center">
-            <h1 className="text-xl sm:text-2xl font-bold uppercase tracking-tighter text-gray-900 leading-none mb-1">INTERNAL ASSET PORTAL</h1>
-            <div className="flex items-center flex-wrap gap-2 sm:gap-3 font-mono text-[10px] sm:text-xs text-gray-500 uppercase tracking-widest mt-1">
-              <span className="flex items-center gap-1.5 text-green-600 font-bold whitespace-nowrap">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                ONLINE
-              </span>
-              <span className="text-gray-300 hidden sm:inline">|</span>
-              <span className="font-bold text-gray-900 truncate max-w-[150px] sm:max-w-[250px]" title={user?.employeeId}>{user?.employeeId}</span>
-              <span className="text-gray-300 hidden sm:inline">|</span>
-              <span className="bg-gray-100 px-2 py-0.5 border border-gray-300 whitespace-nowrap">{user?.role}</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center w-full sm:w-auto mt-2 sm:mt-0 relative profile-dropdown-container">
-          <button 
-            onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-            className="w-full sm:w-auto flex justify-between sm:justify-center items-center gap-2 bg-white border-2 border-gray-900 text-gray-900 font-mono text-xs font-bold uppercase tracking-wider px-4 py-2.5 transition-colors shadow-[4px_4px_0_0_#111827] hover:bg-gray-50 hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[2px_2px_0_0_#111827]"
-          >
-            <div className="flex items-center gap-2">
-              <User size={14} /> Hi, {user?.name?.split(' ')[0] || user?.role}
-            </div>
-            <ChevronDown size={14} className={`transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
-          </button>
-          
-          {isProfileDropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 w-full sm:w-56 bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] flex flex-col p-1 text-left z-50">
-              <div className="px-3 py-2 border-b border-gray-200 mb-1">
-                <p className="font-mono text-[10px] text-gray-500 uppercase font-bold tracking-widest">Signed in as</p>
-                <p className="font-mono text-sm truncate text-gray-900 font-bold" title={user?.name}>{user?.name}</p>
-                <p className="font-mono text-xs truncate text-gray-500" title={user?.employeeId}>{user?.employeeId}</p>
-              </div>
-              <button 
-                onClick={() => { setIsPasswordModalOpen(true); setIsProfileDropdownOpen(false); }}
-                className="px-3 py-2 text-sm font-mono text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors"
-              >
-                <Key size={14} /> Change Password
-              </button>
-              <button 
-                onClick={handleLogout}
-                className="px-3 py-2 text-sm font-mono text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors mt-1"
-              >
-                <LogOut size={14} /> Logout
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
+      <DashboardHeader 
+        user={user}
+        isProfileDropdownOpen={isProfileDropdownOpen}
+        setIsProfileDropdownOpen={setIsProfileDropdownOpen}
+        setIsPasswordModalOpen={setIsPasswordModalOpen}
+        handleLogout={handleLogout}
+      />
 
       <main className="p-4 sm:p-8 max-w-7xl mx-auto overflow-x-hidden">
         
@@ -780,96 +711,11 @@ const Dashboard: React.FC = () => {
 
             {/* Analytics Grid */}
             {user?.role === 'ADMIN' && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                {/* 1. Asset Distribution */}
-                <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
-                  <h3 className="font-mono text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-gray-900 pb-2">Asset Distribution</h3>
-                  <div className="h-[250px] w-full flex items-center justify-center">
-                    {isLoading ? <RefreshCw size={32} className="animate-spin text-gray-400" /> : (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            animationDuration={1200}
-                            animationEasing="ease-in-out"
-                            data={stats.categoryStats}
-                            innerRadius={60}
-                            outerRadius={90}
-                            paddingAngle={2}
-                            dataKey="value"
-                            stroke="#111827"
-                            strokeWidth={2}
-                          >
-                            {stats.categoryStats.map((_: any, index: number) => (
-                              <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip content={<BrutalistTooltip />} />
-                          <Legend iconType="square" wrapperStyle={{ fontFamily: 'monospace', fontSize: '10px' }} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    )}
-                  </div>
-                </div>
-
-                {/* 2. Status Breakdown */}
-                <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
-                  <h3 className="font-mono text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-gray-900 pb-2">Status Breakdown ({stats.total} Total)</h3>
-                  <div className="h-[250px] w-full flex items-center justify-center">
-                    {isLoading ? <RefreshCw size={32} className="animate-spin text-gray-400" /> : (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={[
-                          { name: 'Available', count: stats.available, fill: '#16a34a' },
-                          { name: 'Deployed', count: stats.assigned, fill: '#3b82f6' },
-                          { name: 'Maintenance', count: stats.maintenance, fill: '#ca8a04' },
-                          { name: 'Retired', count: stats.retired, fill: '#dc2626' }
-                        ]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
-                          <XAxis dataKey="name" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
-                          <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
-                          <Tooltip content={<BrutalistTooltip />} cursor={{ fill: '#f3f4f6' }} />
-                          <Bar animationDuration={1200} animationEasing="ease-in-out" dataKey="count" stroke="#111827" strokeWidth={2} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )}
-                  </div>
-                </div>
-
-                {/* 3. Hardware Aging */}
-                <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
-                  <h3 className="font-mono text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-gray-900 pb-2">Hardware Aging (By Purchase Year)</h3>
-                  <div className="h-[250px] w-full flex items-center justify-center">
-                    {isLoading ? <RefreshCw size={32} className="animate-spin text-gray-400" /> : (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={stats.agingStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
-                          <XAxis dataKey="year" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
-                          <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} allowDecimals={false} />
-                          <Tooltip content={<BrutalistTooltip />} cursor={{ fill: '#f3f4f6' }} />
-                          <Bar animationDuration={1200} animationEasing="ease-in-out" dataKey="count" fill="#9333ea" stroke="#111827" strokeWidth={2} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )}
-                  </div>
-                </div>
-
-                {/* 4. Utilization Timeline */}
-                <div className="bg-white border-2 border-gray-900 p-6 shadow-[4px_4px_0_0_#111827]">
-                  <h3 className="font-mono text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-gray-900 pb-2">Assignments (Last 6 Months)</h3>
-                  <div className="h-[250px] w-full flex items-center justify-center">
-                    {isLoading ? <RefreshCw size={32} className="animate-spin text-gray-400" /> : (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={stats.timelineStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
-                          <XAxis dataKey="month" tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} />
-                          <YAxis tick={{ fontFamily: 'monospace', fontSize: 10, fill: '#111827' }} axisLine={{ stroke: '#111827', strokeWidth: 2 }} tickLine={false} allowDecimals={false} />
-                          <Tooltip content={<BrutalistTooltip />} />
-                          <Area animationDuration={1200} animationEasing="ease-in-out" type="monotone" dataKey="assignments" stroke="#ea580c" strokeWidth={2} fill="#ffedd5" />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <AnalyticsCharts 
+                stats={stats} 
+                isLoading={isLoading} 
+                chartColors={['#3b82f6', '#16a34a', '#dc2626', '#ca8a04', '#9333ea', '#ea580c', '#0d9488']}
+              />
             )}
 
             {/* Employee Specific KPI Cards */}
@@ -1007,128 +853,14 @@ const Dashboard: React.FC = () => {
               )}
             </div>
 
-            <div className="bg-white border border-[#e4e4e7] shadow-sm overflow-hidden mb-6">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[800px] relative">
-                  <thead className="sticky top-0 z-10 bg-gray-50 shadow-[0_1px_0_0_#e4e4e7]">
-                    <tr className="font-mono text-xs uppercase tracking-wider text-gray-500">
-                      <th className="p-4 bg-gray-50">Asset Name</th>
-                      <th className="p-4 bg-gray-50">Category</th>
-                      <th className="p-4 bg-gray-50">Serial / ID</th>
-                      <th className="p-4 bg-gray-50">Purchase Date</th>
-                      <th className="p-4 bg-gray-50">Status</th>
-                      {user?.role === 'ADMIN' && <th className="p-4 bg-gray-50">Assigned To</th>}
-                      {user?.role === 'ADMIN' && <th className="p-4 text-right w-24 bg-gray-50">Actions</th>}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#e4e4e7]">
-                    {!isLoading && assets.map((asset) => (
-                      <tr key={asset.id} className="hover:bg-gray-50 transition-all hover:shadow-[inset_4px_0_0_0_#3b82f6] group">
-                        <td className="p-4 font-bold flex items-center gap-3">
-                          <span className="text-[#3b82f6]">{getIcon(asset.category)}</span>
-                          {asset.name}
-                        </td>
-                        <td className="p-4 font-mono text-sm">{asset.category}</td>
-                        <td className="p-4 font-mono text-xs text-gray-500">{asset.serialNumber}</td>
-                        <td className="p-4 font-mono text-xs text-gray-600">
-                          {asset.purchaseDate ? new Date(asset.purchaseDate).toLocaleDateString() : 'N/A'}
-                        </td>
-                        <td className="p-4">
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs border rounded-full ${
-                            asset.status === 'AVAILABLE' ? 'border-green-300 bg-green-50 text-green-700' :
-                            asset.status === 'ASSIGNED' ? 'border-blue-300 bg-blue-50 text-blue-700' :
-                            asset.status === 'MAINTENANCE' ? 'border-yellow-300 bg-yellow-50 text-yellow-700' :
-                            'border-red-300 bg-red-50 text-red-700'
-                          }`}>
-                            <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
-                            {asset.status}
-                          </span>
-                        </td>
-                        {user?.role === 'ADMIN' && (
-                          <td className="p-4 font-mono text-sm text-gray-900 font-bold">
-                            {asset.assignments.length > 0 ? (asset.assignments[0].user.name || asset.assignments[0].user.employeeId) : '--'}
-                          </td>
-                        )}
-                        {user?.role === 'ADMIN' && (
-                          <td className="p-4 text-right">
-                            <div className="relative inline-block text-left action-dropdown-container">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const rect = e.currentTarget.getBoundingClientRect();
-                                  const showAbove = (window.innerHeight - rect.bottom) < 260;
-                                  
-                                  setDropdownPos({ 
-                                    top: showAbove ? rect.top + window.scrollY : rect.bottom + window.scrollY, 
-                                    left: rect.right + window.scrollX - 192,
-                                    showAbove
-                                  });
-                                  setActiveDropdownId(activeDropdownId === asset.id ? null : asset.id);
-                                }}
-                                className="inline-flex items-center justify-center w-8 h-8 bg-white border-2 border-gray-900 shadow-[2px_2px_0_0_#111827] hover:bg-gray-50 hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0_0_#111827] transition-all"
-                              >
-                                <MoreHorizontal size={16} />
-                              </button>
-
-                              {activeDropdownId === asset.id && createPortal(
-                                <div 
-                                  style={{ 
-                                    top: `${dropdownPos.top}px`, 
-                                    left: `${dropdownPos.left}px`,
-                                    transform: dropdownPos.showAbove ? 'translateY(-100%)' : 'none',
-                                    marginTop: dropdownPos.showAbove ? '-8px' : '8px'
-                                  }}
-                                  className="absolute z-[9999] w-48 bg-white border-2 border-gray-900 shadow-[4px_4px_0_0_#111827] flex flex-col p-1 text-left action-dropdown-container"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <button onClick={() => { handleViewHistory(asset.id, asset.name); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors"><Clock size={14}/> Audit Log</button>
-                                  
-                                  {asset.status === 'AVAILABLE' && <button onClick={() => { setAssignAssetId(asset.id); setIsAssignModalOpen(true); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-[#3b82f6] hover:bg-blue-50 flex items-center gap-3 font-bold uppercase transition-colors"><CheckCircle size={14}/> Assign</button>}
-                                  {asset.status === 'ASSIGNED' && <button onClick={() => { handleReturnAsset(asset.id); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-orange-600 hover:bg-orange-50 flex items-center gap-3 font-bold uppercase transition-colors"><RefreshCw size={14}/> Return</button>}
-                                  
-                                  <div className="h-px bg-gray-200 my-1 mx-2"></div>
-                                  
-                                  <button onClick={() => { setEditingAsset({ id: asset.id, name: asset.name, serialNumber: asset.serialNumber, category: asset.category, purchaseDate: asset.purchaseDate ? new Date(asset.purchaseDate).toISOString().split('T')[0] : '' }); setIsEditModalOpen(true); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors"><Edit2 size={14}/> Edit Asset</button>
-                                  
-                                  {asset.status !== 'AVAILABLE' && <button onClick={() => { handleUpdateStatus(asset.id, 'AVAILABLE'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-green-600 hover:bg-green-50 flex items-center gap-3 transition-colors"><CheckCircle size={14}/> Make Available</button>}
-                                  {asset.status !== 'RETIRED' && <button onClick={() => { handleUpdateStatus(asset.id, 'MAINTENANCE'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-yellow-600 hover:bg-yellow-50 flex items-center gap-3 transition-colors"><Wrench size={14}/> Maintenance</button>}
-                                  {asset.status !== 'RETIRED' && <button onClick={() => { handleUpdateStatus(asset.id, 'RETIRED'); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors"><Archive size={14}/> Retire</button>}
-                                  <div className="h-px bg-gray-200 my-1 mx-2"></div>
-                                  <button onClick={() => { setDeleteConfirmInfo({ id: asset.id, type: 'ASSET' }); setActiveDropdownId(null); }} className="px-3 py-2 text-sm font-mono text-red-800 hover:bg-red-100 flex items-center gap-3 transition-colors font-bold"><Trash2 size={14}/> Hard Delete</button>
-                                </div>,
-                                document.body
-                              )}
-                            </div>
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                    {isLoading && (
-                      <tr>
-                        <td colSpan={user?.role === 'ADMIN' ? 6 : 4} className="p-24 text-center">
-                          <div className="flex flex-col items-center justify-center text-gray-900">
-                            <RefreshCw size={48} className="mb-4 animate-spin opacity-50" />
-                            <p className="font-mono text-sm uppercase tracking-widest font-bold">Loading Data...</p>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                    {!isLoading && assets.length === 0 && (
-                      <tr>
-                        <td colSpan={user?.role === 'ADMIN' ? 6 : 4} className="p-24 text-center">
-                          <div className="flex flex-col items-center justify-center text-gray-400">
-                            <Box size={48} className="mb-4 opacity-50" />
-                            <p className="font-mono text-sm uppercase tracking-widest font-bold text-gray-900">
-                              {user?.role === 'ADMIN' ? 'No assets found matching your filters.' : 'You have no assigned equipment.'}
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <AssetTable 
+              assets={assets} isLoading={isLoading} user={user}
+              activeDropdownId={activeDropdownId} setActiveDropdownId={setActiveDropdownId}
+              dropdownPos={dropdownPos} setDropdownPos={setDropdownPos}
+              handleViewHistory={handleViewHistory} setAssignAssetId={setAssignAssetId} setIsAssignModalOpen={setIsAssignModalOpen}
+              handleReturnAsset={handleReturnAsset} setEditingAsset={setEditingAsset} setIsEditModalOpen={setIsEditModalOpen}
+              handleUpdateStatus={handleUpdateStatus} setDeleteConfirmInfo={setDeleteConfirmInfo}
+            />
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
@@ -1291,127 +1023,12 @@ const Dashboard: React.FC = () => {
               )}
             </div>
 
-            <div className="bg-white border border-[#e4e4e7] shadow-sm overflow-hidden mb-6">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse relative">
-                  <thead className="sticky top-0 z-10 bg-gray-50 shadow-[0_1px_0_0_#e4e4e7]">
-                    <tr className="font-mono text-xs uppercase tracking-wider text-gray-500">
-                      <th className="p-4 bg-gray-50">Employee</th>
-                      <th className="p-4 bg-gray-50">Role</th>
-                      <th className="p-4 bg-gray-50">Department</th>
-                      <th className="p-4 bg-gray-50">Status</th>
-                      <th className="p-4 bg-gray-50">Account Created</th>
-                      <th className="p-4 text-right bg-gray-50">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#e4e4e7]">
-                    {!isLoading && users.map((u) => (
-                      <tr key={u.id} className="hover:bg-gray-50 transition-all hover:shadow-[inset_4px_0_0_0_#3b82f6] group">
-                      <td className="p-4">
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-gray-900">{u.name}</span>
-                            {u.resetRequested && (
-                              <span className="bg-red-100 text-red-700 border border-red-300 font-mono text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 whitespace-nowrap animate-pulse">
-                                Reset Req
-                              </span>
-                            )}
-                          </div>
-                          <span className="font-mono text-xs text-gray-500 mt-0.5">{u.employeeId}</span>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <span className={`inline-block px-2 py-1 font-mono text-xs border ${
-                          u.role === 'ADMIN' ? 'border-purple-200 bg-purple-50 text-purple-700' : 'border-gray-200 bg-gray-50 text-gray-700'
-                        }`}>
-                          {u.role}
-                        </span>
-                      </td>
-                      <td className="p-4 font-mono text-sm">{u.role === 'ADMIN' ? '--' : u.department}</td>
-                      <td className="p-4">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs border rounded-full ${
-                          u.isActive ? 'border-green-300 bg-green-50 text-green-700' : 'border-red-300 bg-red-50 text-red-700'
-                        }`}>
-                          <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
-                          {u.isActive ? 'ACTIVE' : 'DEACTIVATED'}
-                        </span>
-                      </td>
-                      <td className="p-4 font-mono text-sm text-gray-500 align-middle">{new Date(u.createdAt).toLocaleDateString()}</td>
-                      <td className="p-4 align-middle">
-                        <div className="flex items-center justify-end gap-3">
-                          <button 
-                            onClick={() => {
-                              setEditingUser({
-                                id: u.id,
-                                name: u.name,
-                                employeeId: u.employeeId,
-                                role: u.role,
-                                department: u.department
-                              });
-                              setIsEditUserModalOpen(true);
-                            }}
-                            className="text-blue-500 hover:text-blue-700 transition-colors"
-                            title="Edit User"
-                          >
-                            <Edit2 size={16} />
-                          </button>
-                          <div className="h-4 w-px bg-gray-300 mx-1"></div>
-                          <button 
-                            onClick={() => handleToggleUserStatus(u.id)}
-                            disabled={u.role === 'ADMIN' && u.isActive}
-                            className={`${u.role === 'ADMIN' && u.isActive ? 'text-gray-300 cursor-not-allowed' : (u.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-500 hover:text-green-700')} font-mono text-sm uppercase transition-colors`}
-                            title={u.role === 'ADMIN' && u.isActive ? "Cannot deactivate ADMIN" : (u.isActive ? "Deactivate User" : "Reactivate User")}
-                          >
-                            {u.isActive ? <UserX size={16} /> : <UserCheck size={16} />}
-                          </button>
-                          <div className="h-4 w-px bg-gray-300 mx-1"></div>
-                          <button 
-                            onClick={() => {
-                              setForceResetUserId(u.id);
-                              setForceResetUserEmployeeId(u.employeeId);
-                              setIsForceResetModalOpen(true);
-                            }}
-                            className="text-[#ca8a04] hover:text-yellow-600 transition-colors"
-                            title="Force Reset Password"
-                          >
-                            <Key size={16} />
-                          </button>
-                          <div className="h-4 w-px bg-gray-300 mx-1"></div>
-                          <button 
-                            onClick={() => setDeleteConfirmInfo({ id: u.id, type: 'USER' })}
-                            className="text-red-800 hover:text-red-900 transition-colors"
-                            title="Hard Delete Employee"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {isLoading && (
-                    <tr>
-                      <td colSpan={5} className="p-24 text-center">
-                        <div className="flex flex-col items-center justify-center text-gray-900">
-                          <RefreshCw size={48} className="mb-4 animate-spin opacity-50" />
-                          <p className="font-mono text-sm uppercase tracking-widest font-bold">Loading Directory...</p>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                  {!isLoading && users.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="p-24 text-center">
-                        <div className="flex flex-col items-center justify-center text-gray-400">
-                          <Users size={48} className="mb-4 opacity-50" />
-                          <p className="font-mono text-sm uppercase tracking-widest font-bold text-gray-900">No users found matching your filters.</p>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            </div>
+            <UserTable 
+              users={users} isLoading={isLoading} setEditingUser={setEditingUser} setIsEditUserModalOpen={setIsEditUserModalOpen}
+              handleToggleUserStatus={handleToggleUserStatus} setForceResetUserId={setForceResetUserId}
+              setForceResetUserEmployeeId={setForceResetUserEmployeeId} setIsForceResetModalOpen={setIsForceResetModalOpen}
+              setDeleteConfirmInfo={setDeleteConfirmInfo}
+            />
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
@@ -1442,407 +1059,22 @@ const Dashboard: React.FC = () => {
 
       {/* --- MODALS --- */}
 
-      {/* Password Change Modal */}
-      {isPasswordModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
-              <X size={24} />
-            </button>
-            <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Security Settings</h3>
-            <form onSubmit={handleUpdatePassword} className="space-y-4">
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Current Password</label>
-                <input required type="password" value={passwordForm.currentPassword} onChange={e => setPasswordForm({...passwordForm, currentPassword: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
-              </div>
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">New Password</label>
-                <input required type="password" value={passwordForm.newPassword} onChange={e => setPasswordForm({...passwordForm, newPassword: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
-                <p className="font-mono text-[10px] text-gray-500 mt-2">Must be at least 8 characters long.</p>
-              </div>
-              <button disabled={isSubmitting} type="submit" className={`w-full bg-gray-900 text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-black transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                {isSubmitting ? 'PROCESSING...' : 'Update Password'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Force Reset Password Modal (Admin Only) */}
-      {isForceResetModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
-              <X size={24} />
-            </button>
-            <h3 className="text-xl font-bold uppercase tracking-tight mb-2 border-b pb-4">Force Reset Password</h3>
-            <p className="font-mono text-xs text-gray-500 mb-6 uppercase">Target Account: {forceResetUserEmployeeId}</p>
-            <form onSubmit={handleForceResetPassword} className="space-y-4">
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">New Temporary Password</label>
-                <input required type="text" value={forceNewPassword} onChange={e => setForceNewPassword(e.target.value)} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. TempPass123!" />
-                <p className="font-mono text-[10px] text-gray-500 mt-2">Must be at least 8 characters long.</p>
-              </div>
-              <button disabled={isSubmitting} type="submit" className={`w-full bg-red-600 text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-red-700 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                {isSubmitting ? 'PROCESSING...' : 'OVERRIDE PASSWORD'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* History Modal */}
-      {isHistoryModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-lg relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
-              <X size={24} />
-            </button>
-            <h3 className="text-xl font-bold uppercase tracking-tight mb-2 pr-8">{activeHistoryAssetName}</h3>
-            <p className="font-mono text-sm text-gray-500 uppercase mb-6 border-b pb-4">Audit Log & Lifecycle</p>
-            
-            <div className="overflow-y-auto pr-2 pl-4 space-y-4">
-              {historyLogs.length === 0 ? (
-                <p className="font-mono text-sm text-gray-400 uppercase text-center py-8">No historical data found.</p>
-              ) : (
-                historyLogs.map(log => (
-                  <div key={log.id} className="border-l-2 border-gray-200 pl-4 py-2 relative">
-                    <div className={`absolute w-3 h-3 rounded-full -left-[7px] top-4 border-2 border-white ${log.returnDate ? 'bg-gray-400' : 'bg-green-500'}`}></div>
-                    <div className="flex items-start gap-4">
-                      <div className="bg-gray-100 p-2 border border-gray-200">
-                        <User size={20} className="text-gray-500" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm mb-1">{log.user.name || log.user.employeeId}</p>
-                        <div className="font-mono text-xs text-gray-500 flex flex-col gap-1">
-                          <span>CHECKOUT: {new Date(log.checkoutDate).toLocaleString()}</span>
-                          {log.returnDate ? (
-                            <span className="text-gray-400">RETURNED: {new Date(log.returnDate).toLocaleString()}</span>
-                          ) : (
-                            <span className="text-green-600 font-bold">STATUS: ACTIVE</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Asset Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
-              <X size={24} />
-            </button>
-            <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Register New Hardware</h3>
-            <form onSubmit={handleCreateAsset} className="space-y-4">
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Asset Name</label>
-                <input required type="text" value={newAsset.name} onChange={e => setNewAsset({...newAsset, name: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. MacBook Pro 16" />
-              </div>
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Serial Number</label>
-                <input required type="text" value={newAsset.serialNumber} onChange={e => setNewAsset({...newAsset, serialNumber: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. MBP-2024-001" />
-              </div>
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Purchase Date</label>
-                <DatePicker maxDate={new Date()} value={newAsset.purchaseDate} onChange={val => setNewAsset({...newAsset, purchaseDate: val})} className="w-full" />
-              </div>
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Category</label>
-                {isCreatingCategory ? (
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <input required autoFocus type="text" value={newCategoryName} onChange={handleCategoryNameChange} className="flex-1 border-2 border-[#3b82f6] p-3 font-mono text-sm focus:border-blue-600 outline-none transition-colors" placeholder="E.g. VR HEADSET" />
-                    <button type="button" onClick={handleCreateCategory} disabled={isSubmitting || !newCategoryName.trim()} className="w-full sm:w-auto bg-[#3b82f6] text-white px-4 py-3 font-bold hover:bg-blue-600 transition-colors">ADD</button>
-                    <button type="button" onClick={() => { setIsCreatingCategory(false); setNewCategoryName(''); }} className="w-full sm:w-auto bg-gray-200 text-gray-700 px-4 py-3 font-bold hover:bg-gray-300 transition-colors">CANCEL</button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <SelectDropdown
-                      value={newAsset.category}
-                      onChange={val => setNewAsset({...newAsset, category: val})}
-                      options={categories.filter(c => c.name !== 'UNASSIGNED').map(c => ({ value: c.name, label: c.name }))}
-                      className="flex-1"
-                    />
-                    <button type="button" onClick={() => setIsCreatingCategory(true)} className="w-full sm:w-auto bg-gray-900 text-white px-4 py-3 font-bold hover:bg-gray-700 transition-colors whitespace-nowrap">+ NEW</button>
-                  </div>
-                )}
-              </div>
-              <button disabled={isSubmitting} type="submit" className={`w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                {isSubmitting ? 'PROCESSING...' : 'Deploy to Inventory'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Assign Asset Modal */}
-      {isAssignModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
-              <X size={24} />
-            </button>
-            <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Assign Hardware</h3>
-            <form onSubmit={handleAssignAsset} className="space-y-4">
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Search & Select Employee</label>
-                <div className="relative">
-                  <input 
-                    type="text" 
-                    value={assignSearchQuery}
-                    onChange={(e) => {
-                      setAssignSearchQuery(e.target.value);
-                      setShowAssignDropdown(true);
-                      setAssignUserId('');
-                    }}
-                    onFocus={() => setShowAssignDropdown(true)}
-                    className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none bg-white transition-colors"
-                    placeholder="Type to search employee..."
-                    required={!assignUserId}
-                  />
-                  {showAssignDropdown && assignSearchQuery.trim().length > 0 && (
-                    <ul className="w-full bg-white border-2 border-gray-900 border-t-0 shadow-[4px_4px_0_0_#111827] mt-0 max-h-48 overflow-y-auto">
-                      {isSearchingAssign ? (
-                        <li className="p-3 font-mono text-sm text-gray-500">Searching...</li>
-                      ) : assignSearchResults.length === 0 ? (
-                        <li className="p-3 font-mono text-sm text-gray-500">No employees found.</li>
-                      ) : (
-                        assignSearchResults.map(u => (
-                          <li 
-                            key={u.id} 
-                            onClick={() => {
-                              setAssignUserId(u.id);
-                              setAssignSearchQuery(`${u.name} (${u.employeeId})`);
-                              setShowAssignDropdown(false);
-                            }}
-                            className="p-3 border-b border-gray-100 last:border-0 hover:bg-blue-50 cursor-pointer font-mono text-sm transition-colors text-left"
-                          >
-                            <div className="font-bold text-gray-900">{u.name}</div>
-                            <div className="text-xs text-gray-500">{u.employeeId}</div>
-                          </li>
-                        ))
-                      )}
-                    </ul>
-                  )}
-                </div>
-              </div>
-              <button type="submit" className="w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors">Confirm Assignment</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Asset Modal */}
-      {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
-              <X size={24} />
-            </button>
-            <h2 className="text-xl sm:text-2xl font-bold font-mono tracking-tight uppercase mb-6 flex items-center gap-3">
-              <Edit2 className="text-[#3b82f6]" />
-              Edit Asset Details
-            </h2>
-            <form onSubmit={handleUpdateAsset} className="space-y-4">
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Asset Name</label>
-                <input required autoFocus type="text" value={editingAsset.name} onChange={e => setEditingAsset({...editingAsset, name: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
-              </div>
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Serial Number</label>
-                <input required type="text" value={editingAsset.serialNumber} onChange={e => setEditingAsset({...editingAsset, serialNumber: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
-              </div>
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Purchase Date</label>
-                <DatePicker maxDate={new Date()} value={editingAsset.purchaseDate} onChange={val => setEditingAsset({...editingAsset, purchaseDate: val})} className="w-full" />
-              </div>
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Category</label>
-                {isCreatingCategory ? (
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <input required autoFocus type="text" value={newCategoryName} onChange={handleCategoryNameChange} className="flex-1 border-2 border-[#3b82f6] p-3 font-mono text-sm focus:border-blue-600 outline-none transition-colors" placeholder="E.g. VR HEADSET" />
-                    <button type="button" onClick={handleCreateCategory} disabled={isSubmitting || !newCategoryName.trim()} className="w-full sm:w-auto bg-[#3b82f6] text-white px-4 py-3 font-bold hover:bg-blue-600 transition-colors">ADD</button>
-                    <button type="button" onClick={() => { setIsCreatingCategory(false); setNewCategoryName(''); }} className="w-full sm:w-auto bg-gray-200 text-gray-700 px-4 py-3 font-bold hover:bg-gray-300 transition-colors">CANCEL</button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <SelectDropdown
-                      value={editingAsset.category}
-                      onChange={val => setEditingAsset({...editingAsset, category: val})}
-                      options={categories.filter(c => c.name !== 'UNASSIGNED').map(c => ({ value: c.name, label: c.name }))}
-                      className="flex-1"
-                    />
-                    <button type="button" onClick={() => setIsCreatingCategory(true)} className="w-full sm:w-auto bg-gray-900 text-white px-4 py-3 font-bold hover:bg-gray-700 transition-colors whitespace-nowrap">+ NEW</button>
-                  </div>
-                )}
-              </div>
-              <button disabled={isSubmitting} type="submit" className={`w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                {isSubmitting ? 'PROCESSING...' : 'Save Changes'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Add User Modal */}
-      {isUserModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
-              <X size={24} />
-            </button>
-            <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Register Employee</h3>
-            <form onSubmit={handleCreateUser} className="space-y-4">
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Full Name</label>
-                <input 
-                  required 
-                  type="text" 
-                  pattern="^[A-Za-z\s]+$" 
-                  title="Only letters and spaces are allowed." 
-                  value={newUser.name} 
-                  onChange={e => {
-                    const rawVal = e.target.value;
-                    if (/[^A-Za-z\s]/.test(rawVal)) {
-                      toast('Only letters and spaces are allowed for Full Name', { icon: '⚠️', id: 'name-val-err' });
-                    }
-                    setNewUser({...newUser, name: rawVal.replace(/[^A-Za-z\s]/g, '')});
-                  }} 
-                  className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" 
-                  placeholder="e.g. John Doe" 
-                />
-              </div>
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Employee ID</label>
-                <input required type="text" value={newUser.employeeId} onChange={e => setNewUser({...newUser, employeeId: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="EMP-001" />
-              </div>
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Initial Password</label>
-                <div className="relative mb-2">
-                  <input required type="text" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. temporary123" />
-                </div>
-                <p className="font-mono text-[10px] text-gray-500">Must be at least 8 characters long.</p>
-              </div>
-              {newUser.role !== 'ADMIN' && (
-                <div>
-                  <label className="block font-mono text-xs uppercase mb-1 font-bold">Department</label>
-                  <input required type="text" value={newUser.department} onChange={handleDepartmentChange} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" placeholder="e.g. ENGINEERING" />
-                </div>
-              )}
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">System Role</label>
-                <SelectDropdown
-                  value={newUser.role}
-                  onChange={val => setNewUser({...newUser, role: val})}
-                  options={[
-                    { value: 'EMPLOYEE', label: 'Standard Employee' },
-                    { value: 'ADMIN', label: 'System Administrator' }
-                  ]}
-                  className="w-full"
-                />
-              </div>
-              <button disabled={isSubmitting} type="submit" className={`w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                {isSubmitting ? 'PROCESSING...' : 'Create Account'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Edit User Modal */}
-      {isEditUserModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
-              <X size={24} />
-            </button>
-            <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Edit Employee</h3>
-            <form onSubmit={handleEditUser} className="space-y-4">
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Full Name</label>
-                <input 
-                  required 
-                  type="text" 
-                  value={editingUser.name} 
-                  onChange={e => {
-                    const rawVal = e.target.value;
-                    if (/[^A-Za-z\s]/.test(rawVal)) {
-                      toast('Only letters and spaces are allowed for Full Name', { icon: '⚠️', id: 'edit-name-val-err' });
-                    }
-                    setEditingUser({...editingUser, name: rawVal.replace(/[^A-Za-z\s]/g, '')});
-                  }} 
-                  className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" 
-                  placeholder="e.g. John Doe" 
-                />
-              </div>
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Employee ID</label>
-                <input disabled required type="text" value={editingUser.employeeId} onChange={e => setEditingUser({...editingUser, employeeId: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors bg-gray-100 cursor-not-allowed text-gray-500" placeholder="EMP-001" title="Employee ID cannot be changed after creation." />
-              </div>
-              {editingUser.role !== 'ADMIN' && (
-                <div>
-                  <label className="block font-mono text-xs uppercase mb-1 font-bold">Department</label>
-                  <input 
-                    required 
-                    type="text" 
-                    value={editingUser.department} 
-                    onChange={e => {
-                      const raw = e.target.value;
-                      const sanitized = raw.replace(/[^A-Za-z\s]/g, '');
-                      if (raw !== sanitized) toast('Only letters and spaces allowed', { icon: '🚧', id: 'edit-dept-val-err' });
-                      setEditingUser({...editingUser, department: sanitized.toUpperCase()});
-                    }} 
-                    className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" 
-                    placeholder="e.g. ENGINEERING" 
-                  />
-                </div>
-              )}
-              <button disabled={isSubmitting} type="submit" className={`w-full bg-[#3b82f6] text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-blue-600 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                {isSubmitting ? 'PROCESSING...' : 'Save Changes'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-    {/* Delete Confirmation Modal */}
-      {deleteConfirmInfo && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center">
-          <div className="bg-white border-2 border-red-600 shadow-[8px_8px_0_0_#dc2626] p-6 sm:p-8 w-full max-w-md relative mx-4">
-            <div className="flex items-center gap-4 mb-4 text-red-600">
-              <Trash2 size={32} />
-              <h2 className="text-2xl font-bold font-mono tracking-tight uppercase">Hard Delete</h2>
-            </div>
-            <p className="text-gray-700 font-mono text-sm mb-6">
-              Are you absolutely sure? This will permanently delete this {deleteConfirmInfo.type.toLowerCase()} from the database.
-              <br/><br/>
-              <span className="font-bold text-red-600">WARNING:</span> This will only succeed if the {deleteConfirmInfo.type.toLowerCase()} has <span className="font-bold underline">ZERO</span> assignment history. Otherwise, you must Retire/Deactivate them instead to preserve audit logs.
-            </p>
-            <div className="flex gap-4">
-              <button 
-                onClick={() => setDeleteConfirmInfo(null)}
-                className="flex-1 bg-gray-100 text-gray-700 border-2 border-gray-300 font-mono uppercase font-bold py-3 hover:bg-gray-200 transition-colors"
-                disabled={isSubmitting}
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={executeDelete}
-                className={`flex-1 bg-red-600 text-white font-mono uppercase font-bold py-3 hover:bg-red-700 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'DELETING...' : 'YES, DELETE'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <UserModals 
+        isUserModalOpen={isUserModalOpen} newUser={newUser} setNewUser={setNewUser} handleCreateUser={handleCreateUser} handleDepartmentChange={handleDepartmentChange}
+        isEditUserModalOpen={isEditUserModalOpen} editingUser={editingUser} setEditingUser={setEditingUser} handleEditUser={handleEditUser}
+        isPasswordModalOpen={isPasswordModalOpen} passwordForm={passwordForm} setPasswordForm={setPasswordForm} handleUpdatePassword={handleUpdatePassword}
+        isForceResetModalOpen={isForceResetModalOpen} forceResetUserEmployeeId={forceResetUserEmployeeId} forceNewPassword={forceNewPassword} setForceNewPassword={setForceNewPassword} handleForceResetPassword={handleForceResetPassword}
+        closeAllModals={closeAllModals} isSubmitting={isSubmitting}
+      />
+      <AssetModals 
+        isAddModalOpen={isAddModalOpen} newAsset={newAsset} setNewAsset={setNewAsset} handleCreateAsset={handleCreateAsset}
+        isCreatingCategory={isCreatingCategory} setIsCreatingCategory={setIsCreatingCategory} newCategoryName={newCategoryName} handleCategoryNameChange={handleCategoryNameChange} handleCreateCategory={handleCreateCategory} categories={categories}
+        isAssignModalOpen={isAssignModalOpen} assignSearchQuery={assignSearchQuery} setAssignSearchQuery={setAssignSearchQuery} showAssignDropdown={showAssignDropdown} setShowAssignDropdown={setShowAssignDropdown} assignUserId={assignUserId} setAssignUserId={setAssignUserId} isSearchingAssign={isSearchingAssign} assignSearchResults={assignSearchResults} handleAssignAsset={handleAssignAsset}
+        isEditModalOpen={isEditModalOpen} editingAsset={editingAsset} setEditingAsset={setEditingAsset} handleUpdateAsset={handleUpdateAsset}
+        isHistoryModalOpen={isHistoryModalOpen} activeHistoryAssetName={activeHistoryAssetName} historyLogs={historyLogs}
+        closeAllModals={closeAllModals} isSubmitting={isSubmitting}
+      />
+      <DeleteModal deleteConfirmInfo={deleteConfirmInfo} setDeleteConfirmInfo={setDeleteConfirmInfo} executeDelete={executeDelete} isSubmitting={isSubmitting} />
 
     </div>
   );

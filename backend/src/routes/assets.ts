@@ -61,47 +61,70 @@ router.get('/', authenticateToken, async (req, res) => {
       { id: 'asc' }
     ];
 
-    if (sortField === 'employee' || sortField === 'category') {
-      orderByClause = { id: 'asc' }; // Remove Prisma sorting, we'll sort in JS
+    if (sortField === 'category') {
+      orderByClause = [
+        { category: { name: sortDir } },
+        { id: 'asc' }
+      ];
     }
+    
+    // Prisma does not natively support sorting by a filtered one-to-many relation (assignments -> user).
+    // If sorting by employee, we must fall back to in-memory sort and slice.
+    // For ALL OTHER FIELDS, we use the fast path: DB-level pagination!
+    const requiresJSSort = sortField === 'employee';
 
-    let assets = await prisma.asset.findMany({
-      where: whereClause,
-      include: {
-        category: true,
-        assignments: {
-          where: { returnDate: null },
-          include: { user: { select: { employeeId: true, name: true } } }
+    let assets;
+    let total;
+
+    if (requiresJSSort) {
+      // Slow Path: In-memory sorting (Fallback)
+      const allAssets = await prisma.asset.findMany({
+        where: whereClause,
+        include: {
+          category: true,
+          assignments: {
+            where: { returnDate: null },
+            include: { user: { select: { employeeId: true, name: true } } }
+          }
         }
-      },
-      orderBy: orderByClause,
-    });
+      });
 
-    // Handle JS sorting for complex relations
-    if (sortField === 'employee') {
-      assets.sort((a: any, b: any) => {
+      allAssets.sort((a: any, b: any) => {
         const nameA = a.assignments[0]?.user?.name || a.assignments[0]?.user?.employeeId || '';
         const nameB = b.assignments[0]?.user?.name || b.assignments[0]?.user?.employeeId || '';
-        
         if (!nameA && nameB) return 1;
         if (nameA && !nameB) return -1;
         if (!nameA && !nameB) return 0;
-
         return sortDir === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
       });
-    } else if (sortField === 'category') {
-      assets.sort((a: any, b: any) => {
-        const catA = a.category?.name || '';
-        const catB = b.category?.name || '';
-        return sortDir === 'asc' ? catA.localeCompare(catB) : catB.localeCompare(catA);
-      });
+
+      total = allAssets.length;
+      assets = allAssets.slice(skip, skip + limitNumber);
+    } else {
+      // 🚀 Fast Path: Database-level sorting and pagination
+      const [fetchedAssets, count] = await Promise.all([
+        prisma.asset.findMany({
+          where: whereClause,
+          include: {
+            category: true,
+            assignments: {
+              where: { returnDate: null },
+              include: { user: { select: { employeeId: true, name: true } } }
+            }
+          },
+          orderBy: orderByClause,
+          skip,
+          take: limitNumber,
+        }),
+        prisma.asset.count({ where: whereClause })
+      ]);
+      
+      assets = fetchedAssets;
+      total = count;
     }
 
-    const total = assets.length;
-    const paginatedAssets = assets.slice(skip, skip + limitNumber);
-
     res.json({
-      data: paginatedAssets.map((a: any) => ({ ...a, category: a.category?.name || 'UNKNOWN' })),
+      data: assets.map((a: any) => ({ ...a, category: a.category?.name || 'UNKNOWN' })),
       total,
       page: pageNumber,
       totalPages: Math.ceil(total / limitNumber)

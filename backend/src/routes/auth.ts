@@ -2,12 +2,12 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import prisma from '../db';
-import { authenticateToken } from '../middleware/auth';
+import { authenticateToken, requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
 // REGISTER ROUTE
-router.post('/register', async (req, res) => {
+router.post('/register', authenticateToken, requireAdmin, async (req, res) => {
   try {
     let { employeeId, password, name, role, department } = req.body;
 
