@@ -123,7 +123,7 @@ export const AssetActionDropdown: React.FC<AssetActionDropdownProps> = ({
               </button>
             )}
 
-            {asset.status !== 'RETIRED' && (
+            {asset.status !== 'MAINTENANCE' && asset.status !== 'RETIRED' && (
               <button
                 onClick={() => {
                   onUpdateStatus(asset.id, 'MAINTENANCE');
