@@ -4,18 +4,19 @@ import { Edit2, UserX, UserCheck, Key, Trash2, RefreshCw, Users } from 'lucide-r
 type UserTableProps = {
   users: any[];
   isLoading: boolean;
-  setEditingUser: (user: any) => void;
-  setIsEditUserModalOpen: (val: boolean) => void;
+  onEditUser: (user: any) => void;
   handleToggleUserStatus: (id: string) => void;
-  setForceResetUserId: (id: string) => void;
-  setForceResetUserEmployeeId: (id: string) => void;
-  setIsForceResetModalOpen: (val: boolean) => void;
-  setDeleteConfirmInfo: (info: { id: string, type: 'USER' | 'ASSET' } | null) => void;
+  onForceReset: (user: { id: string; employeeId: string }) => void;
+  setDeleteConfirmInfo: (info: { id: string; type: 'USER' | 'ASSET' } | null) => void;
 };
 
 export const UserTable: React.FC<UserTableProps> = ({
-  users, isLoading, setEditingUser, setIsEditUserModalOpen, handleToggleUserStatus,
-  setForceResetUserId, setForceResetUserEmployeeId, setIsForceResetModalOpen, setDeleteConfirmInfo
+  users,
+  isLoading,
+  onEditUser,
+  handleToggleUserStatus,
+  onForceReset,
+  setDeleteConfirmInfo,
 }) => {
   return (
     <div className="bg-white border border-[#e4e4e7] shadow-sm overflow-hidden mb-6">
@@ -67,16 +68,7 @@ export const UserTable: React.FC<UserTableProps> = ({
               <td className="p-4 align-middle">
                 <div className="flex items-center justify-end gap-3">
                   <button 
-                    onClick={() => {
-                      setEditingUser({
-                        id: u.id,
-                        name: u.name,
-                        employeeId: u.employeeId,
-                        role: u.role,
-                        department: u.department
-                      });
-                      setIsEditUserModalOpen(true);
-                    }}
+                    onClick={() => onEditUser(u)}
                     className="text-blue-500 hover:text-blue-700 transition-colors"
                     title="Edit User"
                   >
@@ -93,11 +85,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                   </button>
                   <div className="h-4 w-px bg-gray-300 mx-1"></div>
                   <button 
-                    onClick={() => {
-                      setForceResetUserId(u.id);
-                      setForceResetUserEmployeeId(u.employeeId);
-                      setIsForceResetModalOpen(true);
-                    }}
+                    onClick={() => onForceReset({ id: u.id, employeeId: u.employeeId })}
                     className="text-[#ca8a04] hover:text-yellow-600 transition-colors"
                     title="Force Reset Password"
                   >
