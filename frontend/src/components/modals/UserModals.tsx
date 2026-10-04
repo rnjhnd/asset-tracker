@@ -15,61 +15,29 @@ type UserModalsProps = {
   setEditingUser: (user: any) => void;
   handleEditUser: (e: React.FormEvent) => void;
 
-  isPasswordModalOpen: boolean;
-  passwordForm: any;
-  setPasswordForm: (form: any) => void;
-  handleUpdatePassword: (e: React.FormEvent) => void;
-
   isForceResetModalOpen: boolean;
   forceResetUserEmployeeId: string;
   forceNewPassword: string;
   setForceNewPassword: (pw: string) => void;
   handleForceResetPassword: (e: React.FormEvent) => void;
-
-  closeAllModals: () => void;
+  
   isSubmitting: boolean;
+  closeAllModals: () => void;
 };
 
 export const UserModals: React.FC<UserModalsProps> = ({
   isUserModalOpen, newUser, setNewUser, handleCreateUser, handleDepartmentChange,
   isEditUserModalOpen, editingUser, setEditingUser, handleEditUser,
-  isPasswordModalOpen, passwordForm, setPasswordForm, handleUpdatePassword,
   isForceResetModalOpen, forceResetUserEmployeeId, forceNewPassword, setForceNewPassword, handleForceResetPassword,
-  closeAllModals, isSubmitting
+  isSubmitting, closeAllModals
 }) => {
   return (
     <>
-      {/* Password Change Modal */}
-      {isPasswordModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
-              <X size={24} />
-            </button>
-            <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Security Settings</h3>
-            <form onSubmit={handleUpdatePassword} className="space-y-4">
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">Current Password</label>
-                <input required type="password" value={passwordForm.currentPassword} onChange={e => setPasswordForm({...passwordForm, currentPassword: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
-              </div>
-              <div>
-                <label className="block font-mono text-xs uppercase mb-1 font-bold">New Password</label>
-                <input required type="password" value={passwordForm.newPassword} onChange={e => setPasswordForm({...passwordForm, newPassword: e.target.value})} className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors" />
-                <p className="font-mono text-[10px] text-gray-500 mt-2">Must be at least 8 characters long.</p>
-              </div>
-              <button disabled={isSubmitting} type="submit" className={`w-full bg-gray-900 text-white font-mono uppercase font-bold py-4 mt-6 hover:bg-black transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                {isSubmitting ? 'PROCESSING...' : 'Update Password'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
       {/* Force Reset Password Modal (Admin Only) */}
       {isForceResetModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+            <button onClick={closeAllModals} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
             <h3 className="text-xl font-bold uppercase tracking-tight mb-2 border-b pb-4">Force Reset Password</h3>
@@ -92,7 +60,7 @@ export const UserModals: React.FC<UserModalsProps> = ({
       {isUserModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+            <button onClick={closeAllModals} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
             <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Register Employee</h3>
@@ -157,7 +125,7 @@ export const UserModals: React.FC<UserModalsProps> = ({
       {isEditUserModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border-2 border-gray-900 shadow-[8px_8px_0_0_#111827] p-6 sm:p-8 w-full max-w-[95%] sm:max-w-md relative max-h-[90vh] overflow-y-auto flex flex-col">
-            <button onClick={() => closeAllModals()} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+            <button onClick={closeAllModals} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
               <X size={24} />
             </button>
             <h3 className="text-xl font-bold uppercase tracking-tight mb-6 border-b pb-4">Edit Employee</h3>
