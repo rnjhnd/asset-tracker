@@ -37,9 +37,14 @@ export const DashboardHeader: React.FC = () => {
             <Server size={24} />
           </div>
           <div className="flex flex-col justify-center">
-            <h1 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-gray-900 leading-none mb-1">
-              INTERNAL ASSET PORTAL
-            </h1>
+            <div className="flex items-center gap-2 mb-1">
+              <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-gray-900 leading-none">
+                Track<span className="text-[#3b82f6]">IT</span>
+              </h1>
+              <span className="text-[10px] font-mono uppercase bg-blue-50 text-blue-700 px-1.5 py-0.5 border border-blue-200 font-bold hidden sm:inline">
+                Asset Portal
+              </span>
+            </div>
             <div className="flex items-center flex-wrap gap-2 sm:gap-3 font-mono text-[10px] sm:text-xs text-gray-500 uppercase tracking-widest mt-1">
               <span className="flex items-center gap-1.5 text-green-600 font-bold whitespace-nowrap">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>

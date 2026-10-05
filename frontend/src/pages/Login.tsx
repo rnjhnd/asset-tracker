@@ -82,16 +82,19 @@ const Login: React.FC = () => {
             <Server size={24} />
           </div>
           <span className="font-mono font-bold tracking-widest text-sm uppercase border-b-2 border-white pb-1">
-            Staff Portal
+            Enterprise IT Portal
           </span>
         </div>
 
         <div className="relative z-10 mt-auto">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white uppercase tracking-tighter leading-none mb-6">
-            Internal<br/>Asset<br/>Portal
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-white uppercase tracking-tighter leading-none mb-3">
+            Track<span className="text-gray-900 bg-white px-2 ml-1 shadow-[4px_4px_0_0_#1e3a8a]">IT</span>
           </h1>
+          <p className="font-mono text-xs md:text-sm uppercase tracking-widest text-blue-100 mb-6 font-bold">
+            Internal Hardware Asset Management Portal
+          </p>
           <p className="text-blue-100 font-mono text-sm md:text-base max-w-md uppercase tracking-wider leading-relaxed border-l-4 border-white pl-4">
-            A robust, full-stack inventory management system for tracking hardware deployments, managing employee assignments, and monitoring asset lifecycles across the organization.
+            A robust inventory management system for tracking hardware deployments, managing employee assignments, and monitoring asset lifecycles across the organization.
           </p>
         </div>
       </div>
