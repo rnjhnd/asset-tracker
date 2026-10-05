@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { Search, Download, Upload, SlidersHorizontal } from 'lucide-react';
-import { SelectDropdown } from '../SelectDropdown';
+import { SelectDropdown } from '../common';
+import type { AssetCategory } from '../../types';
 
 interface AssetToolbarProps {
   userRole?: string;
@@ -12,7 +13,7 @@ interface AssetToolbarProps {
   onFilterStatusChange: (val: string) => void;
   filterCategory: string;
   onFilterCategoryChange: (val: string) => void;
-  categories: { id: string; name: string }[];
+  categories: AssetCategory[];
   sortBy: string;
   onSortByChange: (val: string) => void;
   sortOrder: string;

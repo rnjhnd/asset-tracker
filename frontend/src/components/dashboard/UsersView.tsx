@@ -1,19 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import { UserStatsCards } from './UserStatsCards';
 import { UserToolbar } from './UserToolbar';
 import { UserTable } from './UserTable';
+import { Pagination } from '../common';
 import { RegisterUserModal } from '../modals/RegisterUserModal';
-import { EditUserModal, type UserToEdit } from '../modals/EditUserModal';
-import { ForceResetPasswordModal, type ForceResetUserTarget } from '../modals/ForceResetPasswordModal';
+import { EditUserModal } from '../modals/EditUserModal';
+import { ForceResetPasswordModal } from '../modals/ForceResetPasswordModal';
 import { DeleteModal } from '../modals/DeleteModal';
 import toast from 'react-hot-toast';
-import API_URL from '../../config/api';
-import { Pagination } from '../Pagination';
+import { userApi } from '../../api';
+import type { ForceResetUserTarget, User, UserStats, UserToEdit } from '../../types';
 
-export const UsersView = ({ user, token }: { user: any; token: string }) => {
-  const [users, setUsers] = useState<any[]>([]);
-  const [userStats, setUserStats] = useState({ total: 0, active: 0, deactivated: 0, admins: 0 });
+export const UsersView = ({ user }: { user: User | null }) => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [userStats, setUserStats] = useState<UserStats>({ total: 0, active: 0, deactivated: 0, admins: 0 });
   const [isLoading, setIsLoading] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,17 +47,20 @@ export const UsersView = ({ user, token }: { user: any; token: string }) => {
   const fetchUsers = async () => {
     try {
       const [usersRes, statsRes] = await Promise.all([
-        axios.get(
-          `${API_URL}/api/users?page=${currentPage}&limit=15&search=${userSearchQuery}&role=${userFilterRole}&status=${userFilterStatus}&sortBy=${userSortBy}&sortOrder=${userSortOrder}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        ),
-        axios.get(`${API_URL}/api/users/stats`, {
-          headers: { Authorization: `Bearer ${token}` },
+        userApi.getUsers({
+          page: currentPage,
+          limit: 15,
+          search: userSearchQuery,
+          role: userFilterRole,
+          status: userFilterStatus,
+          sortBy: userSortBy,
+          sortOrder: userSortOrder,
         }),
+        userApi.getStats(),
       ]);
-      setUsers(usersRes.data.data);
-      setTotalPages(usersRes.data.totalPages);
-      setUserStats(statsRes.data);
+      setUsers(usersRes.data);
+      setTotalPages(usersRes.totalPages);
+      setUserStats(statsRes);
     } catch (error) {
       console.error('Failed to fetch users or stats');
     } finally {
@@ -84,11 +87,7 @@ export const UsersView = ({ user, token }: { user: any; token: string }) => {
 
   const handleToggleUserStatus = async (userId: string) => {
     try {
-      await axios.put(
-        `${API_URL}/api/users/${userId}/status`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await userApi.toggleStatus(userId);
       toast.success('User status updated');
       fetchUsers();
     } catch (error) {
@@ -100,9 +99,7 @@ export const UsersView = ({ user, token }: { user: any; token: string }) => {
     if (!deleteConfirmInfo) return;
     setIsDeleting(true);
     try {
-      await axios.delete(`${API_URL}/api/users/${deleteConfirmInfo.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await userApi.deleteUser(deleteConfirmInfo.id);
       setUsers((prev) => prev.filter((u) => u.id !== deleteConfirmInfo.id));
       toast.success('Employee permanently deleted!');
       fetchUsers();
@@ -171,18 +168,16 @@ export const UsersView = ({ user, token }: { user: any; token: string }) => {
         onPageChange={setCurrentPage}
       />
 
-      {/* Individual, Self-Contained User Modals */}
+      {/* Individual Modals (Zero Token Prop Drilling) */}
       <RegisterUserModal
         isOpen={isRegisterModalOpen}
         onClose={() => setIsRegisterModalOpen(false)}
-        token={token}
         onUserCreated={fetchUsers}
       />
 
       <EditUserModal
         isOpen={!!editingUser}
         onClose={() => setEditingUser(null)}
-        token={token}
         user={editingUser}
         onUserUpdated={fetchUsers}
       />
@@ -190,7 +185,6 @@ export const UsersView = ({ user, token }: { user: any; token: string }) => {
       <ForceResetPasswordModal
         isOpen={!!forceResetUser}
         onClose={() => setForceResetUser(null)}
-        token={token}
         user={forceResetUser}
         onPasswordReset={fetchUsers}
       />

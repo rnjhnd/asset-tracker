@@ -6,7 +6,7 @@ import { PasswordModal } from '../modals/PasswordModal';
 import toast from 'react-hot-toast';
 
 export const DashboardHeader: React.FC = () => {
-  const { user, token, logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -95,7 +95,6 @@ export const DashboardHeader: React.FC = () => {
       <PasswordModal 
         isOpen={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}
-        token={token || ''}
       />
     </>
   );

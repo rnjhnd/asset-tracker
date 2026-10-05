@@ -5,6 +5,7 @@ import { DashboardTabs } from '../components/dashboard/DashboardTabs';
 import { AssetsView } from '../components/dashboard/AssetsView';
 import { UsersView } from '../components/dashboard/UsersView';
 import { useNavigate } from 'react-router-dom';
+import type { User } from '../types';
 
 const Dashboard: React.FC = () => {
   const { user, token } = useAuth();
@@ -30,8 +31,8 @@ const Dashboard: React.FC = () => {
           />
         )}
 
-        {currentTab === 'ASSETS' && <AssetsView user={user!} token={token as string} />}
-        {currentTab === 'USERS' && user?.role === 'ADMIN' && <UsersView user={user!} token={token as string} />}
+        {currentTab === 'ASSETS' && <AssetsView user={user as User | null} />}
+        {currentTab === 'USERS' && user?.role === 'ADMIN' && <UsersView user={user as User | null} />}
       </main>
     </div>
   );

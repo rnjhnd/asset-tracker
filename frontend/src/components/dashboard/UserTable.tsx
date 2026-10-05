@@ -1,12 +1,13 @@
 import React from 'react';
 import { Edit2, UserX, UserCheck, Key, Trash2, RefreshCw, Users } from 'lucide-react';
+import type { User, ForceResetUserTarget } from '../../types';
 
 type UserTableProps = {
-  users: any[];
+  users: User[];
   isLoading: boolean;
-  onEditUser: (user: any) => void;
+  onEditUser: (user: User) => void;
   handleToggleUserStatus: (id: string) => void;
-  onForceReset: (user: { id: string; employeeId: string }) => void;
+  onForceReset: (user: ForceResetUserTarget) => void;
   setDeleteConfirmInfo: (info: { id: string; type: 'USER' | 'ASSET' } | null) => void;
 };
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Search, SlidersHorizontal } from 'lucide-react';
-import { SelectDropdown } from '../SelectDropdown';
+import { SelectDropdown } from '../common';
 
 interface UserToolbarProps {
   searchQuery: string;

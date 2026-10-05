@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
-import { SelectDropdown } from '../SelectDropdown';
-import { ModalShell } from './ModalShell';
-import API_URL from '../../config/api';
+import { ModalShell, SelectDropdown } from '../common';
+import { userApi } from '../../api';
 
 interface RegisterUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  token: string;
   onUserCreated: () => void;
 }
 
 export const RegisterUserModal: React.FC<RegisterUserModalProps> = ({
   isOpen,
   onClose,
-  token,
   onUserCreated,
 }) => {
   const [newUser, setNewUser] = useState({
@@ -58,9 +54,7 @@ export const RegisterUserModal: React.FC<RegisterUserModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      await axios.post(`${API_URL}/api/auth/register`, newUser, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await userApi.registerUser(newUser);
       toast.success('Employee account created!');
       onUserCreated();
       handleClose();

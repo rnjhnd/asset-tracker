@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
-import { ModalShell } from './ModalShell';
-import API_URL from '../../config/api';
+import { ModalShell } from '../common';
+import { assetApi, userApi } from '../../api';
+import type { User } from '../../types';
 
 interface AssignAssetModalProps {
   isOpen: boolean;
   onClose: () => void;
-  token: string;
   assetId: string;
   onAssetAssigned: () => void;
 }
@@ -15,12 +14,11 @@ interface AssignAssetModalProps {
 export const AssignAssetModal: React.FC<AssignAssetModalProps> = ({
   isOpen,
   onClose,
-  token,
   assetId,
   onAssetAssigned,
 }) => {
   const [assignSearchQuery, setAssignSearchQuery] = useState('');
-  const [assignSearchResults, setAssignSearchResults] = useState<any[]>([]);
+  const [assignSearchResults, setAssignSearchResults] = useState<User[]>([]);
   const [isSearchingAssign, setIsSearchingAssign] = useState(false);
   const [showAssignDropdown, setShowAssignDropdown] = useState(false);
   const [assignUserId, setAssignUserId] = useState('');
@@ -44,11 +42,12 @@ export const AssignAssetModal: React.FC<AssignAssetModalProps> = ({
     const delayDebounceFn = setTimeout(async () => {
       setIsSearchingAssign(true);
       try {
-        const res = await axios.get(
-          `${API_URL}/api/users?search=${assignSearchQuery}&limit=20&status=ACTIVE`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setAssignSearchResults(res.data.data.filter((u: any) => u.role !== 'ADMIN'));
+        const res = await userApi.getUsers({
+          search: assignSearchQuery,
+          limit: 20,
+          status: 'ACTIVE',
+        });
+        setAssignSearchResults(res.data.filter((u) => u.role !== 'ADMIN'));
       } catch (err) {
         console.error('Failed to search employees', err);
       } finally {
@@ -57,7 +56,7 @@ export const AssignAssetModal: React.FC<AssignAssetModalProps> = ({
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [assignSearchQuery, token]);
+  }, [assignSearchQuery]);
 
   const handleClose = () => {
     setAssignSearchQuery('');
@@ -78,11 +77,7 @@ export const AssignAssetModal: React.FC<AssignAssetModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      await axios.post(
-        `${API_URL}/api/assets/${assetId}/assign`,
-        { userId: assignUserId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await assetApi.assignAsset(assetId, assignUserId);
       handleClose();
       onAssetAssigned();
       toast.success('Asset assigned successfully!');

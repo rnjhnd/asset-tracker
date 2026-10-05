@@ -1,18 +1,12 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
-import { ModalShell } from './ModalShell';
-import API_URL from '../../config/api';
-
-export interface ForceResetUserTarget {
-  id: string;
-  employeeId: string;
-}
+import { ModalShell } from '../common';
+import { userApi } from '../../api';
+import type { ForceResetUserTarget } from '../../types';
 
 interface ForceResetPasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  token: string;
   user: ForceResetUserTarget | null;
   onPasswordReset: () => void;
 }
@@ -20,7 +14,6 @@ interface ForceResetPasswordModalProps {
 export const ForceResetPasswordModal: React.FC<ForceResetPasswordModalProps> = ({
   isOpen,
   onClose,
-  token,
   user,
   onPasswordReset,
 }) => {
@@ -45,11 +38,7 @@ export const ForceResetPasswordModal: React.FC<ForceResetPasswordModalProps> = (
 
     setIsSubmitting(true);
     try {
-      await axios.put(
-        `${API_URL}/api/users/${user.id}/force-password`,
-        { newPassword },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await userApi.forceResetPassword(user.id, newPassword);
       toast.success(`PASSWORD RESET FOR ${user.employeeId}`);
       onPasswordReset();
       handleClose();

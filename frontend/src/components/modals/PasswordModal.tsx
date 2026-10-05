@@ -1,20 +1,17 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Key } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { ModalShell } from './ModalShell';
-import API_URL from '../../config/api';
+import { ModalShell } from '../common';
+import { userApi } from '../../api';
 
 interface PasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  token: string;
 }
 
 export const PasswordModal: React.FC<PasswordModalProps> = ({
   isOpen,
   onClose,
-  token,
 }) => {
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
@@ -33,9 +30,7 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      await axios.put(`${API_URL}/api/auth/password`, passwordForm, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await userApi.updateOwnPassword(passwordForm);
       handleClose();
       toast.success('Password changed securely.');
     } catch (error: any) {

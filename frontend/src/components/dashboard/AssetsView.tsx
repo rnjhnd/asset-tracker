@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import { AssetToolbar } from './AssetToolbar';
-import { Pagination } from '../Pagination';
+import { Pagination } from '../common';
 import { AnalyticsCharts } from './AnalyticsCharts';
 import { AssetTable } from './AssetTable';
 import { RegisterAssetModal } from '../modals/RegisterAssetModal';
@@ -10,10 +9,11 @@ import { EditAssetModal } from '../modals/EditAssetModal';
 import { AssetHistoryModal } from '../modals/AssetHistoryModal';
 import { DeleteModal } from '../modals/DeleteModal';
 import toast from 'react-hot-toast';
-import API_URL from '../../config/api';
+import { assetApi } from '../../api';
+import type { Asset, AssetCategory, AssetStatus, User } from '../../types';
 
-export const AssetsView = ({ user, token }: { user: any; token: string }) => {
-  const [assets, setAssets] = useState<any[]>([]);
+export const AssetsView = ({ user }: { user: User | null }) => {
+  const [assets, setAssets] = useState<Asset[]>([]);
   const [stats, setStats] = useState({
     total: 0,
     available: 0,
@@ -24,7 +24,7 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
     agingStats: [] as any[],
     timelineStats: [] as any[],
   });
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [categories, setCategories] = useState<AssetCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,7 +40,7 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [assignAssetId, setAssignAssetId] = useState<string | null>(null);
-  const [editingAsset, setEditingAsset] = useState<any | null>(null);
+  const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
   const [historyAsset, setHistoryAsset] = useState<{ id: string; name: string } | null>(null);
   const [deleteConfirmInfo, setDeleteConfirmInfo] = useState<{ id: string; type: 'USER' | 'ASSET' } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -70,12 +70,17 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
 
   const fetchAssets = async () => {
     try {
-      const response = await axios.get(
-        `${API_URL}/api/assets?page=${currentPage}&limit=15&search=${searchQuery}&status=${filterStatus}&category=${assetFilterCategory}&sortBy=${assetSortBy}&sortOrder=${assetSortOrder}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setAssets(response.data.data);
-      setTotalPages(response.data.totalPages);
+      const res = await assetApi.getAssets({
+        page: currentPage,
+        limit: 15,
+        search: searchQuery,
+        status: filterStatus,
+        category: assetFilterCategory,
+        sortBy: assetSortBy,
+        sortOrder: assetSortOrder,
+      });
+      setAssets(res.data);
+      setTotalPages(res.totalPages);
     } catch (error) {
       console.error('Failed to fetch assets');
     }
@@ -84,10 +89,8 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
   const fetchTotals = async () => {
     if (user?.role !== 'ADMIN') return;
     try {
-      const response = await axios.get(`${API_URL}/api/assets/stats`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setStats(response.data);
+      const data = await assetApi.getStats();
+      setStats(data as any);
     } catch (error) {
       console.error('Failed to fetch KPI stats');
     }
@@ -95,10 +98,8 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/categories`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setCategories(res.data);
+      const data = await assetApi.getCategories();
+      setCategories(data);
     } catch (error) {
       console.error('Failed to fetch categories');
     }
@@ -133,9 +134,7 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
     if (!deleteConfirmInfo) return;
     setIsDeleting(true);
     try {
-      await axios.delete(`${API_URL}/api/assets/${deleteConfirmInfo.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await assetApi.deleteAsset(deleteConfirmInfo.id);
       setAssets((prev) => prev.filter((a) => a.id !== deleteConfirmInfo.id));
       toast.success('Asset permanently deleted!');
       fetchAssets();
@@ -150,11 +149,7 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
 
   const handleReturnAsset = async (assetId: string) => {
     try {
-      await axios.post(
-        `${API_URL}/api/assets/${assetId}/return`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await assetApi.returnAsset(assetId);
       fetchAssets();
       fetchTotals();
       toast.success('Asset returned successfully!');
@@ -165,11 +160,7 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
 
   const handleUpdateStatus = async (assetId: string, status: string) => {
     try {
-      await axios.put(
-        `${API_URL}/api/assets/${assetId}/status`,
-        { status },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await assetApi.updateStatus(assetId, status as AssetStatus);
       fetchAssets();
       fetchTotals();
       toast.success(`ASSET MARKED AS ${status}`);
@@ -180,11 +171,12 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
 
   const handleExportCSV = async () => {
     try {
-      const response = await axios.get(
-        `${API_URL}/api/assets?limit=100000&search=${searchQuery}&status=${filterStatus}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const dataToExport: any[] = response.data.data;
+      const res = await assetApi.getAssets({
+        limit: 100000,
+        search: searchQuery,
+        status: filterStatus,
+      });
+      const dataToExport: any[] = res.data;
       if (dataToExport.length === 0) return toast.error('No data to export.');
       const headers = ['Asset ID', 'Name', 'Serial Number', 'Category', 'Status', 'Assigned User'];
       const rows = dataToExport.map((asset) => [
@@ -193,7 +185,7 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
         asset.serialNumber,
         asset.category,
         asset.status,
-        asset.assignments.length > 0
+        asset.assignments && asset.assignments.length > 0
           ? asset.assignments[0].user.name || asset.assignments[0].user.employeeId
           : 'None',
       ]);
@@ -234,18 +226,17 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
           .filter((a) => a.name && a.serialNumber);
 
         if (parsedAssets.length === 0) return toast.error('No valid rows found in CSV.');
-        await axios.post(`${API_URL}/api/assets/bulk`, parsedAssets, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await assetApi.bulkImport(parsedAssets);
         toast.success(`Bulk import successful!`);
         fetchAssets();
         fetchTotals();
+        fetchCategories();
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Failed to import CSV. Check format.');
+        toast.error(error.response?.data?.error || 'Failed to bulk import assets.');
       }
-      e.target.value = '';
     };
     reader.readAsText(file);
+    e.target.value = '';
   };
 
   return (
@@ -337,11 +328,10 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
         onPageChange={setCurrentPage}
       />
 
-      {/* Individual, Self-Contained Modals */}
+      {/* Individual Modals (Zero Token Prop Drilling) */}
       <RegisterAssetModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        token={token}
         categories={categories}
         onAssetCreated={() => {
           fetchAssets();
@@ -353,7 +343,6 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
       <AssignAssetModal
         isOpen={!!assignAssetId}
         onClose={() => setAssignAssetId(null)}
-        token={token}
         assetId={assignAssetId || ''}
         onAssetAssigned={() => {
           fetchAssets();
@@ -364,7 +353,6 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
       <EditAssetModal
         isOpen={!!editingAsset}
         onClose={() => setEditingAsset(null)}
-        token={token}
         asset={editingAsset}
         onAssetUpdated={() => {
           fetchAssets();
@@ -375,7 +363,6 @@ export const AssetsView = ({ user, token }: { user: any; token: string }) => {
       <AssetHistoryModal
         isOpen={!!historyAsset}
         onClose={() => setHistoryAsset(null)}
-        token={token}
         assetId={historyAsset?.id || ''}
         assetName={historyAsset?.name || ''}
       />

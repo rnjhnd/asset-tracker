@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trash2 } from 'lucide-react';
-import { ModalShell } from './ModalShell';
+import { ModalShell } from '../common';
 
 type DeleteModalProps = {
   deleteConfirmInfo: { id: string; type: 'USER' | 'ASSET' } | null;

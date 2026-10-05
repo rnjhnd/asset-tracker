@@ -1,24 +1,20 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
-import { SelectDropdown } from '../SelectDropdown';
-import { DatePicker } from '../DatePicker';
-import { ModalShell } from './ModalShell';
-import API_URL from '../../config/api';
+import { ModalShell, SelectDropdown, DatePicker } from '../common';
+import { assetApi } from '../../api';
+import type { AssetCategory } from '../../types';
 
 interface RegisterAssetModalProps {
   isOpen: boolean;
   onClose: () => void;
-  token: string;
-  categories: { id: string; name: string }[];
+  categories: AssetCategory[];
   onAssetCreated: () => void;
-  onCategoryCreated: (category: { id: string; name: string }) => void;
+  onCategoryCreated: (category: AssetCategory) => void;
 }
 
 export const RegisterAssetModal: React.FC<RegisterAssetModalProps> = ({
   isOpen,
   onClose,
-  token,
   categories,
   onAssetCreated,
   onCategoryCreated,
@@ -60,13 +56,9 @@ export const RegisterAssetModal: React.FC<RegisterAssetModalProps> = ({
   const handleCreateCategory = async () => {
     if (!newCategoryName.trim()) return toast.error('Category name is required.');
     try {
-      const res = await axios.post(
-        `${API_URL}/api/categories`,
-        { name: newCategoryName.trim() },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      onCategoryCreated(res.data);
-      setNewAsset((prev) => ({ ...prev, category: res.data.name }));
+      const created = await assetApi.createCategory(newCategoryName.trim());
+      onCategoryCreated(created);
+      setNewAsset((prev) => ({ ...prev, category: created.name }));
       setIsCreatingCategory(false);
       setNewCategoryName('');
       toast.success('Category created!');
@@ -85,14 +77,12 @@ export const RegisterAssetModal: React.FC<RegisterAssetModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      await axios.post(`${API_URL}/api/assets`, newAsset, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await assetApi.createAsset(newAsset);
       handleClose();
       onAssetCreated();
       toast.success('Hardware registered successfully!');
-    } catch (error) {
-      toast.error('Failed to create asset. Check serial number.');
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to create asset. Check serial number.');
     } finally {
       setIsSubmitting(false);
     }
@@ -175,7 +165,7 @@ export const RegisterAssetModal: React.FC<RegisterAssetModalProps> = ({
           <DatePicker
             value={newAsset.purchaseDate}
             onChange={(val) => setNewAsset({ ...newAsset, purchaseDate: val })}
-            className="w-full border-2 border-gray-300 p-3 font-mono text-sm focus:border-black outline-none transition-colors"
+            className="w-full"
           />
         </div>
 

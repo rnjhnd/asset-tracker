@@ -1,21 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
-import { ModalShell } from './ModalShell';
-import API_URL from '../../config/api';
-
-export interface UserToEdit {
-  id: string;
-  name: string;
-  employeeId: string;
-  role: string;
-  department?: string;
-}
+import { ModalShell } from '../common';
+import { userApi } from '../../api';
+import type { UserToEdit } from '../../types';
 
 interface EditUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  token: string;
   user: UserToEdit | null;
   onUserUpdated: () => void;
 }
@@ -23,7 +14,6 @@ interface EditUserModalProps {
 export const EditUserModal: React.FC<EditUserModalProps> = ({
   isOpen,
   onClose,
-  token,
   user,
   onUserUpdated,
 }) => {
@@ -50,17 +40,11 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      await axios.put(
-        `${API_URL}/api/users/${user.id}`,
-        {
-          ...user,
-          name: formData.name,
-          department: formData.department,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await userApi.updateUser(user.id, {
+        ...user,
+        name: formData.name,
+        department: formData.department,
+      });
       toast.success('Employee updated successfully!');
       onUserUpdated();
       onClose();

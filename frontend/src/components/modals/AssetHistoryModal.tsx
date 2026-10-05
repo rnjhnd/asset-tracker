@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { ModalShell } from './ModalShell';
-import API_URL from '../../config/api';
+import { ModalShell } from '../common';
+import { assetApi } from '../../api';
+import type { AssetAuditLog } from '../../types';
 
 interface AssetHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  token: string;
   assetId: string;
   assetName: string;
 }
@@ -16,11 +15,10 @@ interface AssetHistoryModalProps {
 export const AssetHistoryModal: React.FC<AssetHistoryModalProps> = ({
   isOpen,
   onClose,
-  token,
   assetId,
   assetName,
 }) => {
-  const [historyLogs, setHistoryLogs] = useState<any[]>([]);
+  const [historyLogs, setHistoryLogs] = useState<AssetAuditLog[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -32,10 +30,8 @@ export const AssetHistoryModal: React.FC<AssetHistoryModalProps> = ({
     const fetchHistory = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get(`${API_URL}/api/assets/${assetId}/history`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setHistoryLogs(response.data);
+        const data = await assetApi.getHistory(assetId);
+        setHistoryLogs(data);
       } catch (error) {
         toast.error('Failed to load asset history.');
       } finally {
@@ -44,7 +40,7 @@ export const AssetHistoryModal: React.FC<AssetHistoryModalProps> = ({
     };
 
     fetchHistory();
-  }, [isOpen, assetId, token]);
+  }, [isOpen, assetId]);
 
   return (
     <ModalShell

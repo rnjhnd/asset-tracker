@@ -1,28 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
-import { DatePicker } from '../DatePicker';
-import { ModalShell } from './ModalShell';
-import API_URL from '../../config/api';
+import { ModalShell, DatePicker } from '../common';
+import { assetApi } from '../../api';
+import type { Asset } from '../../types';
 
 interface EditAssetModalProps {
   isOpen: boolean;
   onClose: () => void;
-  token: string;
-  asset: {
-    id: string;
-    name: string;
-    serialNumber: string;
-    category: string;
-    purchaseDate?: string;
-  } | null;
+  asset: Asset | null;
   onAssetUpdated: () => void;
 }
 
 export const EditAssetModal: React.FC<EditAssetModalProps> = ({
   isOpen,
   onClose,
-  token,
   asset,
   onAssetUpdated,
 }) => {
@@ -55,15 +46,11 @@ export const EditAssetModal: React.FC<EditAssetModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      await axios.put(
-        `${API_URL}/api/assets/${asset.id}`,
-        {
-          name: form.name,
-          serialNumber: form.serialNumber,
-          purchaseDate: form.purchaseDate,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await assetApi.updateAsset(asset.id, {
+        name: form.name,
+        serialNumber: form.serialNumber,
+        purchaseDate: form.purchaseDate,
+      });
       onClose();
       onAssetUpdated();
       toast.success('Asset updated successfully!');

@@ -1,17 +1,12 @@
-import React, { createContext, useContext, useState } from 'react';
-import axios from 'axios';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { User } from '../types';
 
-type User = {
-  id: string;
-  employeeId: string;
-  name?: string;
-  role: string;
-};
+type AuthUser = Pick<User, 'id' | 'employeeId' | 'role'> & { name?: string };
 
 type AuthContextType = {
-  user: User | null;
+  user: AuthUser | null;
   token: string | null;
-  login: (userData: User, token: string) => void;
+  login: (userData: AuthUser, token: string) => void;
   logout: () => void;
 };
 
@@ -27,7 +22,7 @@ const isTokenExpired = (token: string) => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
+  const [user, setUser] = useState<AuthUser | null>(() => {
     const storedToken = localStorage.getItem('token');
     if (!storedToken || isTokenExpired(storedToken)) {
       localStorage.removeItem('token');
@@ -37,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const storedUser = localStorage.getItem('user');
     return storedUser ? JSON.parse(storedUser) : null;
   });
-  
+
   const [token, setToken] = useState<string | null>(() => {
     const storedToken = localStorage.getItem('token');
     if (!storedToken || isTokenExpired(storedToken)) {
@@ -46,27 +41,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return storedToken;
   });
 
-  React.useEffect(() => {
-    const interceptor = axios.interceptors.response.use(
-      response => response,
-      error => {
-        if (error.response?.status === 401) {
-          // If the token expires or is invalid, log the user out automatically
-          setUser(null);
-          setToken(null);
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-        }
-        return Promise.reject(error);
-      }
-    );
-    
+  const logout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  };
+
+  useEffect(() => {
     // Cross-tab synchronization
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'token') {
         if (!e.newValue) {
-          setUser(null);
-          setToken(null);
+          logout();
         } else {
           setToken(e.newValue);
           const storedUser = localStorage.getItem('user');
@@ -74,26 +61,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     };
+
+    // Global unauthorized event listener (dispatched by apiClient interceptor)
+    const handleUnauthorized = () => {
+      logout();
+    };
+
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
 
     return () => {
-      axios.interceptors.response.eject(interceptor);
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth:unauthorized', handleUnauthorized);
     };
   }, []);
 
-  const login = (userData: User, authToken: string) => {
+  const login = (userData: AuthUser, authToken: string) => {
     setUser(userData);
     setToken(authToken);
     localStorage.setItem('token', authToken);
     localStorage.setItem('user', JSON.stringify(userData));
-  };
-
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
   };
 
   return (
@@ -105,6 +92,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return context;
 };

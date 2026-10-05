@@ -1,18 +1,19 @@
 import React from 'react';
 import { Mouse, Laptop, Monitor, Tablet, Smartphone, Server, Network, RefreshCw } from 'lucide-react';
 import { AssetActionDropdown } from './AssetActionDropdown';
+import type { Asset, User } from '../../types';
 
 type AssetTableProps = {
-  assets: any[];
+  assets: Asset[];
   isLoading: boolean;
-  user: any;
+  user: User | null;
   activeDropdownId: string | null;
   setActiveDropdownId: (id: string | null) => void;
   handleViewHistory: (assetId: string, assetName: string) => void;
   setAssignAssetId: (id: string) => void;
   setIsAssignModalOpen: (val: boolean) => void;
   handleReturnAsset: (assetId: string) => void;
-  setEditingAsset: (asset: any) => void;
+  setEditingAsset: (asset: Asset) => void;
   setIsEditModalOpen: (val: boolean) => void;
   handleUpdateStatus: (assetId: string, status: string) => void;
   setDeleteConfirmInfo: (info: { id: string, type: 'USER' | 'ASSET' } | null) => void;
@@ -84,7 +85,9 @@ export const AssetTable: React.FC<AssetTableProps> = ({
                 </td>
                 {user?.role === 'ADMIN' && (
                   <td className="p-4 font-mono text-sm text-gray-900 font-bold">
-                    {asset.assignments.length > 0 ? (asset.assignments[0].user.name || asset.assignments[0].user.employeeId) : '--'}
+                    {asset.assignments && asset.assignments.length > 0
+                      ? asset.assignments[0].user.name || asset.assignments[0].user.employeeId
+                      : '--'}
                   </td>
                 )}
                 {user?.role === 'ADMIN' && (
@@ -101,13 +104,7 @@ export const AssetTable: React.FC<AssetTableProps> = ({
                       }}
                       onReturn={handleReturnAsset}
                       onEdit={(a) => {
-                        setEditingAsset({
-                          id: a.id,
-                          name: a.name,
-                          serialNumber: a.serialNumber,
-                          category: a.category,
-                          purchaseDate: a.purchaseDate ? new Date(a.purchaseDate).toISOString().split('T')[0] : '',
-                        });
+                        setEditingAsset(a);
                         setIsEditModalOpen(true);
                       }}
                       onUpdateStatus={handleUpdateStatus}
